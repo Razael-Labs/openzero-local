@@ -11,8 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mobileMenuBtn && sidebar && sidebarOverlay) {
         mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('mobile-open');
-            sidebarOverlay.classList.toggle('active');
+            const isOpen = sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('active', isOpen);
+            document.body.classList.toggle('no-scroll', isOpen);
         });
 
         sidebarOverlay.addEventListener('click', closeMobileSidebar);
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sidebar && sidebarOverlay) {
             sidebar.classList.remove('mobile-open');
             sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('no-scroll');
         }
     }
 

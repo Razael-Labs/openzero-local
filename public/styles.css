@@ -1030,6 +1030,8 @@ code {
     }
     
     .sidebar {
+        width: 280px;
+        max-width: 85vw;
         transform: translateX(-100%);
         transition: transform var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 200;
@@ -1045,38 +1047,92 @@ code {
     }
     
     .content-header {
-        padding: 0 1.5rem;
+        padding: 0 1.25rem;
+        height: 60px;
     }
     
     .content-body {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.25rem;
     }
     
     .calculator-container {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 }
 
 @media (max-width: 768px) {
-    .grid-two-cols, .webhook-grid {
-        grid-template-columns: 1fr;
+    .content-body {
+        padding: 1.5rem 1rem;
     }
-    
-    .checkbox-grid {
-        grid-template-columns: 1fr;
+
+    .hero-section {
+        padding: 1rem 0;
     }
-    
+
     .hero-section h1 {
         font-size: 2.25rem;
+        line-height: 1.2;
     }
     
     .hero-desc {
         font-size: 1rem;
         margin-bottom: 2rem;
+        line-height: 1.5;
     }
 
+    .feature-card, 
+    .card-info-box, 
+    .command-showcase, 
+    .calc-panel, 
+    .result-panel,
+    .concept-card,
+    .info-card-step {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+
+    .grid-two-cols, 
+    .webhook-grid,
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
     .header-actions {
-        display: none; /* Hide GitHub button on small screens to save space */
+        display: none; /* Hide GitHub button on mobile screen to save space */
+    }
+
+    .output-box {
+        padding: 0.6rem 0.85rem;
+    }
+
+    .output-box code {
+        font-size: 0.75rem;
     }
 }
+
+@media (max-width: 600px) {
+    .breadcrumb .parent, 
+    .breadcrumb .separator {
+        display: none;
+    }
+}
+
+/* Force wrapping for all code text to prevent overflow issues on small devices */
+code, pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-width: 100%;
+}
+
+.output-box code {
+    flex: 1;
+    min-width: 0;
+}
+
+body.no-scroll {
+    overflow: hidden;
+}
+
 
