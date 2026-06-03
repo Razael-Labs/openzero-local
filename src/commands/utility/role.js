@@ -312,7 +312,7 @@ export default {
             `Template kustom \`${templateName}\` berhasil dibuat.\n` +
             `*   **Role Referensi:** ${role}\n` +
             `*   **Nilai Bitfield:** \`${bitfield}\`\n\n` +
-            `Sekarang Anda dapat menggunakan template ini di `/role create` atau `/role settemplate`!`
+            `Sekarang Anda dapat menggunakan template ini di \`/role create\` atau \`/role settemplate\`!`
           )
           .build();
 
