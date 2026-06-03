@@ -32,7 +32,9 @@ openzero-local/
     ├── commands/
     │   └── utility/
     │       ├── ping.js       # Slash command /ping (demonstrates button inside V2Embed container)
-    │       └── hello.js      # Slash command /hello (demonstrates optional user arguments)
+    │       ├── hello.js      # Slash command /hello (demonstrates optional user arguments)
+    │       ├── webhook.js    # Slash command /webhook (create / info webhooks with button link)
+    │       └── role.js       # Slash command /role (add / remove / id configurations)
     └── scripts/
         └── sendRules.js  # Maintenance script to post/edit guild rules
 ```

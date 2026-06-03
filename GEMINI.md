@@ -57,6 +57,19 @@ await interaction.reply({
 });
 ```
 
+## Perintah Baru yang Ditambahkan
+
+### 1. Perintah `/webhook`
+Digunakan untuk mengelola webhook di server dengan hak akses `ManageWebhooks`.
+*   **`/webhook create [title] [channel] [pfp]`**: Membuat webhook baru di channel teks, pengumuman, atau voice. Menampilkan tombol interaktif **"Salin URL Webhook"** untuk menyalin tautan.
+*   **`/webhook info [id_or_url]`**: Melihat informasi detail dari webhook tertentu berdasarkan ID atau URL lengkap. Juga dilengkapi dengan tombol **"Salin URL Webhook"**.
+
+### 2. Perintah `/role`
+Digunakan untuk mengelola role pengguna di server secara cepat dengan hak akses `ManageRoles`.
+*   **`/role add [user] [role]`**: Memberikan role ke pengguna yang ditunjuk (dengan proteksi hierarki).
+*   **`/role remove [user] [role]`**: Menghapus role dari pengguna yang ditunjuk.
+*   **`/role id [role]`**: Mengecek informasi detail (ID, Nama Teks, Kode Warna Hex, dan Posisi Hierarki) dari role spesifik secara cepat.
+
 ---
 
 ## Cara Menjalankan Proyek

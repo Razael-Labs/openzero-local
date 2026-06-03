@@ -52,6 +52,17 @@ export default {
 };
 ```
 
+#### New Custom System Commands:
+- **`/webhook`**:
+  - `create`: Create a new webhook on a specific channel with optional profile picture (pfp) URL. Includes an interactive `Salin URL Webhook` Button.
+  - `info`: Fetch details of an existing webhook by ID or Discord Webhook URL. Includes an interactive `Salin URL Webhook` Button.
+- **`/role`**:
+  - `add`: Add a role to a target member.
+  - `remove`: Remove a role from a target member.
+  - `id`: Inspect specific role details (mention, ID, hex color, position).
+
+Both commands require appropriate admin permissions (`ManageWebhooks` and `ManageRoles` respectively) and are replied to ephemerally.
+
 ### Components V2 & V2Embed Builder
 Traditional rich embeds are deprecated in favor of **Components V2**. When returning responses:
 1. Initialize a `new V2Embed()` (it automatically pulls `config.embedColor`).
