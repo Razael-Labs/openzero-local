@@ -4,6 +4,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('.doc-section');
     const breadcrumbChild = document.getElementById('current-breadcrumb');
 
+    // Mobile Sidebar Drawer Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    if (mobileMenuBtn && sidebar && sidebarOverlay) {
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        // Close sidebar when a navigation link is clicked on mobile
+        navLinks.forEach(link => {
+            link.addEventListener('click', closeMobileSidebar);
+        });
+    }
+
+    function closeMobileSidebar() {
+        if (sidebar && sidebarOverlay) {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        }
+    }
+
     // Handle hash links on load
     if (window.location.hash) {
         const targetId = window.location.hash.substring(1);

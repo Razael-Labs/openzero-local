@@ -20,8 +20,10 @@
     <div class="bg-glow bg-glow-2"></div>
 
     <div class="app-container">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <span class="logo-icon"><i class="fa-solid fa-circle-nodes"></i></span>
@@ -60,6 +62,9 @@
         <main class="content-area">
             <!-- Header/Top Bar -->
             <header class="content-header">
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
                 <div class="breadcrumb">
                     <span class="parent">Dokumentasi</span>
                     <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
