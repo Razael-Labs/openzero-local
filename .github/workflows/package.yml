@@ -25,7 +25,7 @@ jobs:
           fi
           echo "Packaging version $VERSION"
           # Kompres file proyek dengan mengecualikan node_modules, .git, dan .github
-          tar -czf "openzero-local-${VERSION}.tar.gz" --exclude="node_modules" --exclude=".git" --exclude=".github" .
+          tar -czf "openzero-local-${VERSION}.tar.gz" --exclude="openzero-local-*.tar.gz" --exclude="node_modules" --exclude=".git" --exclude=".github" .
 
       - name: Create GitHub Release
         env:
