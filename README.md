@@ -25,6 +25,7 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
    * `/deafen` & `/undeafen`: Deafen or undeafen members in voice channels.
    * `/role`: Quick assignment, removal, or retrieval of detailed role IDs.
    * `/webhook`: Create, view details of, and manage webhooks.
+   * `/music-search`: Search for music tracks using iTunes API. Renders high-resolution cover art, paginated results (3 tracks per page), instant lyrics lookup via LRCLIB API integration, and direct audio preview links using Discord Message Components V2.
 9. **Anti-Spam Cooldown System**: Global 3-second cooldown per command per user to prevent spam and rate limits.
 10. **Sequential Color Shuffling**: Automatically alternates the embed accent colors in order for every message from a predefined list of colors:
     * `#6e4cc1` (Purple)

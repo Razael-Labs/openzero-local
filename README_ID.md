@@ -25,6 +25,7 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
    * `/deafen` & `/undeafen`: Menulikan (deafen) atau membatalkan tuli di saluran suara.
    * `/role`: Menambah, menghapus, atau melihat detail informasi ID role secara cepat.
    * `/webhook`: Membuat, melihat informasi detail, dan mengelola webhook server.
+   * `/music-search`: Mencari trek musik menggunakan iTunes API. Menampilkan gambar cover resolusi tinggi, hasil paginasi (3 trek per halaman), pencarian lirik instan melalui integrasi LRCLIB API, dan tombol pratinjau audio langsung menggunakan Discord Message Components V2.
 9. **Sistem Cooldown Anti-Spam**: Batasan waktu tunggu (cooldown) selama 3 detik per perintah per pengguna untuk mencegah spam dan rate limit.
 10. **Perputaran Warna Embed Berurutan**: Secara otomatis mengganti warna aksen garis samping embed secara berurutan untuk setiap pesan baru dari daftar warna premium berikut:
     * `#6e4cc1` (Ungu)

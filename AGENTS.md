@@ -41,6 +41,7 @@ openzero-local/
     │   │   ├── hello.js      # Slash command /hello (demonstrates optional user arguments)
     │   │   ├── webhook.js    # Slash command /webhook (create / info webhooks with button link)
     │   │   ├── role.js       # Slash command /role (add / remove / id configurations)
+    │   │   ├── musicSearch.js # Slash command /music-search (iTunes search API, LRCLIB lyrics lookup, preview button link)
     │   │   ├── translate.js  # Context Menu Command 'Translate to English' via Apps selection
     │   │   ├── userInfo.js   # Context Menu 'User Info' (Consolidated global & guild profile)
     │   │   └── messagesRecord.js # Context Menu 'Messages Record' (7-day chat history inspector)
@@ -120,7 +121,7 @@ Before committing or pushing any features, make sure all tests pass:
 ```bash
 npm test
 ```
-Test files are situated under the `tests/` directory (e.g. `tests/moderation.test.js`, `tests/translate.test.js`).
+Test files are situated under the `tests/` directory (e.g. `tests/moderation.test.js`, `tests/translate.test.js`, `tests/musicSearch.test.js`).
 
 ---
 
