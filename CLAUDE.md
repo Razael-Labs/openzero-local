@@ -111,6 +111,7 @@ npm run send-rules
 - Run Jest test suites: `npm test`
 - Run production bot: `npm start`
 - Run development bot: `npm run dev`
+- Bump version code automatically: `npm run version:bump [major|minor|patch]` (defaults to `patch`)
 
 ---
 

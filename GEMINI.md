@@ -18,8 +18,12 @@ Bot ini terbagi menjadi beberapa komponen utama:
 Menggunakan winston dan chalk untuk menghasilkan pencatatan log berwarna yang rapi, sekaligus menyimpan salinan log ke file `logs/combined.log` dan `logs/error.log`.
 
 ### 2. Auto Versioning (SemVer) (`VERSION`, `src/version.js` & `src/scripts/updateVersion.js`)
-*   **SemVer Format:** Menggunakan penomoran versi berbasis SemVer (misalnya `1.6.0`) secara terpusat di file root `VERSION`.
-*   **Auto Deployment Update:** Script update versi secara otomatis menyinkronkan nilai dari `VERSION` ke `package.json` dan `src/version.js` secara konsisten.
+*   **SemVer Format:** Menggunakan penomoran versi berbasis SemVer secara terpusat di file root `VERSION`.
+*   **Auto Deployment Update & Bump:** Versi dapat diperbarui otomatis dengan menjalankan perintah:
+    ```bash
+    npm run version:bump [major|minor|patch]
+    ```
+    Perintah ini akan menaikkan nomor versi sesuai tipe bump yang dipilih dan menyinkronkannya secara konsisten ke file root `VERSION`, `package.json`, dan `src/version.js`.
 
 ### 3. Event Handler (`src/handlers/eventHandler.js`)
 Membaca seluruh file di dalam direktori `src/events/` secara otomatis pada startup dan mendaftarkannya ke client Discord listener.

@@ -113,6 +113,13 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - Logging/Audit records should run through `src/utils/supabase.js`.
 - Always ensure there is a clean fallback to `src/utils/database.js` local JSON methods when Supabase is not configured. This preserves offline testing and keeps the CI/CD test suite green without external API calls.
 
+### 8. Automated Version Bumping (SemVer)
+- To update the version across all files, do not manually edit files. Run the automated script:
+  ```bash
+  npm run version:bump [major|minor|patch]
+  ```
+  This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js).
+
 ---
 
 ## Logging Guidelines

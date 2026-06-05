@@ -1,6 +1,6 @@
 {
   "name": "discord-basic-bot",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "A basic Discord bot with modular handlers",
   "main": "src/index.js",
   "type": "module",
@@ -15,7 +15,8 @@
     "format": "node node_modules/prettier/bin/prettier.cjs --write src",
     "format:check": "node node_modules/prettier/bin/prettier.cjs --check src",
     "fetch-repos": "node src/scripts/fetchRepos.js",
-    "version:update": "node src/scripts/updateVersion.js"
+    "version:update": "node src/scripts/updateVersion.js",
+    "version:bump": "node src/scripts/updateVersion.js"
   },
   "dependencies": {
     "@sentry/node": "^10.56.0",
