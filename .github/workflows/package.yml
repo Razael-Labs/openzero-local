@@ -21,7 +21,8 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME}
           if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
-            VERSION="latest"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="release-${SHORT_SHA}"
           fi
           echo "Packaging version $VERSION"
           # Kompres ke direktori induk di luar folder workspace, lalu pindahkan kembali
@@ -34,12 +35,12 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME}
           if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
-            # Hapus tag/release 'latest' yang lama jika ada agar tidak error
-            gh release delete latest --yes || true
-            git push --delete origin latest || true
-            # Buat release latest baru
-            gh release create latest "openzero-local-latest.tar.gz" --title "Latest Pre-Release Build" --notes "Automated latest build package of openzero-local from release branch." --prerelease
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="release-${SHORT_SHA}"
+            # Buat release baru dengan tag release-shortsha
+            gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Build ${VERSION}" --notes "Automated build package of openzero-local from release branch commit ${SHORT_SHA}." --prerelease
           else
             # Buat release stabil berdasarkan tag v*
             gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Release ${VERSION}" --notes "Official release package for ${VERSION}."
           fi
+
