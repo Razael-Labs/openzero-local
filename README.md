@@ -1,5 +1,3 @@
-# I'm f#cked up with relying on paid API cloud services. They're really holding my project back f#ck them.
-
 🌐 **Languages:** [English](README.md) | [Bahasa Indonesia](README_ID.md)
 
 ---
