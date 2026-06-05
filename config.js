@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { SpecificColor, SequentialColor, RandomColor } from './src/utils/color.js';
 
 // Load environment variables dynamically
 dotenv.config();
@@ -15,8 +16,6 @@ const isTest = nodeEnv === 'test';
 const dbName = isTest ? 'database-test.json' : 'database.json';
 const dbDir = path.resolve(__dirname, 'data');
 const dbPath = path.join(dbDir, dbName);
-
-let currentColorIndex = 0;
 
 export const config = {
   // Global Bot Credentials & Environment config
@@ -39,19 +38,17 @@ export const config = {
     path: dbPath
   },
 
-  // Daftar warna aksen untuk V2Embed (Hexadecimal)
-  embedColors: [
+  // Strategi pewarnaan embed (SpecificColor, SequentialColor, atau RandomColor)
+  colorStrategy: new SequentialColor([
     0x6e4cc1, // #6e4cc1
     0x242221, // #242221
     0xf58e25, // #f58e25
-    0xfdfdfd // #fdfdfd
-  ],
+    0xfdfdfd  // #fdfdfd
+  ]),
 
-  // Warna aksen utama (dipilih secara berurutan)
+  // Warna aksen utama embed
   get embedColor() {
-    const color = this.embedColors[currentColorIndex];
-    currentColorIndex = (currentColorIndex + 1) % this.embedColors.length;
-    return color;
+    return this.colorStrategy.getColor();
   },
 
   // Konfigurasi Status Kehadiran (Presence Activity) Bot
