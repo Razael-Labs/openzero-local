@@ -3,9 +3,13 @@ import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ensure data directory exists and set local JSON database path
-const DATA_DIR = path.resolve('./data');
+const DATA_DIR = path.join(__dirname, '../../../data');
 const DB_PATH = path.join(DATA_DIR, 'custom_role_templates.json');
 
 if (!fs.existsSync(DATA_DIR)) {

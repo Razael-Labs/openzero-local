@@ -1,11 +1,14 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import logger from './logger.js';
 import { convertObtainiumFile } from './obtainiumConverter.js';
 import { updateObtainiumMessage } from './obtainiumHelper.js';
 
-const DATA_DIR = '/data/data/com.termux/files/home/openzero-local/data';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.join(__dirname, '../../data');
 const OUTPUT_JSON = path.join(DATA_DIR, 'obtainium_repos_data.json');
 const OUTPUT_YAML = path.join(DATA_DIR, 'obtainium_repos_data.yaml');
 

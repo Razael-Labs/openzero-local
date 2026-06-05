@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,8 +22,8 @@ export default async function loadEvents(client) {
 
   for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
-    // Menggunakan skema file:// agar kompatibel dengan ES Modules dynamic import
-    const fileUrl = `file://${filePath}`;
+    // Menggunakan pathToFileURL agar kompatibel dengan ES Modules dynamic import di semua platform
+    const fileUrl = pathToFileURL(filePath).href;
 
     try {
       const eventModule = await import(fileUrl);

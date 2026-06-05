@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { REST, Routes, Collection } from 'discord.js';
 import logger from '../utils/logger.js';
 
@@ -32,7 +32,7 @@ export async function loadCommands(client) {
 
     for (const file of commandFiles) {
       const filePath = path.join(folderPath, file);
-      const fileUrl = `file://${filePath}`;
+      const fileUrl = pathToFileURL(filePath).href;
 
       try {
         const commandModule = await import(fileUrl);
