@@ -1,6 +1,6 @@
 {
   "name": "discord-basic-bot",
-  "version": "1.0.0",
+  "version": "26.06.05",
   "description": "A basic Discord bot with modular handlers",
   "main": "src/index.js",
   "type": "module",
@@ -14,7 +14,8 @@
     "lint:fix": "node node_modules/eslint/bin/eslint.js src --fix",
     "format": "node node_modules/prettier/bin/prettier.cjs --write src",
     "format:check": "node node_modules/prettier/bin/prettier.cjs --check src",
-    "fetch-repos": "node src/scripts/fetchRepos.js"
+    "fetch-repos": "node src/scripts/fetchRepos.js",
+    "version:update": "node src/scripts/updateVersion.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",

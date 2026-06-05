@@ -4,6 +4,8 @@ import logger from './utils/logger.js';
 import loadEvents from './handlers/eventHandler.js';
 import { loadCommands } from './handlers/commandHandler.js';
 
+import { VERSION } from './version.js';
+
 // Memuat variabel lingkungan dari file .env
 dotenv.config();
 
@@ -31,7 +33,7 @@ process.on('uncaughtException', (error) => {
 });
 
 async function init() {
-  logger.info('[Bot] Memulai inisialisasi bot...');
+  logger.info(`[Bot] Memulai inisialisasi bot v${VERSION}...`);
 
   // Memuat Commands dan Events
   await loadCommands(client);

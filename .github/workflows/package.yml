@@ -17,12 +17,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Update Version to CalVer
+        run: npm run version:update
+
       - name: Create Package Archive
         run: |
-          VERSION=${GITHUB_REF_NAME}
-          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('./package.json')).version")
+          if [ "${GITHUB_REF_TYPE}" == "tag" ]; then
+            VERSION=${GITHUB_REF_NAME}
+          else
             SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="release-${SHORT_SHA}"
+            VERSION="${VERSION}-${SHORT_SHA}"
           fi
           echo "Packaging version $VERSION"
           # Kompres ke direktori induk di luar folder workspace, lalu pindahkan kembali
@@ -33,14 +38,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=${GITHUB_REF_NAME}
-          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="release-${SHORT_SHA}"
-            # Buat release baru dengan tag release-shortsha
-            gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Build ${VERSION}" --notes "Automated build package of openzero-local from release branch commit ${SHORT_SHA}." --prerelease
-          else
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('./package.json')).version")
+          if [ "${GITHUB_REF_TYPE}" == "tag" ]; then
+            VERSION=${GITHUB_REF_NAME}
             # Buat release stabil berdasarkan tag v*
             gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Release ${VERSION}" --notes "Official release package for ${VERSION}."
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${VERSION}-${SHORT_SHA}"
+            # Buat release baru dengan tag CalVer-shortsha
+            gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Build ${VERSION}" --notes "Automated build package of openzero-local from release branch commit ${SHORT_SHA}." --prerelease
           fi
+
 
