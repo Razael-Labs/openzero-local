@@ -18,6 +18,7 @@ openzero-local/
 ├── CLAUDE.md             # Guide for Claude Developers
 └── src/
     ├── index.js          # Entrypoint (initializes client, intent configurations, global error catchers)
+    ├── version.js        # Global version configuration (CalVer format)
     ├── config.js         # Global configurations (default colors, presence status)
     ├── locales/          # Translation files for i18n
     │   ├── id.json       # Indonesian dictionary
@@ -55,7 +56,8 @@ openzero-local/
     │       ├── undeafen.js   # Slash command /undeafen
     │       └── unmute.js     # Slash command /unmute
     └── scripts/
-        └── sendRules.js  # Maintenance script to post/edit guild rules
+        ├── sendRules.js  # Maintenance script to post/edit guild rules
+        └── updateVersion.js # Script to automatically update version to CalVer format
 ```
 
 ---

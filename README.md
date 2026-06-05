@@ -36,6 +36,7 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
 12. **Local Logging**: Tracks chat activities and command executions locally in the console using Chalk colors and Winston log files (`logs/`).
 13. **Bot Status/Activity**: Automatically sets rich presence status (e.g., *Playing GTA 6*) on startup.
 14. **Rules Deployment**: Easily post or edit clean, formatted server rules using a simple command line utility.
+15. **Calendar Versioning (CalVer)** *(New)*: Globally tracks bot releases using the `YY.MM.DD` format (e.g. `26.06.05`). Automatically updates on startup and generates unique tag versions during CI/CD release deployments.
 
 ---
 

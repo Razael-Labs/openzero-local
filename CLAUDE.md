@@ -9,7 +9,8 @@ Welcome, Claude! This file outlines the **OpenZero Discord Bot** codebase for An
 The codebase is built on **Node.js** using **discord.js v14.26+** (supporting Discord Message Components V2) with ES modules syntax.
 
 ### Key Components:
-- **`src/index.js`**: Bootstraps the bot. Configures essential intents (`Guilds`, `GuildMessages`, `MessageContent`, `DirectMessages`, `GuildPresences`) and uncaught error handlers.
+- **`src/index.js`**: Bootstraps the bot. Configures essential intents (`Guilds`, `GuildMessages`, `MessageContent`, `DirectMessages`, `GuildPresences`), imports the global CalVer version, and uncaught error handlers.
+- **`src/version.js`**: Stores the global version code in CalVer (`YY.MM.DD`) format. Updated automatically upon release deployment.
 - **`src/config.js`**: Holds global configurations, including sequential color selection for embeds and activity details.
 - **`src/utils/logger.js`**: Custom Winston logging wrapper with Chalk formatting.
 - **`src/utils/v2Embed.js`**: Fluid wrapper class translating basic metadata (Title, Description, Color, ActionRows) into Discord's new Components V2 layout.

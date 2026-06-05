@@ -36,6 +36,7 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
 12. **Logger Konsol & File**: Mencatat setiap aktivitas chat dan eksekusi perintah bot di konsol dengan indikator status Unicode berwarna, serta menyimpannya otomatis ke file log lokal (`logs/`).
 13. **Auto Status Kehadiran**: Bot secara otomatis menampilkan status bermain game (default: *Playing GTA 6*) saat aktif.
 14. **Script Admin Peraturan (Rules)**: Perintah cepat bagi pemilik bot untuk mengirim atau mengedit pesan peraturan komunitas yang rapi dan minim emoji di channel server tertentu.
+15. **Calendar Versioning (CalVer)** *(Baru)*: Pelacakan versi bot secara global berbasis tanggal kalender dengan format `YY.MM.DD` (seperti `26.06.05`). Diperbarui secara otomatis saat startup dan menghasilkan tag versi unik saat melakukan deploy/release rilis lewat CI/CD.
 
 ---
 

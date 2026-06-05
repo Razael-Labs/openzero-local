@@ -17,20 +17,24 @@ Bot ini terbagi menjadi beberapa komponen utama:
 ### 1. Log Handler (`src/utils/logger.js`)
 Menggunakan winston dan chalk untuk menghasilkan pencatatan log berwarna yang rapi, sekaligus menyimpan salinan log ke file `logs/combined.log` dan `logs/error.log`.
 
-### 2. Event Handler (`src/handlers/eventHandler.js`)
+### 2. Auto Versioning (CalVer) (`src/version.js` & `src/scripts/updateVersion.js`)
+*   **CalVer Format:** Menggunakan penomoran versi berbasis kalender `YY.MM.DD` secara global.
+*   **Auto Deployment Update:** Setiap kali bot dideploy/dirilis ke GitHub, pipeline CI/CD otomatis memperbarui versi ini berdasarkan tanggal rilis. Versi dimuat dan ditampilkan pada log startup bot (`src/index.js`).
+
+### 3. Event Handler (`src/handlers/eventHandler.js`)
 Membaca seluruh file di dalam direktori `src/events/` secara otomatis pada startup dan mendaftarkannya ke client Discord listener.
 
-### 3. Command Handler (`src/handlers/commandHandler.js`)
+### 4. Command Handler (`src/handlers/commandHandler.js`)
 Membaca subfolder di dalam `src/commands/` secara dinamis. Mendukung **Slash Commands** dan **Context Menu Commands**. 
 *   **Guild Instant Deployment**: Jika variabel `GUILD_ID` pada berkas `.env` diisi, pendaftaran command dilakukan secara **instan** langsung ke server tujuan (sangat direkomendasikan untuk masa development).
 
-### 4. Cooldown & Anti-Spam (`src/events/interactionCreate.js`)
+### 5. Cooldown & Anti-Spam (`src/events/interactionCreate.js`)
 Sistem pertahanan bot yang membatasi eksekusi command sebesar **3 detik** per perintah per pengguna. Menampilkan hitungan mundur secara privat (*ephemeral*) menggunakan `V2Embed` jika pengguna melakukan spamming.
 
-### 5. Mesin Internasionalisasi & Lokalisasi / i18n (`src/utils/i18n.js`)
+### 6. Mesin Internasionalisasi & Lokalisasi / i18n (`src/utils/i18n.js`)
 Menyediakan utilitas `t(key, locale, replaceData)` untuk menerjemahkan teks respon bot secara dinamis berdasarkan bahasa klien (Discord client locale) pengguna yang melakukan interaksi. Mendukung Bahasa Indonesia (`id`) dan Inggris (`en`). File kamus bahasa disimpan di folder `src/locales/`.
 
-### 6. Integrasi Supabase & Fallback Database Lokal (`src/utils/supabase.js` & `src/utils/database.js`)
+### 7. Integrasi Supabase & Fallback Database Lokal (`src/utils/supabase.js` & `src/utils/database.js`)
 *   **Supabase Log:** Mencatat seluruh pesan guild yang masuk ke tabel Supabase `message_records` untuk keperluan pemantauan perilaku buruk (*bad behavior monitoring*).
 *   **7-Day Auto Cleanup:** Bot secara rutin menghapus pesan berumur lebih dari 7 hari dari database pada startup dan setiap interval 24 jam sekali.
 *   **Local Fallback:** Jika berkas `.env` belum dikonfigurasi dengan URL & Key Supabase, sistem secara otomatis mengalihkan penyimpanan data pesan secara lokal ke dalam `data/database.json`. Hal ini membuat bot aman dari crash dan mudah ditest secara offline.
