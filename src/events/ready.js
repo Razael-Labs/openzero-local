@@ -76,33 +76,12 @@ export default {
       logger.error('[Client Startup] Gagal menjalankan pembersihan pesan lama:', error);
     }
 
-    // Update daftar Obtainium secara otomatis dengan data terbaru dari JSON saat startup
+    // Inisialisasi auto watcher Obtainium data & update list otomatis
     try {
-      const channelId = config.obtainium?.channelId;
-      const messageId = config.obtainium?.messageId;
-
-      if (channelId && messageId) {
-        logger.info(`[Obtainium] Mencoba mengupdate pesan list Obtainium (ID: ${messageId})...`);
-        const channel = await client.channels.fetch(channelId);
-        if (channel && channel.isTextBased()) {
-          const message = await channel.messages.fetch(messageId);
-          if (message) {
-            const { getObtainiumEmbed } = await import('../utils/obtainiumHelper.js');
-            const { MessageFlags } = await import('discord.js');
-            const embed = await getObtainiumEmbed(0); // Selalu perbarui ke halaman pertama
-
-            await message.edit({
-              components: [embed],
-              flags: MessageFlags.IsComponentsV2
-            });
-            logger.info(
-              '[Obtainium] Sukses mengupdate pesan list Obtainium ke data terbaru pada startup!'
-            );
-          }
-        }
-      }
+      const { initObtainiumWatcher } = await import('../utils/obtainiumWatcher.js');
+      await initObtainiumWatcher(client);
     } catch (error) {
-      logger.error('[Obtainium] Gagal mengupdate otomatis list Obtainium pada startup:', error);
+      logger.error('[Obtainium Startup] Gagal menginisialisasi Obtainium Watcher:', error);
     }
   }
 };
