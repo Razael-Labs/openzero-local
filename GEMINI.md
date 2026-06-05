@@ -23,7 +23,7 @@ Menggunakan winston dan chalk untuk menghasilkan pencatatan log berwarna yang ra
     ```bash
     npm run version:bump [major|minor|patch] [amount]
     ```
-    Perintah ini akan menaikkan nomor versi sesuai tipe bump dan jumlah (amount) yang dipilih (misal: `npm run version:bump patch 20` untuk menaikkan versi patch sebanyak 20) dan menyinkronkannya secara konsisten ke file root `VERSION`, `package.json`, dan `src/version.js`.
+    Perintah ini akan menaikkan nomor versi sesuai tipe bump dan jumlah (amount) yang dipilih. Nilai `[amount]` secara default adalah `auto` (yang otomatis menghitung jumlah commit git sejak update versi terakhir), namun Anda juga dapat memasukkan angka spesifik seperti `npm run version:bump patch 20` untuk menaikkan versi patch sebanyak 20. Skrip ini menyinkronkan versi secara konsisten ke file root `VERSION`, `package.json`, dan `src/version.js`.
 
 ### 3. Event Handler (`src/handlers/eventHandler.js`)
 Membaca seluruh file di dalam direktori `src/events/` secara otomatis pada startup dan mendaftarkannya ke client Discord listener.

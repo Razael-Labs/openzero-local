@@ -118,7 +118,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
   ```bash
   npm run version:bump [major|minor|patch] [amount]
   ```
-  This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js). For example, `npm run version:bump patch 20` increments the patch version by 20.
+  This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js). The `[amount]` defaults to `auto`, which automatically counts the number of git commits since the last version update. You can also specify an exact number, e.g., `npm run version:bump patch 20` increments the patch version by 20.
 
 ---
 
