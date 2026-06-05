@@ -33,6 +33,29 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
 
 ---
 
+## Installation Options
+
+You can install this project using either of the following methods:
+
+### Option A: Clone the Repository
+Best if you want to keep the bot updated using git commands:
+```bash
+git clone https://github.com/Razael-Fox/openzero-local.git
+cd openzero-local
+```
+
+### Option B: Download Release Package
+Best if you want a clean, compiled standalone package without git history (only generated from the `release` branch):
+1. Go to the [Releases](https://github.com/Razael-Fox/openzero-local/releases) page.
+2. Download the latest `.tar.gz` package (e.g., `openzero-local-latest.tar.gz`).
+3. Extract it in your desired directory:
+   ```bash
+   tar -xzf openzero-local-latest.tar.gz
+   cd openzero-local
+   ```
+
+---
+
 ## How to Use the Bot
 
 Follow these steps to configure, invite, and run your local bot.

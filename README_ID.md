@@ -33,6 +33,29 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
 
 ---
 
+## Pilihan Instalasi
+
+Anda dapat menginstal proyek ini menggunakan salah satu dari metode berikut:
+
+### Pilihan A: Kloning Repositori (Clone Git)
+Metode terbaik jika Anda ingin terus memperbarui bot menggunakan perintah git:
+```bash
+git clone https://github.com/Razael-Fox/openzero-local.git
+cd openzero-local
+```
+
+### Pilihan B: Unduh Paket Rilis (Release Package)
+Metode terbaik jika Anda menginginkan paket mandiri yang bersih tanpa riwayat git (paket ini hanya di-generate dari branch `release`):
+1. Pergi ke halaman [Releases](https://github.com/Razael-Fox/openzero-local/releases).
+2. Unduh paket `.tar.gz` terbaru (misalnya `openzero-local-latest.tar.gz`).
+3. Ekstrak file tersebut di direktori yang Anda inginkan:
+   ```bash
+   tar -xzf openzero-local-latest.tar.gz
+   cd openzero-local
+   ```
+
+---
+
 ## Panduan Cara Menggunakan Bot
 
 Ikuti langkah-langkah di bawah ini untuk menyiapkan, mengundang, dan menjalankan bot Anda di Discord.

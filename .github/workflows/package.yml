@@ -1,0 +1,44 @@
+name: Package Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - release
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Package Archive
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            VERSION="latest"
+          fi
+          echo "Packaging version $VERSION"
+          # Kompres file proyek dengan mengecualikan node_modules, .git, dan .github
+          tar -czf "openzero-local-${VERSION}.tar.gz" --exclude="node_modules" --exclude=".git" --exclude=".github" .
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            # Hapus tag/release 'latest' yang lama jika ada agar tidak error
+            gh release delete latest --yes || true
+            git push --delete origin latest || true
+            # Buat release latest baru
+            gh release create latest "openzero-local-latest.tar.gz" --title "Latest Pre-Release Build" --notes "Automated latest build package of openzero-local from release branch." --prerelease
+          else
+            # Buat release stabil berdasarkan tag v*
+            gh release create "${VERSION}" "openzero-local-${VERSION}.tar.gz" --title "Release ${VERSION}" --notes "Official release package for ${VERSION}."
+          fi
