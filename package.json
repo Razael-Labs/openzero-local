@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "npm run fetch-repos && node --import ./src/instrument.js src/index.js",
-    "dev": "node --watch --import ./src/instrument.js src/index.js",
+    "start": "npm run fetch-repos && NODE_ENV=production node --import ./src/instrument.js src/index.js",
+    "dev": "NODE_ENV=development node --watch --import ./src/instrument.js src/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "send-rules": "node src/scripts/sendRules.js",
     "send-obtainium": "node src/scripts/sendObtainium.js",
