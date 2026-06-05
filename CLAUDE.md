@@ -82,3 +82,10 @@ npm run send-rules
 - Run Jest test suites: `npm test`
 - Run production bot: `npm start`
 - Run development bot: `npm run dev`
+
+---
+
+## Git Branching & Release Pipeline
+
+- **`release` (Default)**: Represents the stable codebase. Changes here are merged/committed by **Razael-Fox Bot**. Pushes here trigger GitHub Actions (`.github/workflows/package.yml`) to generate a `.tar.gz` archive and upload it to GitHub Releases.
+- **`dev`**: Active development branch for developers using personal credentials (`razaeldotexe`). Push events here do not trigger package builds.

@@ -113,3 +113,11 @@ Run the tests using Jest:
 ```bash
 npm test
 ```
+
+---
+
+## Git Branching & Release Pipeline
+
+This project operates with two primary branches:
+* **`release` (Default Branch)**: Represents the stable production state. All code is managed by the automated **Razael-Fox Bot** on this branch. Pushing to this branch or tagging version releases (`v*`) triggers GitHub Actions to compile and compress the project into `openzero-local-latest.tar.gz` and upload it to the [Releases](https://github.com/Razael-Fox/openzero-local/releases) page.
+* **`dev` (Development Branch)**: Used by developers for minor changes, active coding, and testing. It uses personal developer credentials (`razaeldotexe`). Pushing to this branch **does not** generate release packages.

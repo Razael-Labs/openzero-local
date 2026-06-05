@@ -113,3 +113,11 @@ Jalankan pengujian menggunakan Jest:
 ```bash
 npm test
 ```
+
+---
+
+## Alur Kerja Git Branching & Rilis
+
+Proyek ini dikelola menggunakan dua branch utama:
+* **`release` (Default Branch)**: Merepresentasikan versi produksi yang stabil. Seluruh pembaruan di branch ini digabungkan dan dikomit oleh **Razael-Fox Bot**. Pushing ke branch ini atau pembuatan tag versi (`v*`) akan memicu GitHub Actions untuk mengompresi proyek menjadi file `.tar.gz` dan otomatis mengunggahnya ke halaman [Releases](https://github.com/Razael-Fox/openzero-local/releases).
+* **`dev` (Development Branch)**: Digunakan oleh pengembang untuk pengerjaan fitur baru, perbaikan, dan pengujian secara aktif menggunakan profil personal Anda (`razaeldotexe`). Push ke branch ini **tidak** akan menghasilkan paket rilis otomatis.

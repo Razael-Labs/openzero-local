@@ -79,3 +79,10 @@ Penerjemah pesan otomatis yang diintegrasikan ke menu konteks Discord.
 3. Jalankan bot utama:
    * **Produksi**: `npm start`
    * **Development** (hot-reload): `npm run dev`
+
+---
+
+## Aturan Branching & Workflow Rilis
+
+* **`release`**: Merupakan branch utama/produksi yang stabil. Semua update di branch ini dikelola dan digabungkan oleh **Razael-Fox Bot**. Push ke branch ini otomatis memicu GitHub Actions untuk membuat paket `.tar.gz` proyek dan mempublikasikannya ke halaman rilis GitHub.
+* **`dev`**: Merupakan branch aktif untuk pengerjaan kode/perbaikan oleh pengembang menggunakan profil pengguna personal (`razaeldotexe`).

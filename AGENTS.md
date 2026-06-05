@@ -100,3 +100,11 @@ Before committing or pushing any features, make sure all tests pass:
 npm test
 ```
 Test files are situated under the `tests/` directory (e.g. `tests/moderation.test.js`, `tests/translate.test.js`).
+
+---
+
+## Git Branching & Release Pipeline Guidelines
+
+As an AI Agent, you must adhere to the branching workflow rules:
+* **Active Development**: All code modifications, new feature additions, and script improvements must be written, committed, and pushed on the **`dev`** branch using personal developer credentials (`razaeldotexe`).
+* **Stable Releases**: Changes must be merged into the **`release`** branch (default branch) using **Razael-Fox Bot** credentials (`bot@razael-fox.my.id`). Pushing to `release` triggers the `.github/workflows/package.yml` GitHub Actions pipeline, which packages the repository files into `.tar.gz` and deploys it to the Releases page. Do not push code directly to `release` from your own git profile; always use the bot credentials when merging/committing on this branch.
