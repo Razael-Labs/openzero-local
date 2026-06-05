@@ -50,8 +50,8 @@ export async function getObtainiumEmbed(pageIndex) {
       const appAuthor = app.author || 'N/A';
       const appId = app.id || 'unknown-id';
       const appVersion = app.latestVersion || 'N/A';
-      const appDesc = app.description 
-        ? `${app.description} [Read more](${appUrl})` 
+      const appDesc = app.description
+        ? `${app.description} [Read more](${appUrl})`
         : `Click to view more details... [Read more](${appUrl})`;
 
       description += `**${start + i + 1}. [${appName}](${appUrl})** (by \`${appAuthor}\`)\n`;

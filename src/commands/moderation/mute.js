@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,10 +7,7 @@ export default {
     .setName('mute')
     .setDescription('Mute a member (voice, text, or both).')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The member to mute')
-        .setRequired(true)
+      option.setName('user').setDescription('The member to mute').setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -28,10 +21,7 @@ export default {
         )
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for muting')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for muting').setRequired(false)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
     .setDMPermission(false),
@@ -56,7 +46,10 @@ export default {
           .setDescription(`User **${targetUser.tag}** is not a member of this server.`)
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Hierarchy Check
@@ -67,10 +60,15 @@ export default {
       ) {
         const embed = new V2Embed()
           .setTitle('Permission Denied ❌')
-          .setDescription(`You cannot mute **${targetUser.tag}** because they have a higher or equal role hierarchy.`)
+          .setDescription(
+            `You cannot mute **${targetUser.tag}** because they have a higher or equal role hierarchy.`
+          )
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       let voiceMuted = false;
@@ -85,11 +83,16 @@ export default {
             .setDescription('You need the `Mute Members` permission to voice-mute.')
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         if (!targetMember.voice.channelId) {
-          warnings.push('Target user is not connected to a voice channel (Voice Mute was skipped).');
+          warnings.push(
+            'Target user is not connected to a voice channel (Voice Mute was skipped).'
+          );
         } else {
           await targetMember.voice.setMute(true, `${interaction.user.tag}: ${reason}`);
           voiceMuted = true;
@@ -104,7 +107,10 @@ export default {
             .setDescription('You need the `Manage Roles` permission to assign the Muted role.')
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         // Find or create Muted role
@@ -122,13 +128,15 @@ export default {
             // Set Channel Overrides for all text channels
             for (const [, channel] of guild.channels.cache) {
               if (channel.isTextBased()) {
-                await channel.permissionOverwrites.edit(mutedRole, {
-                  SendMessages: false,
-                  AddReactions: false,
-                  CreatePublicThreads: false,
-                  CreatePrivateThreads: false,
-                  SendMessagesInThreads: false
-                }).catch(() => null);
+                await channel.permissionOverwrites
+                  .edit(mutedRole, {
+                    SendMessages: false,
+                    AddReactions: false,
+                    CreatePublicThreads: false,
+                    CreatePrivateThreads: false,
+                    SendMessagesInThreads: false
+                  })
+                  .catch(() => null);
               }
             }
           } catch (createRoleError) {
@@ -143,7 +151,9 @@ export default {
           } else {
             const botMember = await guild.members.fetch(interaction.client.user.id);
             if (mutedRole.position >= botMember.roles.highest.position) {
-              warnings.push('I cannot assign the "Muted" role because it is higher than my highest role.');
+              warnings.push(
+                'I cannot assign the "Muted" role because it is higher than my highest role.'
+              );
             } else {
               await targetMember.roles.add(mutedRole, `${interaction.user.tag}: ${reason}`);
               textMuted = true;
@@ -158,12 +168,15 @@ export default {
           .setTitle('Mute Skipped ⚠️')
           .setDescription(
             'No mute action was performed.\n' +
-            '*   **Warnings/Info:**\n' +
-            warnings.map(w => `    *   ${w}`).join('\n')
+              '*   **Warnings/Info:**\n' +
+              warnings.map((w) => `    *   ${w}`).join('\n')
           )
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Success Embed
@@ -175,10 +188,12 @@ export default {
         .setTitle('Member Muted 🔇')
         .setDescription(
           `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-          `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-          `*   **Actions:** ${muteSummary.join(' & ')}\n` +
-          `*   **Reason:** ${reason}` +
-          (warnings.length > 0 ? `\n\n**Note/Warnings:**\n${warnings.map(w => `*   ${w}`).join('\n')}` : '')
+            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+            `*   **Actions:** ${muteSummary.join(' & ')}\n` +
+            `*   **Reason:** ${reason}` +
+            (warnings.length > 0
+              ? `\n\n**Note/Warnings:**\n${warnings.map((w) => `*   ${w}`).join('\n')}`
+              : '')
         )
         .setColor(0xff5500)
         .build();
@@ -188,7 +203,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Moderation] ${targetUser.tag} has been muted (${muteSummary.join(', ')}) by ${interaction.user.tag} for: ${reason}`);
+      logger.info(
+        `[Moderation] ${targetUser.tag} has been muted (${muteSummary.join(', ')}) by ${interaction.user.tag} for: ${reason}`
+      );
     } catch (error) {
       logger.error('[Moderation Error] Failed to mute user:', error);
       const embed = new V2Embed()

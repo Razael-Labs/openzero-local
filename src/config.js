@@ -7,7 +7,7 @@ export const config = {
     0x6e4cc1, // #6e4cc1
     0x242221, // #242221
     0xf58e25, // #f58e25
-    0xfdfdfd  // #fdfdfd
+    0xfdfdfd // #fdfdfd
   ],
 
   // Warna aksen utama (dipilih secara berurutan)

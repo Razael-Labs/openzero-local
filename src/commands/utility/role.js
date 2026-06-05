@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 import fs from 'fs';
@@ -40,56 +36,56 @@ function saveCustomTemplates(templates) {
 // Permission map bitmask for custom templates creation
 const PERMISSION_MAP = {
   // General Server Permissions
-  'administrator': PermissionFlagsBits.Administrator,
-  'manage_server': PermissionFlagsBits.ManageGuild,
-  'manage_roles': PermissionFlagsBits.ManageRoles,
-  'manage_channels': PermissionFlagsBits.ManageChannels,
-  'view_audit_log': PermissionFlagsBits.ViewAuditLog,
-  
+  administrator: PermissionFlagsBits.Administrator,
+  manage_server: PermissionFlagsBits.ManageGuild,
+  manage_roles: PermissionFlagsBits.ManageRoles,
+  manage_channels: PermissionFlagsBits.ManageChannels,
+  view_audit_log: PermissionFlagsBits.ViewAuditLog,
+
   // Membership Permissions
-  'kick': PermissionFlagsBits.KickMembers,
-  'ban': PermissionFlagsBits.BanMembers,
-  
+  kick: PermissionFlagsBits.KickMembers,
+  ban: PermissionFlagsBits.BanMembers,
+
   // Text Channel Permissions
-  'view_channel': PermissionFlagsBits.ViewChannel,
-  'send_messages': PermissionFlagsBits.SendMessages,
-  'embed_links': PermissionFlagsBits.EmbedLinks,
-  'attach_files': PermissionFlagsBits.AttachFiles,
-  'read_history': PermissionFlagsBits.ReadMessageHistory,
-  'manage_messages': PermissionFlagsBits.ManageMessages,
-  
+  view_channel: PermissionFlagsBits.ViewChannel,
+  send_messages: PermissionFlagsBits.SendMessages,
+  embed_links: PermissionFlagsBits.EmbedLinks,
+  attach_files: PermissionFlagsBits.AttachFiles,
+  read_history: PermissionFlagsBits.ReadMessageHistory,
+  manage_messages: PermissionFlagsBits.ManageMessages,
+
   // Voice Channel Permissions
-  'connect': PermissionFlagsBits.Connect,
-  'speak': PermissionFlagsBits.Speak,
-  'mute_members': PermissionFlagsBits.MuteMembers,
-  'deafen_members': PermissionFlagsBits.DeafenMembers,
-  'move_members': PermissionFlagsBits.MoveMembers,
+  connect: PermissionFlagsBits.Connect,
+  speak: PermissionFlagsBits.Speak,
+  mute_members: PermissionFlagsBits.MuteMembers,
+  deafen_members: PermissionFlagsBits.DeafenMembers,
+  move_members: PermissionFlagsBits.MoveMembers,
 
   // Application Commands
-  'use_slash': PermissionFlagsBits.UseApplicationCommands
+  use_slash: PermissionFlagsBits.UseApplicationCommands
 };
 
 // Descriptions for each permission string
 const PERMISSION_DESCRIPTIONS = {
-  'administrator': 'Full administrative control (bypasses all channel protections and permissions).',
-  'manage_server': 'Allows editing server settings, name, region, integrations, and widgets.',
-  'manage_roles': 'Allows creating, editing, and deleting roles below the bot\'s highest role.',
-  'manage_channels': 'Allows creating, editing, and deleting channels on the server.',
-  'view_audit_log': 'Allows viewing audit logs of admin and moderator actions.',
-  'kick': 'Allows kicking members from the server.',
-  'ban': 'Allows banning members permanently from the server.',
-  'view_channel': 'Allows viewing text and voice channels (basic channel access).',
-  'send_messages': 'Allows sending messages in text channels.',
-  'embed_links': 'Allows sending formatted links with rich embeds/previews.',
-  'attach_files': 'Allows uploading files and media in channels.',
-  'read_history': 'Allows reading past message history in channels.',
-  'manage_messages': 'Allows deleting other users\' messages or pinning messages.',
-  'connect': 'Allows joining voice channels.',
-  'speak': 'Allows speaking/communicating in voice channels.',
-  'mute_members': 'Allows muting other members in voice channels.',
-  'deafen_members': 'Allows deafening other members in voice channels.',
-  'move_members': 'Allows moving members between voice channels or disconnecting them.',
-  'use_slash': 'Allows using application commands and slash commands.'
+  administrator: 'Full administrative control (bypasses all channel protections and permissions).',
+  manage_server: 'Allows editing server settings, name, region, integrations, and widgets.',
+  manage_roles: 'Allows creating, editing, and deleting roles below the bot\'s highest role.',
+  manage_channels: 'Allows creating, editing, and deleting channels on the server.',
+  view_audit_log: 'Allows viewing audit logs of admin and moderator actions.',
+  kick: 'Allows kicking members from the server.',
+  ban: 'Allows banning members permanently from the server.',
+  view_channel: 'Allows viewing text and voice channels (basic channel access).',
+  send_messages: 'Allows sending messages in text channels.',
+  embed_links: 'Allows sending formatted links with rich embeds/previews.',
+  attach_files: 'Allows uploading files and media in channels.',
+  read_history: 'Allows reading past message history in channels.',
+  manage_messages: 'Allows deleting other users\' messages or pinning messages.',
+  connect: 'Allows joining voice channels.',
+  speak: 'Allows speaking/communicating in voice channels.',
+  mute_members: 'Allows muting other members in voice channels.',
+  deafen_members: 'Allows deafening other members in voice channels.',
+  move_members: 'Allows moving members between voice channels or disconnecting them.',
+  use_slash: 'Allows using application commands and slash commands.'
 };
 
 // Preset standard permissions
@@ -154,16 +150,10 @@ export default {
         .setName('add')
         .setDescription('Assign a role to a specific user.')
         .addUserOption((option) =>
-          option
-            .setName('user')
-            .setDescription('User to receive the role')
-            .setRequired(true)
+          option.setName('user').setDescription('User to receive the role').setRequired(true)
         )
         .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('Role to assign')
-            .setRequired(true)
+          option.setName('role').setDescription('Role to assign').setRequired(true)
         )
     )
     // SUBCOMMAND: REMOVE
@@ -172,16 +162,10 @@ export default {
         .setName('remove')
         .setDescription('Remove a role from a specific user.')
         .addUserOption((option) =>
-          option
-            .setName('user')
-            .setDescription('User to remove the role from')
-            .setRequired(true)
+          option.setName('user').setDescription('User to remove the role from').setRequired(true)
         )
         .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('Role to remove')
-            .setRequired(true)
+          option.setName('role').setDescription('Role to remove').setRequired(true)
         )
     )
     // SUBCOMMAND: ID
@@ -190,10 +174,7 @@ export default {
         .setName('id')
         .setDescription('Get detailed ID information for a specific role.')
         .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('Role to inspect')
-            .setRequired(true)
+          option.setName('role').setDescription('Role to inspect').setRequired(true)
         )
     )
     // SUBCOMMAND: CREATE
@@ -202,10 +183,7 @@ export default {
         .setName('create')
         .setDescription('Create a new role with a preset or custom permission template.')
         .addStringOption((option) =>
-          option
-            .setName('name')
-            .setDescription('Name of the new role')
-            .setRequired(true)
+          option.setName('name').setDescription('Name of the new role').setRequired(true)
         )
         .addStringOption((option) =>
           option
@@ -244,10 +222,7 @@ export default {
         .setName('savetemplate')
         .setDescription('Save an existing role\'s permissions as a new custom template.')
         .addStringOption((option) =>
-          option
-            .setName('name')
-            .setDescription('Name of the new custom template')
-            .setRequired(true)
+          option.setName('name').setDescription('Name of the new custom template').setRequired(true)
         )
         .addRoleOption((option) =>
           option
@@ -262,15 +237,14 @@ export default {
         .setName('createtemplate')
         .setDescription('Create a custom permission template from scratch and save to database.')
         .addStringOption((option) =>
-          option
-            .setName('name')
-            .setDescription('Name of the new custom template')
-            .setRequired(true)
+          option.setName('name').setDescription('Name of the new custom template').setRequired(true)
         )
         .addStringOption((option) =>
           option
             .setName('permissions')
-            .setDescription('Comma-separated list of permissions (e.g. view_channel,send_messages,kick)')
+            .setDescription(
+              'Comma-separated list of permissions (e.g. view_channel,send_messages,kick)'
+            )
             .setRequired(true)
         )
     )
@@ -291,8 +265,9 @@ export default {
     // SUBCOMMAND LISTPERMS
     if (subcommand === 'listperms') {
       try {
-        let desc = 'Here are all the valid permission strings you can use in `/role createtemplate`:\n\n';
-        
+        let desc =
+          'Here are all the valid permission strings you can use in `/role createtemplate`:\n\n';
+
         for (const [key, value] of Object.entries(PERMISSION_DESCRIPTIONS)) {
           desc += `*   **\`${key}\`**: ${value}\n`;
         }
@@ -334,10 +309,10 @@ export default {
           .setTitle('Role ID Information 🔍')
           .setDescription(
             `*   **Role:** ${targetRole}\n` +
-            `*   **Name:** \`${targetRole.name}\`\n` +
-            `*   **ID:** \`${targetRole.id}\`\n` +
-            `*   **Hex Color:** \`${targetRole.hexColor}\`\n` +
-            `*   **Position:** \`${targetRole.position}\``
+              `*   **Name:** \`${targetRole.name}\`\n` +
+              `*   **ID:** \`${targetRole.id}\`\n` +
+              `*   **Hex Color:** \`${targetRole.hexColor}\`\n` +
+              `*   **Position:** \`${targetRole.position}\``
           )
           .build();
 
@@ -346,7 +321,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role ID Checked] ${interaction.user.tag} checked ID for role "${targetRole.name}"`);
+        logger.info(
+          `[Role ID Checked] ${interaction.user.tag} checked ID for role "${targetRole.name}"`
+        );
       } catch (error) {
         logger.error('[Role ID Error] Failed to fetch role ID info:', error);
 
@@ -373,7 +350,9 @@ export default {
         if (['owner', 'admin', 'mods', 'member'].includes(templateName)) {
           const embedError = new V2Embed()
             .setTitle('Failed to Save Template ❌')
-            .setDescription('Template name cannot use preset names (`owner`, `admin`, `mods`, `member`).')
+            .setDescription(
+              'Template name cannot use preset names (`owner`, `admin`, `mods`, `member`).'
+            )
             .setColor(0xff0000)
             .build();
 
@@ -385,7 +364,7 @@ export default {
 
         const bitfield = role.permissions.bitfield;
         const customTemplates = getCustomTemplates();
-        
+
         customTemplates[templateName] = bitfield.toString();
         saveCustomTemplates(customTemplates);
 
@@ -393,9 +372,9 @@ export default {
           .setTitle('Custom Template Saved! 💾')
           .setDescription(
             `Custom template \`${templateName}\` successfully created.\n` +
-            `*   **Reference Role:** ${role}\n` +
-            `*   **Bitfield Value:** \`${bitfield}\`\n\n` +
-            'You can now use this template in `/role create` or `/role settemplate`!'
+              `*   **Reference Role:** ${role}\n` +
+              `*   **Bitfield Value:** \`${bitfield}\`\n\n` +
+              'You can now use this template in `/role create` or `/role settemplate`!'
           )
           .build();
 
@@ -404,7 +383,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Template Saved] ${interaction.user.tag} saved template "${templateName}" from role ${role.name}`);
+        logger.info(
+          `[Role Template Saved] ${interaction.user.tag} saved template "${templateName}" from role ${role.name}`
+        );
       } catch (error) {
         logger.error('[Role Template Save Error] Failed to save custom template:', error);
 
@@ -431,7 +412,9 @@ export default {
         if (['owner', 'admin', 'mods', 'member'].includes(templateName)) {
           const embedError = new V2Embed()
             .setTitle('Failed to Create Template ❌')
-            .setDescription('Template name cannot use preset names (`owner`, `admin`, `mods`, `member`).')
+            .setDescription(
+              'Template name cannot use preset names (`owner`, `admin`, `mods`, `member`).'
+            )
             .setColor(0xff0000)
             .build();
 
@@ -441,7 +424,7 @@ export default {
           });
         }
 
-        const requestedPermissions = permissionsInput.split(',').map(p => p.trim());
+        const requestedPermissions = permissionsInput.split(',').map((p) => p.trim());
         let finalBitfield = 0n;
         const validList = [];
         const invalidList = [];
@@ -460,7 +443,7 @@ export default {
             .setTitle('Failed to Create Template ❌')
             .setDescription(
               'No valid permissions were recognized.\n' +
-              'Use `/role listperms` to view a list of valid permission strings.'
+                'Use `/role listperms` to view a list of valid permission strings.'
             )
             .setColor(0xff0000)
             .build();
@@ -475,7 +458,8 @@ export default {
         customTemplates[templateName] = finalBitfield.toString();
         saveCustomTemplates(customTemplates);
 
-        let details = `Custom template \`${templateName}\` successfully saved to database.\n\n` +
+        let details =
+          `Custom template \`${templateName}\` successfully saved to database.\n\n` +
           `*   **Active Permissions:** ${validList.join(', ')}\n` +
           `*   **Bitfield Value:** \`${finalBitfield}\``;
 
@@ -493,7 +477,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Template Created] ${interaction.user.tag} created custom template "${templateName}" directly from input`);
+        logger.info(
+          `[Role Template Created] ${interaction.user.tag} created custom template "${templateName}" directly from input`
+        );
       } catch (error) {
         logger.error('[Role Template Create Error] Failed to create custom template:', error);
 
@@ -522,7 +508,9 @@ export default {
         if (role.position >= botMember.roles.highest.position) {
           const embedError = new V2Embed()
             .setTitle('Failed to Modify Role ❌')
-            .setDescription(`Cannot modify permissions for role ${role} because it is equal to or higher than the bot's highest role.`)
+            .setDescription(
+              `Cannot modify permissions for role ${role} because it is equal to or higher than the bot's highest role.`
+            )
             .setColor(0xff0000)
             .build();
 
@@ -547,7 +535,9 @@ export default {
         if (targetPermissions === null) {
           const embedError = new V2Embed()
             .setTitle('Template Not Found ❌')
-            .setDescription(`Template \`${templateInput}\` was not found in presets or custom templates.`)
+            .setDescription(
+              `Template \`${templateInput}\` was not found in presets or custom templates.`
+            )
             .setColor(0xff0000)
             .build();
 
@@ -557,11 +547,16 @@ export default {
           });
         }
 
-        await role.setPermissions(targetPermissions, `Modified based on template ${templateInput} by ${interaction.user.tag}`);
+        await role.setPermissions(
+          targetPermissions,
+          `Modified based on template ${templateInput} by ${interaction.user.tag}`
+        );
 
         const embedSuccess = new V2Embed()
           .setTitle('Role Permissions Updated! 🛡️')
-          .setDescription(`Successfully reset permissions for role ${role} based on template \`${templateInput.toUpperCase()}\`.`)
+          .setDescription(
+            `Successfully reset permissions for role ${role} based on template \`${templateInput.toUpperCase()}\`.`
+          )
           .build();
 
         await interaction.editReply({
@@ -569,7 +564,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Template Set] Permissions for role "${role.name}" updated to template ${templateInput} by ${interaction.user.tag}`);
+        logger.info(
+          `[Role Template Set] Permissions for role "${role.name}" updated to template ${templateInput} by ${interaction.user.tag}`
+        );
       } catch (error) {
         logger.error('[Role Template Set Error] Failed to update role permissions:', error);
 
@@ -601,7 +598,9 @@ export default {
           if (!hexRegex.test(hexColorInput)) {
             const embedError = new V2Embed()
               .setTitle('Invalid Color ❌')
-              .setDescription('Incorrect HEX color format. Please use format like `#FFD700` or `FFD700`.')
+              .setDescription(
+                'Incorrect HEX color format. Please use format like `#FFD700` or `FFD700`.'
+              )
               .setColor(0xff0000)
               .build();
 
@@ -636,7 +635,9 @@ export default {
         if (permissions === null) {
           const embedError = new V2Embed()
             .setTitle('Template Not Found ❌')
-            .setDescription(`Template \`${templateInput}\` was not found in presets or custom templates.`)
+            .setDescription(
+              `Template \`${templateInput}\` was not found in presets or custom templates.`
+            )
             .setColor(0xff0000)
             .build();
 
@@ -657,10 +658,10 @@ export default {
           .setTitle('Role Created Successfully! 🎉')
           .setDescription(
             `*   **Role:** ${newRole}\n` +
-            `*   **Name:** \`${newRole.name}\`\n` +
-            `*   **ID:** \`${newRole.id}\`\n` +
-            `*   **Permission Template:** \`${templateInput.toUpperCase()}\`\n` +
-            `*   **Hex Color:** \`${newRole.hexColor}\``
+              `*   **Name:** \`${newRole.name}\`\n` +
+              `*   **ID:** \`${newRole.id}\`\n` +
+              `*   **Permission Template:** \`${templateInput.toUpperCase()}\`\n` +
+              `*   **Hex Color:** \`${newRole.hexColor}\``
           )
           .build();
 
@@ -669,7 +670,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Created] Role "${newRole.name}" created by ${interaction.user.tag} with template ${templateInput}`);
+        logger.info(
+          `[Role Created] Role "${newRole.name}" created by ${interaction.user.tag} with template ${templateInput}`
+        );
       } catch (error) {
         logger.error('[Role Create Error] Failed to create new role:', error);
 
@@ -710,7 +713,9 @@ export default {
     if (targetRole.position >= botMember.roles.highest.position) {
       const embedError = new V2Embed()
         .setTitle('Failed to Modify Role ❌')
-        .setDescription(`Cannot manage role ${targetRole} because it is equal to or higher than the bot's highest role.`)
+        .setDescription(
+          `Cannot manage role ${targetRole} because it is equal to or higher than the bot's highest role.`
+        )
         .setColor(0xff0000)
         .build();
 
@@ -735,7 +740,10 @@ export default {
           });
         }
 
-        await member.roles.add(targetRole, `Assigned by ${interaction.user.tag} via slash command.`);
+        await member.roles.add(
+          targetRole,
+          `Assigned by ${interaction.user.tag} via slash command.`
+        );
 
         const embedSuccess = new V2Embed()
           .setTitle('Role Successfully Assigned! 🎉')
@@ -747,7 +755,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Added] Role "${targetRole.name}" assigned to ${targetUser.tag} by ${interaction.user.tag}`);
+        logger.info(
+          `[Role Added] Role "${targetRole.name}" assigned to ${targetUser.tag} by ${interaction.user.tag}`
+        );
       } catch (error) {
         logger.error('[Role Add Error] Failed to assign role:', error);
 
@@ -762,9 +772,7 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
       }
-    } 
-    
-    else if (subcommand === 'remove') {
+    } else if (subcommand === 'remove') {
       try {
         if (!member.roles.cache.has(targetRole.id)) {
           const embedInfo = new V2Embed()
@@ -779,7 +787,10 @@ export default {
           });
         }
 
-        await member.roles.remove(targetRole, `Removed by ${interaction.user.tag} via slash command.`);
+        await member.roles.remove(
+          targetRole,
+          `Removed by ${interaction.user.tag} via slash command.`
+        );
 
         const embedSuccess = new V2Embed()
           .setTitle('Role Successfully Removed! 🛡️')
@@ -791,7 +802,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Role Removed] Role "${targetRole.name}" removed from ${targetUser.tag} by ${interaction.user.tag}`);
+        logger.info(
+          `[Role Removed] Role "${targetRole.name}" removed from ${targetUser.tag} by ${interaction.user.tag}`
+        );
       } catch (error) {
         logger.error('[Role Remove Error] Failed to remove role:', error);
 

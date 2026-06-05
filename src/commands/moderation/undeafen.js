@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,16 +7,10 @@ export default {
     .setName('undeafen')
     .setDescription('Undeafen a member in a voice channel (Server Undeafen).')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The member to undeafen')
-        .setRequired(true)
+      option.setName('user').setDescription('The member to undeafen').setRequired(true)
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for undeafening')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for undeafening').setRequired(false)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.DeafenMembers)
     .setDMPermission(false),
@@ -44,7 +34,10 @@ export default {
           .setDescription(`User **${targetUser.tag}** is not a member of this server.`)
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       if (!targetMember.voice.channelId) {
@@ -53,7 +46,10 @@ export default {
           .setDescription(`**${targetUser.tag}** is not connected to a voice channel.`)
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       if (!targetMember.voice.deaf) {
@@ -62,7 +58,10 @@ export default {
           .setDescription(`**${targetUser.tag}** is not server deafened.`)
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Undeafen target
@@ -72,8 +71,8 @@ export default {
         .setTitle('Member Undeafened 🔊')
         .setDescription(
           `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-          `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-          `*   **Reason:** ${reason}`
+            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+            `*   **Reason:** ${reason}`
         )
         .setColor(0x00ff88)
         .build();
@@ -83,7 +82,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Moderation] ${targetUser.tag} has been server undeafened by ${interaction.user.tag} for: ${reason}`);
+      logger.info(
+        `[Moderation] ${targetUser.tag} has been server undeafened by ${interaction.user.tag} for: ${reason}`
+      );
     } catch (error) {
       logger.error('[Moderation Error] Failed to undeafen user:', error);
       const embed = new V2Embed()

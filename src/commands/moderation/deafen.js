@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,16 +7,10 @@ export default {
     .setName('deafen')
     .setDescription('Deafen a member in a voice channel (Server Deafen).')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The member to deafen')
-        .setRequired(true)
+      option.setName('user').setDescription('The member to deafen').setRequired(true)
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for deafening')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for deafening').setRequired(false)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.DeafenMembers)
     .setDMPermission(false),
@@ -44,7 +34,10 @@ export default {
           .setDescription(`User **${targetUser.tag}** is not a member of this server.`)
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Hierarchy Check
@@ -55,10 +48,15 @@ export default {
       ) {
         const embed = new V2Embed()
           .setTitle('Permission Denied ❌')
-          .setDescription(`You cannot deafen **${targetUser.tag}** because they have a higher or equal role hierarchy.`)
+          .setDescription(
+            `You cannot deafen **${targetUser.tag}** because they have a higher or equal role hierarchy.`
+          )
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       if (!targetMember.voice.channelId) {
@@ -67,7 +65,10 @@ export default {
           .setDescription(`**${targetUser.tag}** is not connected to a voice channel.`)
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       if (targetMember.voice.deaf) {
@@ -76,7 +77,10 @@ export default {
           .setDescription(`**${targetUser.tag}** is already server deafened.`)
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Deafen target
@@ -86,8 +90,8 @@ export default {
         .setTitle('Member Deafened 🔇')
         .setDescription(
           `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-          `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-          `*   **Reason:** ${reason}`
+            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+            `*   **Reason:** ${reason}`
         )
         .setColor(0xff5500)
         .build();
@@ -97,7 +101,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Moderation] ${targetUser.tag} has been server deafened by ${interaction.user.tag} for: ${reason}`);
+      logger.info(
+        `[Moderation] ${targetUser.tag} has been server deafened by ${interaction.user.tag} for: ${reason}`
+      );
     } catch (error) {
       logger.error('[Moderation Error] Failed to deafen user:', error);
       const embed = new V2Embed()

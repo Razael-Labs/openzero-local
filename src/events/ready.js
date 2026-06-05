@@ -61,6 +61,21 @@ export default {
     // Daftarkan slash commands secara otomatis saat bot aktif
     await deployCommands(client);
 
+    // Jalankan pembersihan pesan lama (> 7 hari) pada startup dan ulangi setiap 24 jam
+    try {
+      const { cleanupOldMessages } = await import('../utils/supabase.js');
+      await cleanupOldMessages();
+      setInterval(async () => {
+        try {
+          await cleanupOldMessages();
+        } catch (err) {
+          logger.error('[Cleanup Interval] Gagal membersihkan pesan lama:', err);
+        }
+      }, 24 * 60 * 60 * 1000); // 24 jam sekali
+    } catch (error) {
+      logger.error('[Client Startup] Gagal menjalankan pembersihan pesan lama:', error);
+    }
+
     // Update daftar Obtainium secara otomatis dengan data terbaru dari JSON saat startup
     try {
       const channelId = config.obtainium?.channelId;

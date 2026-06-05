@@ -15,7 +15,8 @@ const client = new Client({
     GatewayIntentBits.MessageContent, // Memerlukan aktivasi di Discord Developer Portal
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences
   ],
   partials: [Partials.Channel, Partials.Message]
 });

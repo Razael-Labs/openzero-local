@@ -31,7 +31,11 @@ export default {
           option
             .setName('channel')
             .setDescription('Channel where the webhook will be created')
-            .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice)
+            .addChannelTypes(
+              ChannelType.GuildText,
+              ChannelType.GuildAnnouncement,
+              ChannelType.GuildVoice
+            )
             .setRequired(true)
         )
         .addStringOption((option) =>
@@ -71,7 +75,9 @@ export default {
         if (pfp && !pfp.startsWith('http://') && !pfp.startsWith('https://')) {
           const embedError = new V2Embed()
             .setTitle('Failed to Create Webhook ❌')
-            .setDescription('The avatar/pfp URL you entered is invalid. It must start with `http://` or `https://`.')
+            .setDescription(
+              'The avatar/pfp URL you entered is invalid. It must start with `http://` or `https://`.'
+            )
             .setColor(0xff0000)
             .build();
 
@@ -101,9 +107,9 @@ export default {
           .setTitle('Webhook Created Successfully! 🎉')
           .setDescription(
             `*   **Webhook Name:** \`${webhook.name}\`\n` +
-            `*   **Channel:** ${channel}\n` +
-            `*   **Webhook ID:** \`${webhook.id}\`\n` +
-            `*   **Token:** \`||${webhook.token}||\``
+              `*   **Channel:** ${channel}\n` +
+              `*   **Webhook ID:** \`${webhook.id}\`\n` +
+              `*   **Token:** \`||${webhook.token}||\``
           )
           .addActionRow(actionRow)
           .build();
@@ -113,13 +119,17 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Webhook Created] Webhook "${title}" successfully created in #${channel.name} by ${interaction.user.tag}`);
+        logger.info(
+          `[Webhook Created] Webhook "${title}" successfully created in #${channel.name} by ${interaction.user.tag}`
+        );
       } catch (error) {
         logger.error('[Webhook Error] Failed to create webhook:', error);
 
         const embedError = new V2Embed()
           .setTitle('Failed to Create Webhook ❌')
-          .setDescription(`An error occurred while trying to create the webhook: \`${error.message}\``)
+          .setDescription(
+            `An error occurred while trying to create the webhook: \`${error.message}\``
+          )
           .setColor(0xff0000)
           .build();
 
@@ -128,9 +138,7 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
       }
-    } 
-    
-    else if (subcommand === 'info') {
+    } else if (subcommand === 'info') {
       const idOrUrl = interaction.options.getString('id_or_url').trim();
 
       try {
@@ -176,15 +184,16 @@ export default {
             .setEmoji('📋')
         );
 
-        const channel = interaction.guild.channels.cache.get(webhook.channelId) || `<#${webhook.channelId}>`;
+        const channel =
+          interaction.guild.channels.cache.get(webhook.channelId) || `<#${webhook.channelId}>`;
 
         const embedInfo = new V2Embed()
           .setTitle('Webhook Details 🔍')
           .setDescription(
             `*   **Webhook Name:** \`${webhook.name}\`\n` +
-            `*   **Channel:** ${channel}\n` +
-            `*   **Webhook ID:** \`${webhook.id}\`\n` +
-            `*   **Created By:** ${webhook.owner ? `${webhook.owner} (\`${webhook.owner.id}\`)` : 'Unknown'}`
+              `*   **Channel:** ${channel}\n` +
+              `*   **Webhook ID:** \`${webhook.id}\`\n` +
+              `*   **Created By:** ${webhook.owner ? `${webhook.owner} (\`${webhook.owner.id}\`)` : 'Unknown'}`
           )
           .addActionRow(actionRow)
           .build();
@@ -194,7 +203,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Webhook Info] Webhook ${webhook.id} details successfully displayed for ${interaction.user.tag}`);
+        logger.info(
+          `[Webhook Info] Webhook ${webhook.id} details successfully displayed for ${interaction.user.tag}`
+        );
       } catch (error) {
         logger.error('[Webhook Info Error] Failed to fetch webhook details:', error);
 

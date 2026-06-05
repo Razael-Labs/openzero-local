@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -39,9 +35,9 @@ export default {
         .setTitle('Purge Successful 🧹')
         .setDescription(
           `*   **Pesan Terhapus:** \`${deletedCount}\`\n` +
-          `*   **Saluran:** ${channel}\n` +
-          `*   **Moderator:** ${interaction.user}\n\n` +
-          `*Catatan: Pesan yang lebih dari 14 hari tidak dapat dihapus secara massal oleh sistem Discord.*`
+            `*   **Saluran:** ${channel}\n` +
+            `*   **Moderator:** ${interaction.user}\n\n` +
+            '*Catatan: Pesan yang lebih dari 14 hari tidak dapat dihapus secara massal oleh sistem Discord.*'
         )
         .build();
 

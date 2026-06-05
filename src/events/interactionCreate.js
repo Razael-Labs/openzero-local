@@ -1,4 +1,11 @@
-import { Events, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, Collection } from 'discord.js';
+import {
+  Events,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+  Collection
+} from 'discord.js';
 import logger from '../utils/logger.js';
 import { V2Embed } from '../utils/v2Embed.js';
 import { getObtainiumEmbed } from '../utils/obtainiumHelper.js';
@@ -104,7 +111,9 @@ export default {
         const timeLeft = ((expirationTime - now) / 1000).toFixed(1);
         const cooldownEmbed = new V2Embed()
           .setTitle('Slow down! ⏱️')
-          .setDescription(`Harap tunggu \`${timeLeft}\` detik lagi sebelum menggunakan kembali perintah \`/${interaction.commandName}\`.`)
+          .setDescription(
+            `Harap tunggu \`${timeLeft}\` detik lagi sebelum menggunakan kembali perintah \`/${interaction.commandName}\`.`
+          )
           .setColor(0xff3333)
           .build();
 

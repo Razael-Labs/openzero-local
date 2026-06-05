@@ -10,7 +10,7 @@ Here is the directory structure you must adhere to:
 
 ```text
 openzero-local/
-├── .env                  # Environment secrets (Token, Client ID, Guild ID)
+├── .env                  # Environment secrets (Token, Client ID, Guild ID, Supabase URL/Key)
 ├── .env.example          # Template for secrets
 ├── package.json          # Dependency and script manager (ES Modules format)
 ├── GEMINI.md             # Guide for Gemini Developers
@@ -19,23 +19,31 @@ openzero-local/
 └── src/
     ├── index.js          # Entrypoint (initializes client, intent configurations, global error catchers)
     ├── config.js         # Global configurations (default colors, presence status)
+    ├── locales/          # Translation files for i18n
+    │   ├── id.json       # Indonesian dictionary
+    │   └── en.json       # English dictionary
     ├── utils/
     │   ├── logger.js     # Winston & Chalk logger utility (logs to console and logs/ folder)
-    │   └── v2Embed.js    # Custom fluent V2Embed helper wrapper for Discord Message Components V2
+    │   ├── v2Embed.js    # Custom fluent V2Embed helper wrapper for Discord Message Components V2
+    │   ├── i18n.js       # Dynamic translation engine for localized input/output
+    │   ├── database.js   # Local JSON database utility (msg counts and logging fallback)
+    │   └── supabase.js   # Supabase database wrapper (message records with 7-day auto cleanup)
     ├── handlers/
     │   ├── commandHandler.js # Dynamic slash command loader & REST API deployment router
     │   └── eventHandler.js   # Dynamic event loader (registers ready, messageCreate, interactionCreate)
     ├── events/
-    │   ├── ready.js          # On-ready: Sets presence activity, deploys slash commands
-    │   ├── messageCreate.js  # Message log observer (no prefix parsing)
-    │   └── interactionCreate.js # Interaction router (splits into slash commands and buttons, handles cooldowns)
+    │   ├── ready.js          # On-ready: Sets presence activity, deploys slash commands, runs 7-day message cleanup
+    │   ├── messageCreate.js  # Message observer logging every guild message to Supabase/Local database
+    │   └── interactionCreate # Interaction router (splits into slash commands and buttons, handles cooldowns)
     ├── commands/
     │   ├── utility/
     │   │   ├── ping.js       # Slash command /ping (demonstrates button inside V2Embed container)
     │   │   ├── hello.js      # Slash command /hello (demonstrates optional user arguments)
     │   │   ├── webhook.js    # Slash command /webhook (create / info webhooks with button link)
     │   │   ├── role.js       # Slash command /role (add / remove / id configurations)
-    │   │   └── translate.js  # Context Menu Command 'Translate to English' via Apps selection
+    │   │   ├── translate.js  # Context Menu Command 'Translate to English' via Apps selection
+    │   │   ├── userInfo.js   # Context Menu 'User Info' (Consolidated global & guild profile)
+    │   │   └── messagesRecord.js # Context Menu 'Messages Record' (7-day chat history inspector)
     │   └── moderation/
     │       ├── ban.js        # Slash command /ban
     │       ├── deafen.js     # Slash command /deafen
@@ -65,6 +73,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
   - `data`: a `SlashCommandBuilder` or `ContextMenuCommandBuilder` instance.
   - `execute(interaction)`: an async function executing the command.
 - Set commands as Guild-only by adding `.setDMPermission(false)` to the builder if they are not meant for direct messages.
+- Always use `.setNameLocalizations()` or `.setDescriptionLocalizations()` for command interface translating in Discord clients.
 
 ### 3. Events & Cooldowns
 - All event listeners must be created in `src/events/`.
@@ -85,6 +94,18 @@ When extending or editing this codebase, you **must** strictly follow these rule
 ### 5. Interactive Routing (Buttons, Select Menus)
 - Any button click or select menu interaction will trigger the `interactionCreate` event.
 - If you add custom components with a `custom_id`, you must add a check block inside `src/events/interactionCreate.js` to intercept the interaction, call `await interaction.deferUpdate()`, run your logic, and call `interaction.editReply(...)` to update.
+
+### 6. Internationalization (i18n) Engine
+- Outputs must be translated dynamically using the `t` utility located at `src/utils/i18n.js`:
+  ```javascript
+  import { t } from '../../utils/i18n.js';
+  const text = t('keyName', interaction.locale, { param: 'value' });
+  ```
+- Make sure keys are present in both `src/locales/id.json` and `src/locales/en.json`.
+
+### 7. Dual Database Pipeline (Supabase + Local fallback)
+- Logging/Audit records should run through `src/utils/supabase.js`.
+- Always ensure there is a clean fallback to `src/utils/database.js` local JSON methods when Supabase is not configured. This preserves offline testing and keeps the CI/CD test suite green without external API calls.
 
 ---
 

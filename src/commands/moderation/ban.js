@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,16 +7,10 @@ export default {
     .setName('ban')
     .setDescription('Ban a user from the server.')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The user to ban')
-        .setRequired(true)
+      option.setName('user').setDescription('The user to ban').setRequired(true)
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for the ban')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for the ban').setRequired(false)
     )
     .addStringOption((option) =>
       option
@@ -55,10 +45,15 @@ export default {
         if (!targetMember.bannable) {
           const embed = new V2Embed()
             .setTitle('Action Failed ❌')
-            .setDescription(`I cannot ban **${targetUser.tag}**. They may have a higher role than me or are the server owner.`)
+            .setDescription(
+              `I cannot ban **${targetUser.tag}**. They may have a higher role than me or are the server owner.`
+            )
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         const executorMember = interaction.member;
@@ -68,10 +63,15 @@ export default {
         ) {
           const embed = new V2Embed()
             .setTitle('Permission Denied ❌')
-            .setDescription(`You cannot ban **${targetUser.tag}** because they have a higher or equal role hierarchy.`)
+            .setDescription(
+              `You cannot ban **${targetUser.tag}** because they have a higher or equal role hierarchy.`
+            )
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
       }
 
@@ -86,9 +86,9 @@ export default {
         .setTitle('User Banned 🔨')
         .setDescription(
           `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-          `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-          `*   **Delete History:** \`${deleteSeconds === 0 ? 'None' : deleteSeconds === 86400 ? '24 Hours' : '7 Days'}\`\n` +
-          `*   **Reason:** ${reason}`
+            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+            `*   **Delete History:** \`${deleteSeconds === 0 ? 'None' : deleteSeconds === 86400 ? '24 Hours' : '7 Days'}\`\n` +
+            `*   **Reason:** ${reason}`
         )
         .setColor(0xff3333) // Red accent for ban
         .build();
@@ -98,7 +98,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Moderation] ${targetUser.tag} has been banned by ${interaction.user.tag} for: ${reason}`);
+      logger.info(
+        `[Moderation] ${targetUser.tag} has been banned by ${interaction.user.tag} for: ${reason}`
+      );
     } catch (error) {
       logger.error('[Moderation Error] Failed to ban user:', error);
       const embed = new V2Embed()

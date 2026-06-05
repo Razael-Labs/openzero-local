@@ -41,9 +41,9 @@ export default {
         .setTitle('Translate to English 🇺🇸')
         .setDescription(
           `**Teks Asli (${detectedLang}):**\n` +
-          `> ${originalText.length > 500 ? originalText.slice(0, 500) + '...' : originalText}\n\n` +
-          `**Hasil Terjemahan:**\n` +
-          `> ${translatedText}`
+            `> ${originalText.length > 500 ? originalText.slice(0, 500) + '...' : originalText}\n\n` +
+            '**Hasil Terjemahan:**\n' +
+            `> ${translatedText}`
         )
         .setColor(0x00aeef) // Biru muda premium
         .build();

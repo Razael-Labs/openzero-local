@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,10 +7,7 @@ export default {
     .setName('timeout')
     .setDescription('Place a member in timeout or remove their timeout.')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The member to timeout')
-        .setRequired(true)
+      option.setName('user').setDescription('The member to timeout').setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -32,10 +25,7 @@ export default {
         )
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for the timeout')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for the timeout').setRequired(false)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .setDMPermission(false),
@@ -60,7 +50,10 @@ export default {
           .setDescription(`User **${targetUser.tag}** is not a member of this server.`)
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Hierarchy Check
@@ -71,10 +64,15 @@ export default {
       ) {
         const embed = new V2Embed()
           .setTitle('Permission Denied ❌')
-          .setDescription(`You cannot moderate **${targetUser.tag}** because they have a higher or equal role hierarchy.`)
+          .setDescription(
+            `You cannot moderate **${targetUser.tag}** because they have a higher or equal role hierarchy.`
+          )
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       if (durationMs > 0) {
@@ -82,10 +80,15 @@ export default {
         if (!targetMember.moderatable) {
           const embed = new V2Embed()
             .setTitle('Action Failed ❌')
-            .setDescription(`I cannot timeout **${targetUser.tag}**. They may have a higher role than me or are the server owner.`)
+            .setDescription(
+              `I cannot timeout **${targetUser.tag}**. They may have a higher role than me or are the server owner.`
+            )
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         await targetMember.timeout(durationMs, `${interaction.user.tag}: ${reason}`);
@@ -104,9 +107,9 @@ export default {
           .setTitle('Member Timed Out ⏳')
           .setDescription(
             `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-            `*   **Duration:** \`${durationLabels[durationMs] || durationMs + ' ms'}\`\n` +
-            `*   **Reason:** ${reason}`
+              `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+              `*   **Duration:** \`${durationLabels[durationMs] || durationMs + ' ms'}\`\n` +
+              `*   **Reason:** ${reason}`
           )
           .setColor(0xff7700)
           .build();
@@ -116,7 +119,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Moderation] ${targetUser.tag} has been timed out for ${durationMs}ms by ${interaction.user.tag} for: ${reason}`);
+        logger.info(
+          `[Moderation] ${targetUser.tag} has been timed out for ${durationMs}ms by ${interaction.user.tag} for: ${reason}`
+        );
       } else {
         // Remove Timeout
         if (!targetMember.communicationDisabledUntilTimestamp) {
@@ -125,7 +130,10 @@ export default {
             .setDescription(`**${targetUser.tag}** is not currently in a timeout.`)
             .setColor(0xffaa00)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         await targetMember.timeout(null, `${interaction.user.tag}: ${reason}`);
@@ -134,8 +142,8 @@ export default {
           .setTitle('Timeout Removed 🔊')
           .setDescription(
             `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-            `*   **Reason:** ${reason}`
+              `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+              `*   **Reason:** ${reason}`
           )
           .setColor(0x00ff88)
           .build();
@@ -145,7 +153,9 @@ export default {
           flags: MessageFlags.IsComponentsV2
         });
 
-        logger.info(`[Moderation] Timeout removed for ${targetUser.tag} by ${interaction.user.tag}.`);
+        logger.info(
+          `[Moderation] Timeout removed for ${targetUser.tag} by ${interaction.user.tag}.`
+        );
       }
     } catch (error) {
       logger.error('[Moderation Error] Failed to timeout user:', error);

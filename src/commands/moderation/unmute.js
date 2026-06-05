@@ -1,8 +1,4 @@
-import {
-  SlashCommandBuilder,
-  MessageFlags,
-  PermissionFlagsBits
-} from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
 
@@ -11,10 +7,7 @@ export default {
     .setName('unmute')
     .setDescription('Unmute a member (voice, text, or both).')
     .addUserOption((option) =>
-      option
-        .setName('user')
-        .setDescription('The member to unmute')
-        .setRequired(true)
+      option.setName('user').setDescription('The member to unmute').setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -28,10 +21,7 @@ export default {
         )
     )
     .addStringOption((option) =>
-      option
-        .setName('reason')
-        .setDescription('Reason for unmuting')
-        .setRequired(false)
+      option.setName('reason').setDescription('Reason for unmuting').setRequired(false)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
     .setDMPermission(false),
@@ -56,7 +46,10 @@ export default {
           .setDescription(`User **${targetUser.tag}** is not a member of this server.`)
           .setColor(0xff3333)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       let voiceUnmuted = false;
@@ -71,11 +64,16 @@ export default {
             .setDescription('You need the `Mute Members` permission to voice-unmute.')
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         if (!targetMember.voice.channelId) {
-          warnings.push('Target user is not connected to a voice channel (Voice Unmute was skipped).');
+          warnings.push(
+            'Target user is not connected to a voice channel (Voice Unmute was skipped).'
+          );
         } else {
           await targetMember.voice.setMute(false, `${interaction.user.tag}: ${reason}`);
           voiceUnmuted = true;
@@ -90,7 +88,10 @@ export default {
             .setDescription('You need the `Manage Roles` permission to remove the Muted role.')
             .setColor(0xff3333)
             .build();
-          return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+          return await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
         }
 
         const mutedRole = guild.roles.cache.find((role) => role.name.toLowerCase() === 'muted');
@@ -100,7 +101,9 @@ export default {
         } else {
           const botMember = await guild.members.fetch(interaction.client.user.id);
           if (mutedRole.position >= botMember.roles.highest.position) {
-            warnings.push('I cannot remove the "Muted" role because it is higher than my highest role.');
+            warnings.push(
+              'I cannot remove the "Muted" role because it is higher than my highest role.'
+            );
           } else {
             await targetMember.roles.remove(mutedRole, `${interaction.user.tag}: ${reason}`);
             textUnmuted = true;
@@ -114,12 +117,15 @@ export default {
           .setTitle('Unmute Skipped ⚠️')
           .setDescription(
             'No unmute action was performed.\n' +
-            '*   **Warnings/Info:**\n' +
-            warnings.map(w => `    *   ${w}`).join('\n')
+              '*   **Warnings/Info:**\n' +
+              warnings.map((w) => `    *   ${w}`).join('\n')
           )
           .setColor(0xffaa00)
           .build();
-        return await interaction.editReply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
+        return await interaction.editReply({
+          components: [embed],
+          flags: MessageFlags.IsComponentsV2
+        });
       }
 
       // Success Embed
@@ -131,10 +137,12 @@ export default {
         .setTitle('Member Unmuted 🔊')
         .setDescription(
           `*   **Target:** ${targetUser} (\`${targetUser.tag}\`)\n` +
-          `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
-          `*   **Actions:** ${unmuteSummary.join(' & ')}\n` +
-          `*   **Reason:** ${reason}` +
-          (warnings.length > 0 ? `\n\n**Note/Warnings:**\n${warnings.map(w => `*   ${w}`).join('\n')}` : '')
+            `*   **Moderator:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+            `*   **Actions:** ${unmuteSummary.join(' & ')}\n` +
+            `*   **Reason:** ${reason}` +
+            (warnings.length > 0
+              ? `\n\n**Note/Warnings:**\n${warnings.map((w) => `*   ${w}`).join('\n')}`
+              : '')
         )
         .setColor(0x00ff88) // Green accent for success/unmute
         .build();
@@ -144,7 +152,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Moderation] ${targetUser.tag} has been unmuted (${unmuteSummary.join(', ')}) by ${interaction.user.tag} for: ${reason}`);
+      logger.info(
+        `[Moderation] ${targetUser.tag} has been unmuted (${unmuteSummary.join(', ')}) by ${interaction.user.tag} for: ${reason}`
+      );
     } catch (error) {
       logger.error('[Moderation Error] Failed to unmute user:', error);
       const embed = new V2Embed()

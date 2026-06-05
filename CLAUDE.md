@@ -9,10 +9,13 @@ Welcome, Claude! This file outlines the **OpenZero Discord Bot** codebase for An
 The codebase is built on **Node.js** using **discord.js v14.26+** (supporting Discord Message Components V2) with ES modules syntax.
 
 ### Key Components:
-- **`src/index.js`**: Bootstraps the bot. Configures essential intents (`Guilds`, `GuildMessages`, `MessageContent`, `DirectMessages`) and uncaught error handlers.
+- **`src/index.js`**: Bootstraps the bot. Configures essential intents (`Guilds`, `GuildMessages`, `MessageContent`, `DirectMessages`, `GuildPresences`) and uncaught error handlers.
 - **`src/config.js`**: Holds global configurations, including sequential color selection for embeds and activity details.
 - **`src/utils/logger.js`**: Custom Winston logging wrapper with Chalk formatting.
 - **`src/utils/v2Embed.js`**: Fluid wrapper class translating basic metadata (Title, Description, Color, ActionRows) into Discord's new Components V2 layout.
+- **`src/utils/i18n.js`**: i18n helper utility providing the `t(key, locale, replaceData)` translation helper. Dict locales are situated under `src/locales/` (`id.json` and `en.json`).
+- **`src/utils/supabase.js`**: Connects to Supabase to insert and retrieve message records. Safely falls back to `src/utils/database.js` local JSON methods if credentials are not specified.
+- **`src/utils/database.js`**: Local JSON storage utility for handling local message counts and logging fallbacks.
 - **`src/handlers/`**: Houses loaders for commands and events.
 - **`src/events/`**: Registers message listeners, command executors, cooldown validations, and button click interactions.
 
@@ -43,7 +46,7 @@ export const config = {
 
 ## Interaction Management
 
-### Slash Commands (`src/commands/`)
+### Slash Commands & Context Menus (`src/commands/`)
 Slash commands and Context Menu Commands are loaded dynamically. Each command file exports a default object:
 ```javascript
 import { SlashCommandBuilder } from 'discord.js';
@@ -62,11 +65,20 @@ export default {
 #### Cooldowns & Anti-Spam
 A 3-second cooldown is enforced globally per command per user in `src/events/interactionCreate.js`. Attempting to spam commands will return an ephemeral `V2Embed` indicating the remaining wait time.
 
-#### Current Custom System Commands:
+#### Current System Commands:
 - **`/webhook`** (Utility): Create or view details of webhooks with copy URL buttons.
 - **`/role`** (Utility): Assign, remove, or view positions and IDs of server roles.
 - **`/purge`** (Moderation): Bulk delete messages (1-100, default is 100). Automatically filters out messages older than 14 days to comply with Discord API limits.
 - **`Translate to English`** (Context Menu Command): Translates any targeted message to English. Accessed via right-clicking/long-pressing a message -> **Apps** -> **Translate to English**. Powered by the lightweight `@vitalets/google-translate-api` package.
+- **`User Info`** (Context Menu Command - Consolidated): Consolidated user profiling command showing global properties (ID, Username, Bot/System status, badges, banner color), server-specific details (Roles, Server Nickname, server avatar, boosting status, key permissions), joined dates, status/presence activity, and message counts. Includes download action buttons for global avatar, server avatar, and banner. Fully localizable (supports ID and EN-US).
+- **`Messages Record`** (Context Menu Command): Retrieves and lists the last 15 messages sent by the user in this guild over the past 7 days. Facilitates behavioral monitoring. Fully localizable.
+
+---
+
+## Supabase Logging & 7-Day Pruning
+*   **Logging:** All guild message events trigger `recordMessage` which saves the message details to Supabase.
+*   **Pruning:** A cleanup task running on startup and repeating every 24 hours deletes message records older than 7 days (`cleanupOldMessages`).
+*   **Fallback:** If `SUPABASE_URL` and `SUPABASE_KEY` are not set in `.env`, the bot silently logs messages locally in `data/database.json`.
 
 ---
 

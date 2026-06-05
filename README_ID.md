@@ -2,7 +2,7 @@
 
 ---
 
-Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancang untuk dijalankan sepenuhnya secara lokal pada perangkat Anda sendiri (seperti PC, Server Rumah, atau Termux di Android). Proyek ini **100% bebas dari ketergantungan API cloud berbayar** (hosting berbayar atau API eksternal yang membatasi penggunaan). Semua data, logging, dan pemrosesan berjalan sepenuhnya di bawah kendali Anda sendiri tanpa biaya langganan tambahan.
+Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancang untuk dijalankan sepenuhnya secara lokal pada perangkat Anda sendiri (seperti PC, Server Rumah, or Termux di Android). Proyek ini **100% bebas dari ketergantungan API cloud berbayar** (hosting berbayar atau API eksternal yang membatasi penggunaan). Semua data, logging, dan pemrosesan berjalan sepenuhnya di bawah kendali Anda sendiri tanpa biaya langganan tambahan.
 
 **Deskripsi Repositori GitHub:** *OpenZero based Discord bot without any paid API dependency.*
 
@@ -11,8 +11,13 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
 ## Fitur Utama Bot
 
 1. **Slash Commands Terintegrasi**: Menggunakan format perintah modern langsung dari antarmuka Discord.
-2. **Terjemahan Menu Konteks ("Translate to English")** *(Baru)*: Cukup tekan lama (di mobile) atau klik kanan (di desktop) pada pesan apa pun -> buka menu **Apps** -> pilih **Translate to English** untuk menerjemahkan pesan secara instan ke bahasa Inggris. Bekerja 100% gratis dan tanpa API key menggunakan `@vitalets/google-translate-api` (sangat optimal untuk Termux).
-3. **Toolkit Moderasi Tingkat Lanjut** *(Baru)*:
+2. **Inspeksi Profil Terkonsolidasi ("User Info")** *(Baru)*: Cukup klik kanan atau tekan lama pada pengguna -> buka menu **Apps** -> pilih **User Info** untuk melihat dashboard profil lengkap pengguna tersebut. Fitur ini menggantikan beberapa perintah terpisah sebelumnya dan menggabungkan informasi global akun (ID, lencana, bot/sistem, warna banner), metadata server (role, nickname server, key permissions, status booster), tanggal bergabung Discord & Server, status kehadiran/aktivitas detail, jumlah pesan terkirim, serta tombol untuk mengunduh Avatar Global, Avatar Server, dan Banner profil.
+3. **Pemantauan Perilaku ("Messages Record")** *(Baru)*: Perintah menu konteks di bawah **Apps** -> **Messages Record** untuk melihat hingga 15 riwayat pesan terakhir yang dikirim oleh pengguna di channel mana saja di server ini dalam 7 hari terakhir.
+4. **Perekaman Supabase dengan Database Fallback** *(Baru)*: Mencatat semua pesan yang dikirim di server ke database Supabase untuk pemantauan perilaku. Jika Supabase tidak dikonfigurasi, bot secara otomatis mengalihkan penyimpanan data pesan secara lokal ke `data/database.json` tanpa membuat bot crash.
+5. **Pembersihan Pesan Otomatis 7 Hari** *(Baru)*: Sistem pembersih berkala yang berjalan saat startup bot dan setiap 24 jam sekali untuk menghapus otomatis rekaman pesan yang berumur lebih dari 7 hari agar kapasitas database efisien.
+6. **Sistem Multi-Bahasa / i18n** *(Baru)*: Pengalihan bahasa bot otomatis di sisi klien. Menu input commands beserta respon teks outputs (embed, button, dsb) secara dinamis berubah bahasa antara **Indonesia** dan **Inggris (US)** menyesuaikan bahasa aplikasi Discord yang digunakan oleh user.
+7. **Terjemahan Menu Konteks ("Translate to English")**: Cukup tekan lama pada pesan -> buka menu **Apps** -> pilih **Translate to English** untuk menerjemahkan pesan secara instan ke bahasa Inggris. Bekerja 100% gratis dan tanpa API key menggunakan `@vitalets/google-translate-api` (sangat optimal untuk Termux).
+8. **Toolkit Moderasi Tingkat Lanjut**:
    * `/purge`: Menghapus pesan secara massal di suatu channel (1-100 pesan, default 100).
    * `/kick` & `/ban`: Mengeluarkan atau memblokir anggota dengan perlindungan hierarki role.
    * `/mute` & `/unmute`: Mute Teks (menggunakan Muted role) dan Mute Suara.
@@ -20,16 +25,16 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
    * `/deafen` & `/undeafen`: Menulikan (deafen) atau membatalkan tuli di saluran suara.
    * `/role`: Menambah, menghapus, atau melihat detail informasi ID role secara cepat.
    * `/webhook`: Membuat, melihat informasi detail, dan mengelola webhook server.
-4. **Sistem Cooldown Anti-Spam** *(Baru)*: Batasan waktu tunggu (cooldown) selama 3 detik per perintah per pengguna untuk mencegah spam dan rate limit.
-5. **Perputaran Warna Embed Berurutan** *(Baru)*: Secara otomatis mengganti warna aksen garis samping embed secara berurutan untuk setiap pesan baru dari daftar warna premium berikut:
-   * `#6e4cc1` (Ungu)
-   * `#242221` (Hitam Gelap)
-   * `#f58e25` (Oranye)
-   * `#fdfdfd` (Putih)
-6. **Layout Embed Premium (Components V2)**: Tampilan informasi bot menggunakan layout modern baru dari Discord (bukan embed lama yang monoton) lengkap dengan tombol interaktif (seperti tombol refresh latency 🔄) yang tertanam langsung di dalam kotak informasi.
-7. **Logger Konsol & File**: Mencatat setiap aktivitas chat dan eksekusi perintah bot di konsol dengan indikator status Unicode berwarna, serta menyimpannya otomatis ke file log lokal (`logs/`).
-8. **Auto Status Kehadiran**: Bot secara otomatis menampilkan status bermain game (default: *Playing GTA 6*) saat aktif.
-9. **Script Admin Peraturan (Rules)**: Perintah cepat bagi pemilik bot untuk mengirim atau mengedit pesan peraturan komunitas yang rapi dan minim emoji di channel server tertentu.
+9. **Sistem Cooldown Anti-Spam**: Batasan waktu tunggu (cooldown) selama 3 detik per perintah per pengguna untuk mencegah spam dan rate limit.
+10. **Perputaran Warna Embed Berurutan**: Secara otomatis mengganti warna aksen garis samping embed secara berurutan untuk setiap pesan baru dari daftar warna premium berikut:
+    * `#6e4cc1` (Ungu)
+    * `#242221` (Hitam Gelap)
+    * `#f58e25` (Oranye)
+    * `#fdfdfd` (Putih)
+11. **Layout Embed Premium (Components V2)**: Tampilan informasi bot menggunakan layout modern baru dari Discord (bukan embed lama yang monoton) lengkap dengan tombol interaktif yang tertanam langsung di dalam kotak informasi.
+12. **Logger Konsol & File**: Mencatat setiap aktivitas chat dan eksekusi perintah bot di konsol dengan indikator status Unicode berwarna, serta menyimpannya otomatis ke file log lokal (`logs/`).
+13. **Auto Status Kehadiran**: Bot secara otomatis menampilkan status bermain game (default: *Playing GTA 6*) saat aktif.
+14. **Script Admin Peraturan (Rules)**: Perintah cepat bagi pemilik bot untuk mengirim atau mengedit pesan peraturan komunitas yang rapi dan minim emoji di channel server tertentu.
 
 ---
 
@@ -67,7 +72,7 @@ Sebelum menggunakan bot, pastikan perangkat Anda sudah terinstal **Node.js** (ve
 1. Buka [Discord Developer Portal](https://discord.com/developers/applications).
 2. Klik tombol **New Application** di pojok kanan atas, beri nama bot Anda, lalu buat.
 3. Pergi ke menu **Bot** (di menu sebelah kiri), klik **Reset Token**, lalu salin token yang muncul. Ini adalah `DISCORD_TOKEN` Anda.
-4. Di halaman yang sama, scroll ke bawah ke bagian **Privileged Gateway Intents**, lalu aktifkan **Message Content Intent** (diperlukan agar bot dapat membaca aktivitas chat untuk logger). Klik **Save Changes**.
+4. Di halaman yang sama, scroll ke bawah ke bagian **Privileged Gateway Intents**, lalu aktifkan **Message Content Intent** (diperlukan agar bot dapat membaca aktivitas chat) dan **Presence Intent** (diperlukan agar bot melacak status online/kehadiran). Klik **Save Changes**.
 5. Pergi ke menu **General Information** (di menu sebelah kiri), lalu salin **Application ID** yang tertera. Ini adalah `CLIENT_ID` Anda.
 
 ### Langkah 3: Mengundang Bot ke Server Discord Anda
@@ -85,13 +90,16 @@ Agar perintah slash bot langsung muncul **seketika** di server Anda tanpa perlu 
 2. Klik kanan pada ikon Server Discord Anda di daftar server sebelah kiri, lalu klik **Copy Server ID**. Ini adalah `GUILD_ID` Anda.
 
 ### Langkah 5: Konfigurasi File Lingkungan (.env)
-1. Buka folder bot ini di komputer/perangkat Anda.
-2. Duplikat file `.env.example` dan ubah namanya menjadi `.env`.
-3. Buka file `.env` tersebut menggunakan teks editor pilihan Anda dan isi nilainya dengan data yang sudah disalin di langkah sebelumnya:
+1. Duplikat file `.env.example` dan ubah namanya menjadi `.env`.
+2. Buka file `.env` tersebut menggunakan teks editor pilihan Anda dan isi nilainya dengan data yang sudah disalin di langkah sebelumnya:
    ```env
    DISCORD_TOKEN=MASUKKAN_TOKEN_BOT_ANDA_DI_SINI
    CLIENT_ID=MASUKKAN_APPLICATION_ID_BOT_ANDA_DI_SINI
    GUILD_ID=MASUKKAN_SERVER_ID_ANDA_DI_SINI
+   
+   # Konfigurasi Supabase (Opsional - Otomatis fallback ke database lokal jika kosong)
+   SUPABASE_URL=MASUKKAN_URL_SUPABASE_DI_SINI
+   SUPABASE_KEY=MASUKKAN_ANON_KEY_SUPABASE_DI_SINI
    ```
 
 ### Langkah 6: Mengaktifkan & Menjalankan Bot
@@ -107,8 +115,8 @@ Agar perintah slash bot langsung muncul **seketika** di server Anda tanpa perlu 
    *(Gunakan `npm run dev` jika Anda ingin bot otomatis me-restart sendiri apabila ada perubahan konfigurasi atau kode perintah).*
 4. Setelah terminal memunculkan log `[Client] Login berhasil!`, bot Anda resmi online!
 
-### Langkah 7: Pengujian Kode (Unit Testing)
-Repositori ini dilengkapi dengan unit test pra-konfigurasi untuk memverifikasi perintah moderasi dan terjemahan.
+### Langkah 7: Pengujian Keandalan Kode (Unit Testing)
+Repositori ini dilengkapi dengan unit test pra-konfigurasi untuk memverifikasi perintah moderasi, i18n, database local fallback, dan menu konteks.
 Jalankan pengujian menggunakan Jest:
 ```bash
 npm test
