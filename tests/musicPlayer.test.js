@@ -57,6 +57,13 @@ jest.unstable_mockModule('@discordjs/voice', () => ({
   },
   VoiceConnectionStatus: {
     Disconnected: 'disconnected'
+  },
+  StreamType: {
+    Arbitrary: 'arbitrary',
+    Raw: 'raw',
+    OggOpus: 'ogg/opus',
+    WebmOpus: 'webm/opus',
+    Opus: 'opus'
   }
 }));
 
