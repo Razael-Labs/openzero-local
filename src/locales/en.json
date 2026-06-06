@@ -53,5 +53,16 @@
   "lyricsSearchError": "An error occurred while fetching lyrics from database.",
   "pageText": "Page {current} of {total}",
   "lyricsButtonLabel": "Lyrics {index}",
-  "previewButtonLabel": "Preview {index}"
+  "previewButtonLabel": "Preview {index}",
+  "notInVoiceChannel": "You must be in a voice channel to use this command!",
+  "differentVoiceChannel": "You must be in the same voice channel as the bot to use this command!",
+  "noMusicResults": "No results found for **{query}**.",
+  "addedToQueue": "Added **{title}** to the queue.",
+  "skippedTrack": "Skipped the current track.",
+  "noMusicPlaying": "No music is currently playing.",
+  "pausedMusic": "Playback has been paused.",
+  "resumedMusic": "Playback has been resumed.",
+  "stoppedMusic": "Stopped music and cleared the queue.",
+  "queueTitle": "Music Queue 🎵",
+  "queueEmpty": "The queue is currently empty."
 }

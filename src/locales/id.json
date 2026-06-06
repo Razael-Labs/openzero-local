@@ -53,5 +53,16 @@
   "lyricsSearchError": "Terjadi kegagalan saat mengambil lirik dari basis data.",
   "pageText": "Halaman {current} dari {total}",
   "lyricsButtonLabel": "Lirik {index}",
-  "previewButtonLabel": "Preview {index}"
+  "previewButtonLabel": "Preview {index}",
+  "notInVoiceChannel": "Anda harus berada di saluran suara untuk menggunakan perintah ini!",
+  "differentVoiceChannel": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini!",
+  "noMusicResults": "Tidak ditemukan hasil untuk **{query}**.",
+  "addedToQueue": "Menambahkan **{title}** ke antrean.",
+  "skippedTrack": "Melewati lagu saat ini.",
+  "noMusicPlaying": "Tidak ada musik yang sedang diputar saat ini.",
+  "pausedMusic": "Pemutaran musik dijeda.",
+  "resumedMusic": "Pemutaran musik dilanjutkan.",
+  "stoppedMusic": "Menghentikan musik dan mengosongkan antrean.",
+  "queueTitle": "Antrean Musik 🎵",
+  "queueEmpty": "Antrean saat ini kosong."
 }
