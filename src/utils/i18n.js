@@ -31,12 +31,12 @@ loadLocales();
 /**
  * Translate a key according to user locale
  * @param {string} key - Translation key
- * @param {string} [locale='id'] - Discord interaction locale
+ * @param {string} [locale='en'] - Discord interaction locale
  * @param {object} [replaceData={}] - Interpolation variables (e.g. {username: 'OZ'})
  * @returns {string} Translated string or the key itself
  */
-export function t(key, locale = 'id', replaceData = {}) {
-  let lang = 'id';
+export function t(key, locale = 'en', replaceData = {}) {
+  let lang = 'en';
   if (locale) {
     const cleanLocale = locale.toLowerCase();
     if (cleanLocale.startsWith('en')) {
@@ -46,8 +46,8 @@ export function t(key, locale = 'id', replaceData = {}) {
     }
   }
 
-  const dict = locales[lang] || locales['id'] || {};
-  let value = dict[key] || locales['id']?.[key] || key;
+  const dict = locales[lang] || locales['en'] || {};
+  let value = dict[key] || locales['en']?.[key] || key;
 
   // Interpolation
   for (const [k, v] of Object.entries(replaceData)) {

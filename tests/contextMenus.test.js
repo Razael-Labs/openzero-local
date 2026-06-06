@@ -30,7 +30,7 @@ describe('i18n Utility', () => {
     expect(t('messagesCountSuffix', 'en-US', { count: 5 })).toBe('5 messages');
 
     // Test fallback behavior
-    expect(t('yes', 'fr')).toBe('Ya'); // fallback to default 'id'
+    expect(t('yes', 'fr')).toBe('Yes'); // fallback to default 'en'
   });
 });
 
