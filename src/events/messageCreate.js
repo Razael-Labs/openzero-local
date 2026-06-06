@@ -2,6 +2,7 @@ import { Events } from 'discord.js';
 import logger from '../utils/logger.js';
 import { incrementMessageCount } from '../utils/database.js';
 import { recordMessage } from '../utils/supabase.js';
+import { handleSticker } from '../handlers/stickerHandler.js';
 
 export default {
   name: Events.MessageCreate,
@@ -13,6 +14,9 @@ export default {
     // Abaikan pesan dari bot lain (dan diri sendiri)
     if (message.author.bot) return;
 
+    const stickerContent = handleSticker(message);
+    const finalContent = stickerContent || message.content;
+
     // Increment message count and record details in database for the server
     if (message.guild) {
       incrementMessageCount(message.guild.id, message.author.id);
@@ -23,7 +27,7 @@ export default {
         channelName: message.channel.name,
         userId: message.author.id,
         username: message.author.username,
-        content: message.content,
+        content: finalContent,
         messageId: message.id,
         createdAt: message.createdAt
       });
@@ -31,7 +35,7 @@ export default {
 
     // Catat aktivitas pesan masuk menggunakan Logger Handler (observasi/log saja)
     logger.info(
-      `[Message] [${message.guild?.name || 'DM'}] #${message.channel.name || 'unknown'} | ${message.author.tag}: ${message.content}`
+      `[Message] [${message.guild?.name || 'DM'}] #${message.channel.name || 'unknown'} | ${message.author.tag}: ${finalContent}`
     );
   }
 };

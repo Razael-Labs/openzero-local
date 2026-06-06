@@ -95,15 +95,16 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
       let fetchUrl = entry.url;
       let targetExt = entry.ext;
 
-      // Convert SVG to PNG using images.weserv.nl so Discord can render it properly
+      // Convert SVG to PNG and invert colors (making black icons white) using images.weserv.nl
+      let weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(entry.url.replace(/^https?:\/\//, ''))}&filt=negate`;
       if (entry.ext === 'svg') {
-        let weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(entry.url.replace(/^https?:\/\//, ''))}&output=png`;
-        if (size) {
-          weservUrl += `&w=${size}&h=${size}&fit=contain`;
-        }
-        fetchUrl = weservUrl;
+        weservUrl += '&output=png';
         targetExt = 'png';
       }
+      if (size) {
+        weservUrl += `&w=${size}&h=${size}&fit=contain`;
+      }
+      fetchUrl = weservUrl;
 
       const response = await fetch(fetchUrl);
       if (response.ok) {
