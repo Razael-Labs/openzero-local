@@ -51,7 +51,7 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
     // List all
     for (const cat of sortedCategories) {
       const capitalizedCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-      descriptionText += `### 📁 ${t('helpCategory', locale)}: ${capitalizedCat}\n`;
+      descriptionText += `### 🧭 ${t('helpCategory', locale)}: ${capitalizedCat}\n`;
 
       for (const cmd of categories[cat]) {
         const name = cmd.title || cmd.data.name;
@@ -71,7 +71,7 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
     const cat = selectedCategory.toLowerCase();
     const capitalizedCat = cat.charAt(0).toUpperCase() + cat.slice(1);
 
-    descriptionText += `### 📁 ${t('helpCategory', locale)}: ${capitalizedCat}\n\n`;
+    descriptionText += `### 🧭 ${t('helpCategory', locale)}: ${capitalizedCat}\n\n`;
 
     const catCmds = categories[cat] || [];
     if (catCmds.length === 0) {
