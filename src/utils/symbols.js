@@ -2,6 +2,8 @@
  * Class representing system-wide symbols and emojis to maintain styling consistency.
  */
 export class Symbols {
+  static guild = null;
+
   static get ENTER() { return '↳'; }
   static get ARROW_LEFT() { return '⬅️'; }
   static get ARROW_RIGHT() { return '➡️'; }
@@ -47,8 +49,10 @@ export function applyGuildEmojis(text, guild) {
     .replace(/➡️/g, Symbols.ARROW_RIGHT)
     .replace(/🔄/g, Symbols.REFRESH);
 
-  if (guild) {
-    const emojis = guild.emojis.cache;
+  const targetGuild = guild || Symbols.guild;
+
+  if (targetGuild) {
+    const emojis = targetGuild.emojis.cache;
     const emojiMapping = {
       [Symbols.SUCCESS]: 'oz_success',
       [Symbols.FAILURE]: 'oz_failure',

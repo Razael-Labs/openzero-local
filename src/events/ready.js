@@ -2,6 +2,7 @@ import { Events, ActivityType } from 'discord.js';
 import { deployCommands } from '../handlers/commandHandler.js';
 import logger from '../utils/logger.js';
 import { config } from '../config.js';
+import { Symbols } from '../utils/symbols.js';
 
 export default {
   name: Events.ClientReady,
@@ -11,6 +12,18 @@ export default {
    */
   async execute(client) {
     logger.info(`[Client] Login berhasil! Bot aktif sebagai ${client.user.tag}`);
+
+    // Pre-fetch custom emojis guild cache reference globally
+    if (config.guildId) {
+      try {
+        const guild = await client.guilds.fetch(config.guildId);
+        await guild.emojis.fetch(); // Ensure emojis are in cache
+        Symbols.guild = guild;
+        logger.info(`[Client] Custom emojis guild cache reference set globally for guild: ${guild.name}`);
+      } catch (err) {
+        logger.warn(`[Client] Failed to pre-fetch guild for global custom emojis: ${err.message}`);
+      }
+    }
 
     // Set aktivitas kehadiran bot dari Global Config
     try {
