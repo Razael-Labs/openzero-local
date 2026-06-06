@@ -35,5 +35,5 @@ describe('IconHelper Test Suite', () => {
     // To mock/avoid network dependency/flakiness on non-existent, we can test cache behavior or mock fetch.
     // Let's verify standard error handling for totally invalid icons
     await expect(downloadIcon('this-icon-does-not-exist-anywhere-12345')).rejects.toThrow();
-  });
+  }, 15000);
 });

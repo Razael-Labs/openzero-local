@@ -61,7 +61,11 @@ export async function recordMessage({ guildId, channelId, channelName, userId, u
 
     return { success: true, method: 'supabase' };
   } catch (err) {
-    logger.error('[Supabase] Exception saat menyimpan pesan:', err);
+    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
+      logger.warn(`[Supabase] Gagal menyimpan pesan ke cloud (Offline/Network Error): ${err.message}. Tersimpan lokal.`);
+    } else {
+      logger.error('[Supabase] Exception saat menyimpan pesan:', err);
+    }
     return { success: false, error: err, method: 'supabase-exception' };
   }
 }
@@ -92,7 +96,11 @@ export async function getUserMessages(guildId, userId) {
 
     return data || [];
   } catch (err) {
-    logger.error('[Supabase] Exception saat fetch record pesan:', err);
+    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
+      logger.warn(`[Supabase] Gagal fetch dari cloud (Offline/Network Error): ${err.message}. Mengambil dari lokal.`);
+    } else {
+      logger.error('[Supabase] Exception saat fetch record pesan:', err);
+    }
     return getUserMessagesLocally(guildId, userId);
   }
 }
@@ -122,7 +130,11 @@ export async function cleanupOldMessages() {
     logger.info('[Supabase] Pembersihan berkala (cleanup) pesan berumur > 7 hari selesai.');
     return { success: true, method: 'supabase' };
   } catch (err) {
-    logger.error('[Supabase] Exception saat cleanup pesan lama:', err);
+    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
+      logger.warn(`[Supabase] Cleanup ditangguhkan (Offline/Network Error): ${err.message}`);
+    } else {
+      logger.error('[Supabase] Exception saat cleanup pesan lama:', err);
+    }
     return { success: false, error: err };
   }
 }
