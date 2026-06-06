@@ -100,7 +100,7 @@ export class MusicSession {
 
     try {
       logger.info(`[Music Manager] Fetching stream for track: ${this.currentTrack.title} (${this.currentTrack.url})`);
-      const stream = await play.stream(this.currentTrack.url);
+      const stream = await play.stream(this.currentTrack.url, { discordPlayerCompatibility: true });
       
       const resource = createAudioResource(stream.stream, {
         inputType: stream.type
