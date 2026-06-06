@@ -1,6 +1,6 @@
 {
   "name": "discord-basic-bot",
-  "version": "1.7.22",
+  "version": "1.7.37",
   "description": "A basic Discord bot with modular handlers",
   "main": "src/index.js",
   "type": "module",
