@@ -11,7 +11,7 @@ export default {
    * @param {import('discord.js').Client} client
    */
   async execute(client) {
-    logger.info(`[Client] Login berhasil! Bot aktif sebagai ${client.user.tag}`);
+    logger.info(`[Client] Login successful! Bot is active as ${client.user.tag}`);
 
     // Pre-fetch custom emojis guild cache reference globally
     if (config.guildId) {
@@ -25,7 +25,7 @@ export default {
       }
     }
 
-    // Set aktivitas kehadiran bot dari Global Config
+    // Set bot presence activity from Global Config
     try {
       const actName = config.activity?.name;
       const actTypeString = config.activity?.type || 'PLAYING';
@@ -59,7 +59,7 @@ export default {
           };
         }
 
-        // Jika dalam mode development/test (lokal), otomatis atur status menjadi 'invisible' (offline)
+        // If in development/test mode (local), automatically set status to 'invisible' (offline)
         const botStatus = config.nodeEnv === 'production'
           ? (config.activity?.status || 'online')
           : 'invisible';
@@ -69,17 +69,17 @@ export default {
           status: botStatus
         });
         logger.info(
-          `[Client] Aktivitas bot diatur menjadi: ${actTypeString} ${actName} (Status: ${botStatus})`
+          `[Client] Bot activity set to: ${actTypeString} ${actName} (Status: ${botStatus})`
         );
       }
     } catch (error) {
-      logger.error('[Client] Gagal mengatur aktivitas bot:', error);
+      logger.error('[Client] Failed to set bot activity:', error);
     }
 
-    // Daftarkan slash commands secara otomatis saat bot aktif
+    // Automatically deploy slash commands when bot starts
     await deployCommands(client);
 
-    // Jalankan pembersihan pesan lama (> 7 hari) pada startup dan ulangi setiap 24 jam
+    // Run cleanup of old messages (> 7 days) on startup and repeat every 24 hours
     try {
       const { cleanupOldMessages } = await import('../utils/supabase.js');
       await cleanupOldMessages();
@@ -87,19 +87,19 @@ export default {
         try {
           await cleanupOldMessages();
         } catch (err) {
-          logger.error('[Cleanup Interval] Gagal membersihkan pesan lama:', err);
+          logger.error('[Cleanup Interval] Failed to clean up old messages:', err);
         }
-      }, 24 * 60 * 60 * 1000); // 24 jam sekali
+      }, 24 * 60 * 60 * 1000); // Once every 24 hours
     } catch (error) {
-      logger.error('[Client Startup] Gagal menjalankan pembersihan pesan lama:', error);
+      logger.error('[Client Startup] Failed to run old messages cleanup:', error);
     }
 
-    // Inisialisasi auto watcher Obtainium data & update list otomatis
+    // Initialize auto watcher for Obtainium data & auto list updates
     try {
       const { initObtainiumWatcher } = await import('../utils/obtainiumWatcher.js');
       await initObtainiumWatcher(client);
     } catch (error) {
-      logger.error('[Obtainium Startup] Gagal menginisialisasi Obtainium Watcher:', error);
+      logger.error('[Obtainium Startup] Failed to initialize Obtainium Watcher:', error);
     }
   }
 };
