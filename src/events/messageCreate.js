@@ -3,6 +3,7 @@ import logger from '../utils/logger.js';
 import { incrementMessageCount } from '../utils/database.js';
 import { recordMessage } from '../utils/supabase.js';
 import { handleSticker } from '../handlers/stickerHandler.js';
+import { handleDevCommand } from '../handlers/devCommandHandler.js';
 
 export default {
   name: Events.MessageCreate,
@@ -13,6 +14,10 @@ export default {
   async execute(message) {
     // Abaikan pesan dari bot lain (dan diri sendiri)
     if (message.author.bot) return;
+
+    // Jalankan prefix command developer jika ada
+    const isDevCommand = await handleDevCommand(message);
+    if (isDevCommand) return;
 
     const stickerContent = handleSticker(message);
     const finalContent = stickerContent || message.content;
