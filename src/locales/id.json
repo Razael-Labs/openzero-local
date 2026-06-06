@@ -54,7 +54,7 @@
   "pageText": "Halaman {current} dari {total}",
   "lyricsButtonLabel": "Lirik {index}",
   "previewButtonLabel": "Preview {index}",
-  "helpTitle": "Daftar Perintah Bot ⚙",
+  "helpTitle": "⚙ Menu Bantuan",
   "helpDescription": "Berikut adalah daftar perintah yang tersedia di bot ini:\n\n",
   "helpCategory": "Kategori",
   "helpCommandFormat": "Perintah",

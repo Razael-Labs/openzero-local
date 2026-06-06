@@ -54,7 +54,7 @@
   "pageText": "Page {current} of {total}",
   "lyricsButtonLabel": "Lyrics {index}",
   "previewButtonLabel": "Preview {index}",
-  "helpTitle": "Bot Command List ⚙",
+  "helpTitle": "⚙ Help Menu",
   "helpDescription": "Here is the list of available commands on this bot:\n\n",
   "helpCategory": "Category",
   "helpCommandFormat": "Command",
