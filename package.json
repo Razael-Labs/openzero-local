@@ -15,6 +15,7 @@
     "format": "node node_modules/prettier/bin/prettier.cjs --write src",
     "format:check": "node node_modules/prettier/bin/prettier.cjs --check src",
     "fetch-repos": "node src/scripts/fetchRepos.js",
+    "setup-emojis": "node src/scripts/setupGuildEmojis.js",
     "version:update": "node src/scripts/updateVersion.js",
     "version:bump": "node src/scripts/updateVersion.js"
   },

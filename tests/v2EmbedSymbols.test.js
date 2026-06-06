@@ -33,4 +33,23 @@ describe('V2Embed Symbols Auto-Formatting Test Suite', () => {
       expect.stringContaining(`${Symbols.ENTER} Step 1: ${Symbols.MUSIC} Play music ${Symbols.MICROPHONE} Sing along`)
     );
   });
+
+  test('should replace standard emojis with custom guild emojis if they exist in guild cache', () => {
+    const mockGuild = {
+      emojis: {
+        cache: [
+          { name: 'oz_success', toString: () => '<:oz_success:1122334455>' },
+          { name: 'oz_failure', toString: () => '<:oz_failure:6677889900>' }
+        ]
+      }
+    };
+
+    new V2Embed(mockGuild)
+      .setTitle('Status: ✅ and ❌')
+      .build();
+
+    expect(setContentSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Status: <:oz_success:1122334455> and <:oz_failure:6677889900>')
+    );
+  });
 });
