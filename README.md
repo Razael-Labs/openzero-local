@@ -15,7 +15,7 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
 3. **Behavioral Monitoring ("Messages Record")** *(New)*: Context menu command under **Apps** -> **Messages Record** that retrieves the last 15 messages sent by the user in any channel of this server within the last 7 days.
 4. **Supabase Logging with Local Fallback** *(New)*: Logs all guild messages to a Supabase database for long-term audit and analysis. If Supabase keys are not set up, it automatically and silently falls back to writing records locally into `data/database.json`.
 5. **7-Day Automatic Message Pruning** *(New)*: Periodic cleanup mechanism running on startup and every 24 hours to automatically delete message logs older than 7 days, maintaining a rolling audit window.
-6. **Multi-Language i18n System** *(New)*: Automatic client-side language switching. Input commands and outputs (embeds, buttons, response texts) dynamically adjust between **Indonesian** and **English (US)** based on the user's Discord client settings.
+6. **Multi-Language i18n System** *(New)*: Automatic client-side language switching. Input commands and outputs (embeds, buttons, response texts) dynamically adjust between **Indonesian** and **English (US)** based on the user's Discord client settings (defaults to **English**).
 7. **Context Menu Translation ("Translate to English")**: Right-click or long-press any message -> go to **Apps** -> select **Translate to English** to translate messages instantly to English. Works 100% free and without API keys using `@vitalets/google-translate-api` (perfect for Termux).
 8. **Advanced Moderation Toolkit**:
    * `/purge`: Bulk delete messages in a channel (1-100, default is 100).
@@ -26,13 +26,14 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
    * `/role`: Quick assignment, removal, or retrieval of detailed role IDs.
    * `/webhook`: Create, view details of, and manage webhooks.
    * `/music-search`: Search for music tracks using iTunes API. Renders high-resolution cover art, paginated results (3 tracks per page), instant lyrics lookup via LRCLIB API integration, and direct audio preview links using Discord Message Components V2.
+   * `/help` & `/menu` *(New)*: Displays an interactive help panel. Groups commands dynamically based on their folder categories with custom Font Awesome symbols, interactive filter buttons, and full translation support.
 9. **Anti-Spam Cooldown System**: Global 3-second cooldown per command per user to prevent spam and rate limits.
 10. **Flexible Color Strategies**: Automatically alternates the embed accent colors using a configurable coloring strategy (`SpecificColor`, `SequentialColor`, or `RandomColor` defined in root `config.js`).
 11. **Premium V2 Layouts**: Renders response boxes using Discord's new Message Components V2 system (`ContainerBuilder`, `TextDisplayBuilder`, etc.) with interactive buttons embedded directly inside the container frame.
 12. **Local Logging**: Tracks chat activities and command executions locally in the console using Chalk colors and Winston log files (`logs/`).
 13. **Bot Status/Activity**: Automatically sets rich presence status (e.g., *Playing GTA 6*) on startup. Sets to `invisible` when running in a local development environment.
 14. **Rules Deployment**: Easily post or edit clean, formatted server rules using a simple command line utility.
-15. **Semantic Versioning (SemVer)** *(New)*: Globally tracks bot releases using the SemVer format (e.g. `1.6.0`). Managed via a root `VERSION` file and synchronized dynamically to configurations.
+15. **Semantic Versioning (SemVer)** *(New)*: Globally tracks bot releases using the SemVer format (e.g. `1.7.0`). Managed via a root `VERSION` file and synchronized dynamically to configurations.
 
 ---
 

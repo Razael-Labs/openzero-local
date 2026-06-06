@@ -10,7 +10,7 @@ The codebase is built on **Node.js** using **discord.js v14.26+** (supporting Di
 
 ### Key Components:
 - **`src/index.js`**: Bootstraps the bot. Configures essential intents (`Guilds`, `GuildMessages`, `MessageContent`, `DirectMessages`, `GuildPresences`), imports the global SemVer version, and uncaught error handlers.
-- **`src/version.js`**: Stores the global version code in SemVer (`1.6.0`) format, synchronized from the root `VERSION` file.
+- **`src/version.js`**: Stores the global version code in SemVer (`1.7.x`) format, synchronized from the root `VERSION` file.
 - **`src/config.js`**: Wrapper re-exporting the root global configuration `config.js`.
 - **`src/utils/logger.js`**: Custom Winston logging wrapper with Chalk formatting.
 - **`src/utils/v2Embed.js`**: Fluid wrapper class translating basic metadata (Title, Description, Color, ActionRows) into Discord's new Components V2 layout.
@@ -84,10 +84,12 @@ A 3-second cooldown is enforced globally per command per user in `src/events/int
 - **`/webhook`** (Utility): Create or view details of webhooks with copy URL buttons.
 - **`/role`** (Utility): Assign, remove, or view positions and IDs of server roles.
 - **`/music-search`** (Utility): Query Apple iTunes Music API for tracks. Show cover art, navigate results page-by-page, fetch lyrics via LRCLIB integration with a button click, and link direct previews. Utilizes Discord Message Components V2 and i18n support.
+- **`/help` & **`/menu`** (Utility): Shows a beautifully styled interactive category navigation menu for all bot commands using V2Embed, custom Font Awesome symbols, and translation options.
 - **`/purge`** (Moderation): Bulk delete messages (1-100, default is 100). Automatically filters out messages older than 14 days to comply with Discord API limits.
 - **`Translate to English`** (Context Menu Command): Translates any targeted message to English. Accessed via right-clicking/long-pressing a message -> **Apps** -> **Translate to English**. Powered by the lightweight `@vitalets/google-translate-api` package.
-- **`User Info`** (Context Menu Command - Consolidated): Consolidated user profiling command showing global properties (ID, Username, Bot/System status, badges, banner color), server-specific details (Roles, Server Nickname, server avatar, boosting status, key permissions), joined dates, status/presence activity, and message counts. Includes download action buttons for global avatar, server avatar, and banner. Fully localizable (supports ID and EN-US).
+- **`User Info`** (Context Menu Command - Consolidated): Consolidated user profiling command showing global properties (ID, Username, Bot/System status, badges, banner color), server-specific details (Roles, Server Nickname, server avatar, boosting status, key permissions), joined dates, status/presence activity, and message counts. Includes download action buttons for global avatar, server avatar, and banner. Fully localizable (supports ID and EN-US, defaults to EN).
 - **`Messages Record`** (Context Menu Command): Retrieves and lists the last 15 messages sent by the user in this guild over the past 7 days. Facilitates behavioral monitoring. Fully localizable.
+
 
 
 ---

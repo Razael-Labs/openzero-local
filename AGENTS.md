@@ -46,6 +46,8 @@ openzero-local/
     │   │   ├── webhook.js    # Slash command /webhook (create / info webhooks with button link)
     │   │   ├── role.js       # Slash command /role (add / remove / id configurations)
     │   │   ├── musicSearch.js # Slash command /music-search (iTunes search API, LRCLIB lyrics lookup, preview button link)
+    │   │   ├── help.js       # Slash command /help (interactive dynamic help menu with category buttons)
+    │   │   ├── menu.js       # Slash command /menu (identical shortcut to /help)
     │   │   ├── translate.js  # Context Menu Command 'Translate to English' via Apps selection
     │   │   ├── userInfo.js   # Context Menu 'User Info' (Consolidated global & guild profile)
     │   │   └── messagesRecord.js # Context Menu 'Messages Record' (7-day chat history inspector)
@@ -107,7 +109,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
   import { t } from '../../utils/i18n.js';
   const text = t('keyName', interaction.locale, { param: 'value' });
   ```
-- Make sure keys are present in both `src/locales/id.json` and `src/locales/en.json`.
+- Make sure keys are present in both `src/locales/id.json` and `src/locales/en.json` (Default bot locale is English `en`).
 
 ### 7. Dual Database Pipeline (Supabase + Local fallback)
 - Logging/Audit records should run through `src/utils/supabase.js`.

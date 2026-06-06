@@ -15,7 +15,7 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
 3. **Pemantauan Perilaku ("Messages Record")** *(Baru)*: Perintah menu konteks di bawah **Apps** -> **Messages Record** untuk melihat hingga 15 riwayat pesan terakhir yang dikirim oleh pengguna di channel mana saja di server ini dalam 7 hari terakhir.
 4. **Perekaman Supabase dengan Database Fallback** *(Baru)*: Mencatat semua pesan yang dikirim di server ke database Supabase untuk pemantauan perilaku. Jika Supabase tidak dikonfigurasi, bot secara otomatis mengalihkan penyimpanan data pesan secara lokal ke `data/database.json` tanpa membuat bot crash.
 5. **Pembersihan Pesan Otomatis 7 Hari** *(Baru)*: Sistem pembersih berkala yang berjalan saat startup bot dan setiap 24 jam sekali untuk menghapus otomatis rekaman pesan yang berumur lebih dari 7 hari agar kapasitas database efisien.
-6. **Sistem Multi-Bahasa / i18n** *(Baru)*: Pengalihan bahasa bot otomatis di sisi klien. Menu input commands beserta respon teks outputs (embed, button, dsb) secara dinamis berubah bahasa antara **Indonesia** dan **Inggris (US)** menyesuaikan bahasa aplikasi Discord yang digunakan oleh user.
+6. **Sistem Multi-Bahasa / i18n** *(Baru)*: Pengalihan bahasa bot otomatis di sisi klien. Menu input commands beserta respon teks outputs (embed, button, dsb) secara dinamis berubah bahasa antara **Indonesia** dan **Inggris (US)** menyesuaikan bahasa aplikasi Discord yang digunakan oleh user (default ke **Bahasa Inggris**).
 7. **Terjemahan Menu Konteks ("Translate to English")**: Cukup tekan lama pada pesan -> buka menu **Apps** -> pilih **Translate to English** untuk menerjemahkan pesan secara instan ke bahasa Inggris. Bekerja 100% gratis dan tanpa API key menggunakan `@vitalets/google-translate-api` (sangat optimal untuk Termux).
 8. **Toolkit Moderasi Tingkat Lanjut**:
    * `/purge`: Menghapus pesan secara massal di suatu channel (1-100 pesan, default 100).
@@ -26,13 +26,14 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
    * `/role`: Menambah, menghapus, atau melihat detail informasi ID role secara cepat.
    * `/webhook`: Membuat, melihat informasi detail, dan mengelola webhook server.
    * `/music-search`: Mencari trek musik menggunakan iTunes API. Menampilkan gambar cover resolusi tinggi, hasil paginasi (3 trek per halaman), pencarian lirik instan melalui integrasi LRCLIB API, dan tombol pratinjau audio langsung menggunakan Discord Message Components V2.
+   * `/help` & `/menu` *(Baru)*: Menampilkan panel bantuan interaktif. Mengelompokkan perintah secara dinamis berdasarkan kategori foldernya dengan simbol kustom Font Awesome, tombol filter interaktif, dan dukungan lokalisasi penuh.
 9. **Sistem Cooldown Anti-Spam**: Batasan waktu tunggu (cooldown) selama 3 detik per perintah per pengguna untuk mencegah spam dan rate limit.
 10. **Strategi Warna Embed Fleksibel**: Secara otomatis mengatur warna aksen garis samping embed menggunakan strategi pewarnaan yang dapat dikonfigurasi (`SpecificColor`, `SequentialColor`, atau `RandomColor` di dalam root `config.js`).
 11. **Layout Embed Premium (Components V2)**: Tampilan informasi bot menggunakan layout modern baru dari Discord (bukan embed lama yang monoton) lengkap dengan tombol interaktif yang tertanam langsung di dalam kotak informasi.
 12. **Logger Konsol & File**: Mencatat setiap aktivitas chat dan eksekusi perintah bot di konsol dengan indikator status Unicode berwarna, serta menyimpannya otomatis ke file log lokal (`logs/`).
 13. **Auto Status Kehadiran**: Bot secara otomatis menampilkan status bermain game (default: *Playing GTA 6*) saat aktif. Bot otomatis diatur menjadi `invisible` (offline) jika dijalankan di lingkungan pengujian lokal (development).
 14. **Script Admin Peraturan (Rules)**: Perintah cepat bagi pemilik bot untuk mengirim atau mengedit pesan peraturan komunitas yang rapi dan minim emoji di channel server tertentu.
-15. **Semantic Versioning (SemVer)** *(Baru)*: Pelacakan versi bot secara global menggunakan format SemVer (seperti `1.6.0`). Dikelola melalui file root `VERSION` dan disinkronkan secara dinamis ke seluruh konfigurasi bot.
+15. **Semantic Versioning (SemVer)** *(Baru)*: Pelacakan versi bot secara global menggunakan format SemVer (seperti `1.7.0`). Dikelola melalui file root `VERSION` dan disinkronkan secara dinamis ke seluruh konfigurasi bot.
 
 ---
 

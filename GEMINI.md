@@ -36,7 +36,7 @@ Membaca subfolder di dalam `src/commands/` secara dinamis. Mendukung **Slash Com
 Sistem pertahanan bot yang membatasi eksekusi command sebesar **3 detik** per perintah per pengguna. Menampilkan hitungan mundur secara privat (*ephemeral*) menggunakan `V2Embed` jika pengguna melakukan spamming.
 
 ### 6. Mesin Internasionalisasi & Lokalisasi / i18n (`src/utils/i18n.js`)
-Menyediakan utilitas `t(key, locale, replaceData)` untuk menerjemahkan teks respon bot secara dinamis berdasarkan bahasa klien (Discord client locale) pengguna yang melakukan interaksi. Mendukung Bahasa Indonesia (`id`) dan Inggris (`en`). File kamus bahasa disimpan di folder `src/locales/`.
+Menyediakan utilitas `t(key, locale, replaceData)` untuk menerjemahkan teks respon bot secara dinamis berdasarkan bahasa klien (Discord client locale) pengguna yang melakukan interaksi. Mendukung Bahasa Indonesia (`id`) dan Inggris (`en`) (secara bawaan/default menggunakan **Bahasa Inggris**). File kamus bahasa disimpan di folder `src/locales/`.
 
 ### 7. Integrasi Supabase & Fallback Database Lokal (`src/utils/supabase.js` & `src/utils/database.js`)
 *   **Supabase Log:** Mencatat seluruh pesan guild yang masuk ke tabel Supabase `message_records` untuk keperluan pemantauan perilaku buruk (*bad behavior monitoring*).
@@ -81,11 +81,18 @@ Mencari trek lagu di Apple iTunes Search API dan menampilkan hasilnya dengan vis
 *   **Tombol 🎵 Preview #X**: Tautan eksternal pratinjau audio lagu jika tersedia.
 *   Mendukung lokalisasi i18n penuh (Bahasa Indonesia / Inggris).
 
-### 5. Context Menu: `Translate to English` (Apps Selection)
+### 5. Perintah `/help` & `/menu` (Utility)
+Menampilkan menu bantuan interaktif dengan daftar perintah bot yang dikelompokkan secara dinamis berdasarkan kategori.
+*   Menggunakan layout **Discord Message Components V2** (`V2Embed`).
+*   Dilengkapi dengan tombol navigasi kategori interaktif yang secara otomatis memfilter perintah.
+*   Menggunakan emoji kustom Font Awesome (seperti `border-all`, `black-tie`, `music`, `screwdriver-wrench`, `discord`, `letterboxd`) yang disiapkan melalui skrip `npm run setup-emojis`.
+*   Mendukung lokalisasi i18n penuh (Bahasa Indonesia / Inggris).
+
+### 6. Context Menu: `Translate to English` (Apps Selection)
 Penerjemah pesan otomatis yang diintegrasikan ke menu konteks Discord.
 *   Pesan diterjemahkan menggunakan `@vitalets/google-translate-api` secara gratis dan murni lokal.
 
-### 6. Context Menu Terkonsolidasi: `User Info` (Apps Selection)
+### 7. Context Menu Terkonsolidasi: `User Info` (Apps Selection)
 Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi profil:
 *   Informasi global (Username, ID, Akun Bot/Sistem, Lencana/Badges, Banner Color).
 *   Informasi khusus Server (Nickname server, Role, Key permissions, Status Booster).
@@ -95,7 +102,7 @@ Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi pro
 *   Tombol download Avatar Global, Server Avatar, dan Banner Image.
 *   Respon output mendukung lokalisasi bahasa (Indonesia/Inggris) berdasarkan bahasa klien pengguna.
 
-### 7. Context Menu: `Messages Record` (Apps Selection)
+### 8. Context Menu: `Messages Record` (Apps Selection)
 Mengambil riwayat pesan yang dikirim oleh target pengguna di berbagai channel server ini selama 7 hari terakhir. Digunakan oleh moderator untuk memonitor perilaku pengguna. Respon output mendukung lokalisasi bahasa.
 
 ---
