@@ -69,5 +69,8 @@
   "stoppedMusic": "Menghentikan musik dan mengosongkan antrean.",
   "queueTitle": "Antrean Musik 🎵",
   "queueEmpty": "Antrean saat ini kosong.",
-  "welcomeMessage": "Selamat datang di server, {user}! Kami sangat senang Anda bergabung bersama kami."
+  "welcomeMessage": "Selamat datang di server, {user}! Kami sangat senang Anda bergabung bersama kami.",
+  "helpCommandsSuffix": "{count} perintah",
+  "helpFooter": "\n*Gunakan tombol di bawah untuk menyaring perintah berdasarkan kategori.*\n\n",
+  "helpNoCommands": "Tidak ada perintah di kategori ini."
 }

@@ -45,9 +45,9 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
     descriptionText += `### 📊 Summary:\n`;
     for (const cat of sortedCategories) {
       const capitalizedCat = cat.charAt(0).toUpperCase() + cat.slice(1);
-      descriptionText += `*   **${capitalizedCat}:** \`${categories[cat].length}\` commands\n`;
+      descriptionText += `*   **${capitalizedCat}:** \`${t('helpCommandsSuffix', locale, { count: categories[cat].length })}\`\n`;
     }
-    descriptionText += `\n*Gunakan tombol di bawah untuk menyaring perintah berdasarkan kategori.*\n\n`;
+    descriptionText += t('helpFooter', locale);
 
     // List all
     for (const cat of sortedCategories) {
@@ -76,7 +76,7 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
 
     const catCmds = categories[cat] || [];
     if (catCmds.length === 0) {
-      descriptionText += `Tidak ada perintah di kategori ini.`;
+      descriptionText += t('helpNoCommands', locale);
     } else {
       for (const cmd of catCmds) {
         const name = cmd.title || cmd.data.name;

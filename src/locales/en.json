@@ -69,5 +69,8 @@
   "stoppedMusic": "Stopped music and cleared the queue.",
   "queueTitle": "Music Queue 🎵",
   "queueEmpty": "The queue is currently empty.",
-  "welcomeMessage": "Welcome to the server, {user}! We are glad to have you here."
+  "welcomeMessage": "Welcome to the server, {user}! We are glad to have you here.",
+  "helpCommandsSuffix": "{count} commands",
+  "helpFooter": "\n*Use the buttons below to filter commands by category.*\n\n",
+  "helpNoCommands": "No commands found in this category."
 }
