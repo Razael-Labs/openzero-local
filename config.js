@@ -31,6 +31,12 @@ export const config = {
     key: process.env.SUPABASE_KEY
   },
 
+  // Groq API Configuration
+  groq: {
+    apiKey: process.env.GROQ_API_KEY,
+    model: process.env.GROQ_MODEL || 'gemma2-9b-it'
+  },
+
   // Local JSON Database Configuration
   database: {
     dir: dbDir,

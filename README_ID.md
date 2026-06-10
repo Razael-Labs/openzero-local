@@ -34,6 +34,8 @@ Ini adalah **OpenZero Local Version**—sebuah bot Discord mandiri yang dirancan
 13. **Auto Status Kehadiran**: Bot secara otomatis menampilkan status bermain game (default: *Playing GTA 6*) saat aktif. Bot otomatis diatur menjadi `invisible` (offline) jika dijalankan di lingkungan pengujian lokal (development).
 14. **Script Admin Peraturan (Rules)**: Perintah cepat bagi pemilik bot untuk mengirim atau mengedit pesan peraturan komunitas yang rapi dan minim emoji di channel server tertentu.
 15. **Semantic Versioning (SemVer)** *(Baru)*: Pelacakan versi bot secara global menggunakan format SemVer (versi saat ini: `1.7.60`). Dikelola melalui file root `VERSION` dan disinkronkan secara dinamis ke seluruh konfigurasi bot.
+16. **Integrasi AI Agent dengan Groq** *(Baru)*: Obrolan cerdas menggunakan perintah `/fox` atau dengan melakukan ping/mention bot secara langsung di server. Mengintegrasikan **Groq API** (default: `gemma2-9b-it`) dengan fitur pemanggilan alat (*function calling*) untuk menjalankan plugin secara otomatis (seperti membuat webhook, memutar lagu, atau menambah role) berdasarkan wacana natural pengguna. Dilengkapi *fallback* klasifikasi mockup lokal jika API key tidak diatur.
+17. **Pengelola Plugin Dinamis** *(Baru)*: Mengizinkan administrator mengaktifkan dan menonaktifkan plugin AI secara dinamis menggunakan perintah `/plugin list`, `/plugin install`, dan `/plugin uninstall`, yang secara instan menambah/menghapus perintah dari Discord API saat itu juga.
 
 ---
 

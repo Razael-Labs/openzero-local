@@ -42,5 +42,52 @@ export default {
     logger.info(
       `[Message] [${message.guild?.name || 'DM'}] #${message.channel.name || 'unknown'} | ${message.author.tag}: ${finalContent}`
     );
+
+    // AI Trigger: Jika bot di-mention, panggil AI Agent runAgent
+    const botMention = `<@${message.client.user.id}>`;
+    const botMentionNick = `<@!${message.client.user.id}>`;
+    if (message.content.includes(botMention) || message.content.includes(botMentionNick)) {
+      try {
+        // Bersihkan mention bot dari prompt
+        let cleanPrompt = message.content
+          .replace(botMention, '')
+          .replace(botMentionNick, '')
+          .trim();
+
+        if (cleanPrompt.length === 0) {
+          return message.reply('Ada yang bisa saya bantu? Tanyakan saja atau minta saya menjalankan tugas!');
+        }
+
+        // Tunjukkan status sedang mengetik
+        await message.channel.sendTyping();
+
+        const { runAgent } = await import('../utils/aiManager.js');
+        const context = {
+          client: message.client,
+          guild: message.guild,
+          channel: message.channel,
+          member: message.member,
+          user: message.author
+        };
+
+        const response = await runAgent(cleanPrompt, context);
+
+        const replyOptions = {
+          content: response.responseText || 'Tugas selesai dijalankan.'
+        };
+
+        if (response.result?.embeds) {
+          replyOptions.components = response.result.embeds; // V2Embed builds to a container components format
+          replyOptions.flags = 1 << 14; // MessageFlags.IsComponentsV2 (IsComponentsV2 is 16384 or 1 << 14)
+        } else if (response.result?.responseText) {
+          replyOptions.content = response.result.responseText;
+        }
+
+        await message.reply(replyOptions);
+      } catch (err) {
+        logger.error('[AI Message Trigger] Gagal merespon mention:', err);
+        await message.reply('Maaf, saya mengalami kesalahan saat memproses permintaan Anda.');
+      }
+    }
   }
 };

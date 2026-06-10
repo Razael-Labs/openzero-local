@@ -44,6 +44,13 @@ export async function loadCommands(client) {
           continue;
         }
 
+        // Check if command is enabled by its plugin installation state
+        const { isCommandEnabled } = await import('../utils/pluginManager.js');
+        if (!isCommandEnabled(command.data.name)) {
+          logger.info(`[Command Handler] Skipping disabled command: /${command.data.name} (Plugin not installed)`);
+          continue;
+        }
+
         command.category = folder;
         client.commands.set(command.data.name, command);
         logger.info(`[Command Handler] Loaded command: /${command.data.name}`);

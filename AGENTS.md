@@ -31,7 +31,18 @@ openzero-local/
     │   ├── v2Embed.js    # Custom fluent V2Embed helper wrapper for Discord Message Components V2
     │   ├── i18n.js       # Dynamic translation engine for localized input/output
     │   ├── database.js   # Local JSON database utility (msg counts and logging fallback)
-    │   └── supabase.js   # Supabase database wrapper (message records with 7-day auto cleanup)
+    │   ├── supabase.js   # Supabase database wrapper (message records with 7-day auto cleanup)
+    │   ├── aiHistory.js  # AI Chat history manager (Supabase + Local fallback)
+    │   ├── aiManager.js  # Main AI agent coordinator with Groq client support
+    │   └── pluginManager.js # Plugin installer state mapping commands to active plugins
+    ├── plugins/          # AI plugin extensions
+    │   ├── webhookPlugin.js
+    │   ├── rolePlugin.js
+    │   ├── musicPlugin.js
+    │   ├── moderationPlugin.js
+    │   ├── translatePlugin.js
+    │   ├── userInfoPlugin.js
+    │   └── messagesRecordPlugin.js
     ├── handlers/
     │   ├── commandHandler.js # Dynamic slash command loader & REST API deployment router
     │   └── eventHandler.js   # Dynamic event loader (registers ready, messageCreate, interactionCreate)
@@ -122,6 +133,11 @@ When extending or editing this codebase, you **must** strictly follow these rule
   npm run version:bump [major|minor|patch] [amount]
   ```
   This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js). The `[amount]` defaults to `auto`, which automatically counts the number of git commits since the last version update. You can also specify an exact number, e.g., `npm run version:bump patch 20` increments the patch version by 20.
+
+### 9. AI Agent Plugins and Extension System
+- Each new tool or action that the AI is supposed to perform must be wrapped in a plugin file inside `src/plugins/`.
+- All plugin files must expose standard OpenAI function schemas via `.parameters` and an execution entrypoint via `.execute(args, context)`.
+- Plugins must be registered in the `plugins` dictionary in `src/utils/aiManager.js` and their commands mapped in `src/utils/pluginManager.js` to support dynamic installation and automatic Discord re-registration via `/plugin`.
 
 ---
 

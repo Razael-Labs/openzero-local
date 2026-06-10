@@ -105,6 +105,26 @@ Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi pro
 ### 8. Context Menu: `Messages Record` (Apps Selection)
 Mengambil riwayat pesan yang dikirim oleh target pengguna di berbagai channel server ini selama 7 hari terakhir. Digunakan oleh moderator untuk memonitor perilaku pengguna. Respon output mendukung lokalisasi bahasa.
 
+### 9. Perintah `/fox` (Utility / AI Agent)
+Memanggil asisten kecerdasan buatan Fox (AI Agent) secara langsung via prompt text.
+*   Mendukung integrasi **Groq API** (model default `gemma2-9b-it`) untuk merespon obrolan.
+*   Menggunakan skema *Function Calling/Tool Use* untuk memicu plugin secara otomatis (seperti membuat webhook, memutar lagu, atau menambah role) berdasarkan wacana natural pengguna.
+*   Secara otomatis mendeteksi jika bot di-ping/mention di chat room dan memproses obrolan serupa.
+
+### 10. Perintah `/plugin` (Utility / Plugin Manager)
+Menginstal dan menghapus modul plugin AI secara dinamis tanpa perlu me-restart bot.
+*   **`/plugin list`**: Menampilkan daftar semua plugin dan status keaktifan saat ini.
+*   **`/plugin install [name]`**: Mengaktifkan plugin dan mendaftarkan perintah terkait ke Discord API secara instan.
+*   **`/plugin uninstall [name]`**: Menonaktifkan plugin dan menghapus perintah terkait dari Discord API secara instan.
+
+---
+
+## Integrasi Sistem AI Agent & Plugin
+Bot ini dilengkapi dengan arsitektur agen cerdas modular di bawah direktori `src/plugins/`:
+*   **AI Engine**: Menggunakan API OpenAI-compatible dari Groq.com dengan penanganan fallback otomatis. Jika model tidak mendukung *tool calling* (seperti gemma2-9b-it), request secara otomatis dikirim ulang tanpa parameter tools untuk menjamin bot tetap memberikan respon obrolan.
+*   **Histori Obrolan Persisten**: Percakapan pengguna disimpan secara berurutan ke tabel Supabase `ai_chat_history`. Jika koneksi terputus atau tabel belum dibuat, sistem secara otomatis mengalihkan penyimpanan (*failover*) secara lokal ke `data/database.json`.
+*   **Modularitas Plugin**: Setiap fungsi bot dibungkus sebagai plugin terisolasi (seperti `webhookPlugin`, `musicPlugin`, `rolePlugin`). Status keaktifan plugin dikontrol oleh `/plugin` dan dipantau oleh `src/utils/pluginManager.js`.
+
 ---
 
 ## Cara Menjalankan & Menguji Proyek

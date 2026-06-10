@@ -34,6 +34,8 @@ This is the **OpenZero Local Version**—a self-contained, standalone Discord bo
 13. **Bot Status/Activity**: Automatically sets rich presence status (e.g., *Playing GTA 6*) on startup. Sets to `invisible` when running in a local development environment.
 14. **Rules Deployment**: Easily post or edit clean, formatted server rules using a simple command line utility.
 15. **Semantic Versioning (SemVer)** *(New)*: Globally tracks bot releases using the SemVer format (current version: `1.7.60`). Managed via a root `VERSION` file and synchronized dynamically to configurations.
+16. **AI Agent Integration with Groq** *(New)*: Conversational prompt query using the `/fox` command or by mentioning/pinging the bot directly. Integrates the **Groq API** (defaulting to `gemma2-9b-it`) and uses function calling to automatically execute plugin tools (e.g. creating webhooks, playing music, managing roles). Falls back to an offline mockup classification system when the API key is not configured.
+17. **Dynamic Plugin Installer/Manager** *(New)*: Allows administrators to view, enable, and disable AI plugins dynamically using `/plugin list`, `/plugin install`, and `/plugin uninstall`. It instantly registers/deregisters slash commands from the Discord API on the fly.
 
 ---
 

@@ -89,8 +89,18 @@ A 3-second cooldown is enforced globally per command per user in `src/events/int
 - **`Translate to English`** (Context Menu Command): Translates any targeted message to English. Accessed via right-clicking/long-pressing a message -> **Apps** -> **Translate to English**. Powered by the lightweight `@vitalets/google-translate-api` package.
 - **`User Info`** (Context Menu Command - Consolidated): Consolidated user profiling command showing global properties (ID, Username, Bot/System status, badges, banner color), server-specific details (Roles, Server Nickname, server avatar, boosting status, key permissions), joined dates, status/presence activity, and message counts. Includes download action buttons for global avatar, server avatar, and banner. Fully localizable (supports ID and EN-US, defaults to EN).
 - **`Messages Record`** (Context Menu Command): Retrieves and lists the last 15 messages sent by the user in this guild over the past 7 days. Facilitates behavioral monitoring. Fully localizable.
+- **`/fox`** (AI Agent / Utility): Direct prompt assistant query. Supports **Groq API** (`gemma2-9b-it`) and uses function calling schema to trigger plugins automatically. Also responds to mentions/pings.
+- **`/plugin`** (Plugin Manager / Utility): Administrators can view (`/plugin list`), enable (`/plugin install`), and disable (`/plugin uninstall`) AI plugins. Command registrations to the Discord API are dynamically added/removed instantly.
 
+---
 
+## AI Agent & Plugin Extension Architecture
+
+The bot features a highly modular, decoupled AI agent architecture:
+*   **Plugins (`src/plugins/`)**: Self-contained ES modules that expose standard manifest structures (name, description, parameter schemas) and `execute` hooks.
+*   **AI Manager (`src/utils/aiManager.js`)**: Resolves prompt actions, handles the Groq Chat Completions client flow, and falls back to a local offline mockup matcher during testing or if the API key is not configured. Automatically retries failed tool-calling requests without tools if the model (like `gemma2-9b-it`) does not support function calling.
+*   **Chat History (`src/utils/aiHistory.js`)**: Persists sequential thread history in Supabase table `ai_chat_history` with an automatic failover to the local JSON file database (`data/database.json`).
+*   **Plugin Controller (`src/utils/pluginManager.js`)**: Tracks which plugins are active, mapping them to command names and allowing `/plugin` to dynamically load/unload commands in [src/handlers/commandHandler.js](file:///data/data/com.termux/files/home/openzero-local/src/handlers/commandHandler.js).
 
 ---
 
