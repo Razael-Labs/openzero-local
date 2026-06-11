@@ -15,7 +15,8 @@ import fs from 'fs';
 import path from 'path';
 import logger from './logger.js';
 import { V2Embed } from './v2Embed.js';
-import { MessageFlags } from 'discord.js';
+import { MessageFlags, ActivityType } from 'discord.js';
+import { config } from '../config.js';
 
 // Resolve cookies path from environment variable YTDLP_COOKIES_PATH or fallback cookies.txt/cookie.txt in root directory
 let cookiesPath = process.env.YTDLP_COOKIES_PATH || null;
@@ -62,16 +63,17 @@ export class MusicSession {
 
     // Setup state change logs for debugging
     this.connection.on('stateChange', (oldState, newState) => {
-      logger.info(`[Music Manager] Connection state changed from ${oldState.status} to ${newState.status}`);
+      logger.info(`[Music Manager] Connection state changed from ${oldState.status} to ${newState.status}`, { type: 'CONNECTION' });
     });
 
     this.player.on('stateChange', (oldState, newState) => {
-      logger.info(`[Music Manager] Player state changed from ${oldState.status} to ${newState.status}`);
+      logger.info(`[Music Manager] Player state changed from ${oldState.status} to ${newState.status}`, { type: 'PLAYING' });
+      updatePresence(this.voiceChannel.client);
     });
 
     // Setup event listeners
     this.player.on(AudioPlayerStatus.Idle, () => {
-      logger.info(`[Music Manager] Player in guild ${this.guildId} became Idle. Playing next track.`);
+      logger.info(`[Music Manager] Player in guild ${this.guildId} became Idle. Playing next track.`, { type: 'IDLE' });
       this.playNext();
     });
 
@@ -92,7 +94,7 @@ export class MusicSession {
 
     // Automatically clean up session on disconnect
     this.connection.on(VoiceConnectionStatus.Disconnected, async () => {
-      logger.info(`[Music Manager] Connection disconnected in guild ${this.guildId}. Cleaning up.`);
+      logger.info(`[Music Manager] Connection disconnected in guild ${this.guildId}. Cleaning up.`, { type: 'DISCONNECTED' });
       this.destroy();
     });
   }
@@ -101,7 +103,7 @@ export class MusicSession {
    * Add a track to the queue
    */
   addTrack(track) {
-    logger.info(`[Music Manager] Pre-fetching stream for added track: ${track.title}`);
+    logger.info(`[Music Manager] Pre-fetching stream for added track: ${track.title}`, { type: 'PREFETCH' });
     track.streamPromise = this.fetchStreamWithRetry(track.url).then(stream => {
       track.stream = stream;
       return stream;
@@ -183,7 +185,7 @@ export class MusicSession {
 
       if (hasCookies) {
         ytdlpArgs.push('--cookies', cookiesPath);
-        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`);
+        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
       } else {
         ytdlpArgs.push('--extractor-args', 'youtube:player_client=android,web');
       }
@@ -216,7 +218,7 @@ export class MusicSession {
             chunk[3] === 0xA3;
 
           const streamType = isWebm ? StreamType.WebmOpus : StreamType.Arbitrary;
-          logger.info(`[Music Manager] Detected stream format: ${isWebm ? 'WebM/Opus (StreamType.WebmOpus)' : 'Other (StreamType.Arbitrary)'}`);
+          logger.info(`[Music Manager] Detected stream format: ${isWebm ? 'WebM/Opus (StreamType.WebmOpus)' : 'Other (StreamType.Arbitrary)'}`, { type: 'STREAM' });
 
           resolve({ stream: ytdlp.stdout, type: streamType, process: ytdlp });
         }
@@ -254,7 +256,7 @@ export class MusicSession {
       this.currentTrack = null;
       this.isPlaying = false;
       if (this.is247) {
-        logger.info(`[Music Manager] Queue finished for guild ${this.guildId}, 24/7 mode active. Auto-playing a random chill track to keep channel active.`);
+        logger.info(`[Music Manager] Queue finished for guild ${this.guildId}, 24/7 mode active. Auto-playing a random chill track to keep channel active.`, { type: 'DONE' });
         this.textChannel.send({
           components: [
             new V2Embed()
@@ -312,7 +314,7 @@ export class MusicSession {
     this.isPlaying = true;
 
     try {
-      logger.info(`[Music Manager] Fetching stream for track: ${this.currentTrack.title} (${this.currentTrack.url})`);
+      logger.info(`[Music Manager] Fetching stream for track: ${this.currentTrack.title} (${this.currentTrack.url})`, { type: 'STREAM' });
       const stream = this.currentTrack.stream
         ? this.currentTrack.stream
         : (this.currentTrack.streamPromise
@@ -357,7 +359,7 @@ export class MusicSession {
       }).catch(() => {});
     } catch (error) {
       if (error.message === 'Aborted') {
-        logger.info(`[Music Manager] Stream fetch aborted (user skipped or stopped).`);
+        logger.info(`[Music Manager] Stream fetch aborted (user skipped or stopped).`, { type: 'ABORT' });
         return;
       }
       logger.error(`[Music Manager] Failed to stream track ${this.currentTrack.title}:`, error);
@@ -437,8 +439,10 @@ export class MusicSession {
       this.queue = [];
       this.connection.destroy();
     } catch (_) {}
+    const client = this.voiceChannel.client;
     musicSessions.delete(this.guildId);
-    logger.info(`[Music Manager] Session destroyed for guild: ${this.guildId}`);
+    logger.info(`[Music Manager] Session destroyed for guild: ${this.guildId}`, { type: 'CLEANUP' });
+    updatePresence(client);
   }
 }
 
@@ -450,7 +454,7 @@ export function getOrCreateSession(guildId, voiceChannel, textChannel) {
   if (!session) {
     session = new MusicSession(guildId, voiceChannel, textChannel);
     musicSessions.set(guildId, session);
-    logger.info(`[Music Manager] Created new session for guild: ${guildId}`);
+    logger.info(`[Music Manager] Created new session for guild: ${guildId}`, { type: 'INIT' });
   }
   return session;
 }
@@ -508,14 +512,14 @@ async function playDlFallback(query) {
  */
 export async function fetchVideoInfoViaYtDlp(query) {
   if (process.env.NODE_ENV === 'test') {
-    logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.');
+    logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.', { type: 'INFO' });
     return playDlFallback(query);
   }
 
   try {
     const isYtUrl = play.yt_validate(query) === 'video';
     if (isYtUrl) {
-      logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`);
+      logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`, { type: 'METADATA' });
       const videoInfo = await play.video_basic_info(query);
       const durationStr = videoInfo.video_details.durationRaw || formatDuration(videoInfo.video_details.durationInSec);
       const thumbnail = videoInfo.video_details.thumbnails?.[0]?.url || null;
@@ -545,10 +549,10 @@ export async function fetchVideoInfoViaYtDlp(query) {
     if (cookiesPath && fs.existsSync(cookiesPath)) {
       cookiesFlag = `--cookies ${JSON.stringify(cookiesPath)} `;
       extractorArgsFlag = '';
-      logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`);
+      logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
     }
 
-    logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`);
+    logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`, { type: 'METADATA' });
     const { stdout } = await execAsync(`yt-dlp --js-runtimes node --remote-components ejs:github --socket-timeout 10 --retries 3 ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`);
     const data = JSON.parse(stdout);
     
@@ -570,5 +574,42 @@ export async function fetchVideoInfoViaYtDlp(query) {
   } catch (error) {
     logger.warn(`[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`);
     return playDlFallback(query);
+  }
+}
+
+/**
+ * Update the client presence dynamically based on active music sessions
+ */
+export function updatePresence(client) {
+  if (!client || !client.user) return;
+
+  const botStatus = config.nodeEnv === 'production'
+    ? (config.activity?.status || 'online')
+    : 'invisible';
+
+  let activeTrack = null;
+  for (const session of musicSessions.values()) {
+    if (session.isPlaying && session.currentTrack && session.player?.state?.status === AudioPlayerStatus.Playing) {
+      activeTrack = session.currentTrack;
+      break;
+    }
+  }
+
+  if (activeTrack) {
+    client.user.setPresence({
+      activities: [{
+        name: activeTrack.title,
+        type: ActivityType.Listening
+      }],
+      status: botStatus
+    });
+  } else {
+    client.user.setPresence({
+      activities: [{
+        name: '/help | /menu',
+        type: ActivityType.Watching
+      }],
+      status: botStatus
+    });
   }
 }

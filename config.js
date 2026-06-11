@@ -58,23 +58,23 @@ export const config = {
   },
 
   activity: {
-    name: 'Grand Theft Auto VI',
+    name: '/help | /menu',
     // Pilihan tipe: PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
-    type: 'PLAYING',
+    type: 'WATCHING',
     // Pilihan status: online, idle, dnd, invisible (Hanya berlaku di mode production)
     status: 'online',
-    details: 'Exploring Leonida & Vice City',
-    state: 'Campaign: 68% Completed',
+    details: 'View commands helper',
+    state: 'Active',
     assets: {
       largeImage: 'https://discord.c99.nl/widget/theme-1/1511151761660838049.png', // Discord C99 Status Widget
-      largeText: 'Grand Theft Auto VI',
-      smallImage: 'https://i.imgur.com/pYVjN18.png', // Rockstar Games Logo
-      smallText: 'Leonida County'
+      largeText: 'OpenZero Bot',
+      smallImage: 'https://i.imgur.com/pYVjN18.png', // Logo
+      smallText: 'Support System'
     },
     buttons: [
       {
-        label: 'Join Game',
-        url: 'https://discord.gg/openzero' // Target URL untuk tombol Join Game
+        label: 'Support Server',
+        url: 'https://discord.gg/openzero' // Target URL
       }
     ]
   },
