@@ -27,9 +27,13 @@ export async function handleDevCommand(message) {
   // Command untuk mengetes welcome message canvas
   if (command === 'test-welcome' || command === 'testwelcome') {
     const targetMember = message.mentions.members.first() || message.member;
-    logger.info(`[Dev Command] Memicu event welcome secara manual untuk member: ${targetMember.user.tag}`);
+    logger.info(
+      `[Dev Command] Memicu event welcome secara manual untuk member: ${targetMember.user.tag}`
+    );
 
-    const statusMsg = await message.reply(`⚙️ **[Dev Tool]** Memicu event \`GuildMemberAdd\` untuk ${targetMember.toString()}...`);
+    const statusMsg = await message.reply(
+      `⚙️ **[Dev Tool]** Memicu event \`GuildMemberAdd\` untuk ${targetMember.toString()}...`
+    );
 
     try {
       // Emit event GuildMemberAdd secara manual pada client Discord
@@ -37,14 +41,18 @@ export async function handleDevCommand(message) {
 
       setTimeout(async () => {
         try {
-          await statusMsg.edit(`⚙️ **[Dev Tool]** Event \`GuildMemberAdd\` untuk ${targetMember.toString()} berhasil dipicu!`);
+          await statusMsg.edit(
+            `⚙️ **[Dev Tool]** Event \`GuildMemberAdd\` untuk ${targetMember.toString()} berhasil dipicu!`
+          );
         } catch (err) {
           // Abaikan jika pesan sudah dihapus oleh pengguna
         }
       }, 1500);
     } catch (error) {
       logger.error('[Dev Command] Gagal memicu event GuildMemberAdd secara manual:', error);
-      await statusMsg.edit(`❌ **[Dev Tool]** Gagal memicu event: ${error.message}`).catch(() => {});
+      await statusMsg
+        .edit(`❌ **[Dev Tool]** Gagal memicu event: ${error.message}`)
+        .catch(() => {});
     }
     return true;
   }

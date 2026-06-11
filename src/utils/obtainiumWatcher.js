@@ -22,8 +22,8 @@ async function findLatestExportFile() {
   try {
     const files = await fsPromises.readdir(DATA_DIR);
     const exportFiles = files
-      .filter(f => f.startsWith('obtainium-export-') && f.endsWith('.json'))
-      .map(f => ({
+      .filter((f) => f.startsWith('obtainium-export-') && f.endsWith('.json'))
+      .map((f) => ({
         name: f,
         path: path.join(DATA_DIR, f),
         time: fs.statSync(path.join(DATA_DIR, f)).mtimeMs
@@ -41,7 +41,7 @@ async function findLatestExportFile() {
 
 /**
  * Runs the conversion for the given export file
- * @param {string} filePath 
+ * @param {string} filePath
  * @param {import('discord.js').Client} [client] Optional Discord client to trigger updates
  */
 async function processFile(filePath, client) {
@@ -51,13 +51,15 @@ async function processFile(filePath, client) {
     if (filePath === lastProcessedFile && stats.mtimeMs - lastProcessedTime < 2000) {
       return;
     }
-    
+
     lastProcessedFile = filePath;
     lastProcessedTime = stats.mtimeMs;
 
     logger.info(`[Obtainium Watcher] Detected file to process: ${path.basename(filePath)}`);
-    const statsResult = await convertObtainiumFile(filePath, OUTPUT_JSON, OUTPUT_YAML, { enrich: true });
-    
+    const statsResult = await convertObtainiumFile(filePath, OUTPUT_JSON, OUTPUT_YAML, {
+      enrich: true
+    });
+
     logger.info(
       `[Obtainium Watcher] Conversion successful! Total apps: ${statsResult.total} (reused: ${statsResult.reused}, fetched: ${statsResult.fetched})`
     );
@@ -81,7 +83,9 @@ export async function initObtainiumWatcher(client) {
   // 1. Initial conversion on startup (process the latest export file if present)
   const latestFile = await findLatestExportFile();
   if (latestFile) {
-    logger.info(`[Obtainium Watcher] Found latest export on startup: ${path.basename(latestFile)}. Processing...`);
+    logger.info(
+      `[Obtainium Watcher] Found latest export on startup: ${path.basename(latestFile)}. Processing...`
+    );
     await processFile(latestFile, client);
   } else {
     logger.warn('[Obtainium Watcher] No obtainium-export-*.json files found in data directory.');

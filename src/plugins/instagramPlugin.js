@@ -23,14 +23,16 @@ export const instagramPlugin = {
       // Clean up username from '@' symbol if present in arguments
       const cleanUsername = username.replace(/^@/, '');
       logger.info(`[Instagram Plugin] Querying Instagram stalker for: ${cleanUsername}`);
-      const res = await fetch(`https://apis.snowping.eu.cc/api/stalker/instagram?usn=${encodeURIComponent(cleanUsername)}`);
-      
+      const res = await fetch(
+        `https://apis.snowping.eu.cc/api/stalker/instagram?usn=${encodeURIComponent(cleanUsername)}`
+      );
+
       if (!res.ok) {
         throw new Error(`API returned status ${res.status}`);
       }
 
       const body = await res.json();
-      
+
       // Handle the new response schema
       if (body.status !== 200 || !body.result) {
         return {
@@ -45,10 +47,10 @@ export const instagramPlugin = {
         .setTitle(`Instagram Stalker: ${result.username || `@${cleanUsername}`} 📸`)
         .setDescription(
           `*   **Nama Lengkap:** ${result.name || '-'}\n` +
-          `*   **Followers:** \`${result.followers || 0}\` pengikut\n` +
-          `*   **Postingan (Uploads):** \`${result.uploads || 0}\` postingan\n` +
-          `*   **Engagement Rate:** \`${result.engagement || '-'}\`\n` +
-          `*   **Profil Link:** ${result.profileUrl ? `[Buka Instagram](${result.profileUrl})` : '-'}`
+            `*   **Followers:** \`${result.followers || 0}\` pengikut\n` +
+            `*   **Postingan (Uploads):** \`${result.uploads || 0}\` postingan\n` +
+            `*   **Engagement Rate:** \`${result.engagement || '-'}\`\n` +
+            `*   **Profil Link:** ${result.profileUrl ? `[Buka Instagram](${result.profileUrl})` : '-'}`
         );
 
       if (result.avatar) {
@@ -60,7 +62,8 @@ export const instagramPlugin = {
       return {
         success: true,
         data: result,
-        responseText: `Berikut adalah informasi profil Instagram untuk **${result.username || `@${cleanUsername}`}**:\n` +
+        responseText:
+          `Berikut adalah informasi profil Instagram untuk **${result.username || `@${cleanUsername}`}**:\n` +
           `*   **Nama**: ${result.name || '-'}\n` +
           `*   **Followers**: \`${result.followers || 0}\` pengikut\n` +
           `*   **Postingan**: \`${result.uploads || 0}\` postingan.`,

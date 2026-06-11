@@ -9,7 +9,10 @@ export const translatePlugin = {
     type: 'object',
     properties: {
       text: { type: 'string', description: 'The text content to translate.' },
-      to: { type: 'string', description: 'The target language code (e.g., "en", "id", "ja"). Default is "en".' }
+      to: {
+        type: 'string',
+        description: 'The target language code (e.g., "en", "id", "ja"). Default is "en".'
+      }
     },
     required: ['text']
   },

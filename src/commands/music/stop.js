@@ -60,10 +60,7 @@ export default {
 
     return interaction.reply({
       components: [
-        new V2Embed()
-          .setTitle('Stopped ⏹️')
-          .setDescription(t('stoppedMusic', locale))
-          .build()
+        new V2Embed().setTitle('Stopped ⏹️').setDescription(t('stoppedMusic', locale)).build()
       ],
       flags: MessageFlags.IsComponentsV2
     });

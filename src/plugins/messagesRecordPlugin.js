@@ -23,9 +23,16 @@ export const messagesRecordPlugin = {
 
     const records = await getUserMessages(guild.id, userId);
 
-    const desc = records.length > 0
-      ? records.slice(0, 10).map((r, i) => `${i + 1}. [#${r.channel_name || 'unknown-channel'}] \`${r.created_at}\`: ${r.content}`).join('\n')
-      : 'No messages found in the last 7 days.';
+    const desc =
+      records.length > 0
+        ? records
+            .slice(0, 10)
+            .map(
+              (r, i) =>
+                `${i + 1}. [#${r.channel_name || 'unknown-channel'}] \`${r.created_at}\`: ${r.content}`
+            )
+            .join('\n')
+        : 'No messages found in the last 7 days.';
 
     const embed = new V2Embed()
       .setTitle(`Messages Record: User ${userId} 📋`)

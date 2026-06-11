@@ -68,10 +68,21 @@ export async function createWelcomeImage(member, locale = 'en') {
   ctx.clip();
 
   if (avatarImg) {
-    ctx.drawImage(avatarImg, avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+    ctx.drawImage(
+      avatarImg,
+      avatarX - avatarRadius,
+      avatarY - avatarRadius,
+      avatarRadius * 2,
+      avatarRadius * 2
+    );
   } else {
     ctx.fillStyle = '#6e4cc1';
-    ctx.fillRect(avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+    ctx.fillRect(
+      avatarX - avatarRadius,
+      avatarY - avatarRadius,
+      avatarRadius * 2,
+      avatarRadius * 2
+    );
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
@@ -94,7 +105,7 @@ export async function createWelcomeImage(member, locale = 'en') {
   const userTag = member.user.tag;
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 36px "Segoe UI", Roboto, Arial, sans-serif';
-  
+
   let maxTagWidth = 480;
   let tagToDraw = userTag;
   if (ctx.measureText(tagToDraw).width > maxTagWidth) {
@@ -106,19 +117,16 @@ export async function createWelcomeImage(member, locale = 'en') {
   ctx.fillText(tagToDraw, textStartX, 105);
 
   // C. Server Info (Clean minimalist styling)
-  const guildNameText = locale === 'id' 
-    ? `ke server ${member.guild.name}` 
-    : `to ${member.guild.name}`;
+  const guildNameText =
+    locale === 'id' ? `ke server ${member.guild.name}` : `to ${member.guild.name}`;
   ctx.fillStyle = '#dbdee1'; // Active text grey
   ctx.font = '500 20px "Segoe UI", Roboto, Arial, sans-serif';
   ctx.fillText(guildNameText, textStartX, 155);
 
   // D. Member Counter Badge (Flat capsule pill)
   const memberCount = member.guild.memberCount;
-  const countText = locale === 'id'
-    ? `Member #${memberCount}`
-    : `Member #${memberCount}`;
-  
+  const countText = locale === 'id' ? `Member #${memberCount}` : `Member #${memberCount}`;
+
   const badgeY = 210;
   const badgeHeight = 36;
   ctx.font = 'bold 15px "Segoe UI", Roboto, Arial, sans-serif';

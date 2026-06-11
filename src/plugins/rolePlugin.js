@@ -3,11 +3,16 @@ import { V2Embed } from '../utils/v2Embed.js';
 export const rolePlugin = {
   name: 'role',
   commands: ['role'],
-  description: 'Manage member roles in the guild. Actions include "add" (assigns role to a user), "remove" (removes role from a user), and "info" (retrieves details about a role).',
+  description:
+    'Manage member roles in the guild. Actions include "add" (assigns role to a user), "remove" (removes role from a user), and "info" (retrieves details about a role).',
   parameters: {
     type: 'object',
     properties: {
-      action: { type: 'string', enum: ['add', 'remove', 'info'], description: 'The role management action.' },
+      action: {
+        type: 'string',
+        enum: ['add', 'remove', 'info'],
+        description: 'The role management action.'
+      },
       userId: { type: 'string', description: 'ID of the member to modify.' },
       roleId: { type: 'string', description: 'ID of the role to assign, remove, or inspect.' }
     },
@@ -40,7 +45,9 @@ export const rolePlugin = {
         await member.roles.add(role);
         const embed = new V2Embed()
           .setTitle('Role Added Successfully! ✅')
-          .setDescription(`Successfully added role **${role.name}** (\`${role.id}\`) to **${member.user.tag}**.`)
+          .setDescription(
+            `Successfully added role **${role.name}** (\`${role.id}\`) to **${member.user.tag}**.`
+          )
           .build();
         return {
           success: true,
@@ -52,7 +59,9 @@ export const rolePlugin = {
         await member.roles.remove(role);
         const embed = new V2Embed()
           .setTitle('Role Removed Successfully! ✅')
-          .setDescription(`Successfully removed role **${role.name}** (\`${role.id}\`) from **${member.user.tag}**.`)
+          .setDescription(
+            `Successfully removed role **${role.name}** (\`${role.id}\`) from **${member.user.tag}**.`
+          )
           .build();
         return {
           success: true,

@@ -36,13 +36,18 @@ describe('Obtainium Converter Test Suite', () => {
 
   test('should successfully convert raw export to JSON and YAML formats', async () => {
     // Run conversion with enrich: false to avoid fetching from real Github API during tests
-    const stats = await convertObtainiumFile(MOCK_EXPORT, OUTPUT_JSON, OUTPUT_YAML, { enrich: false });
+    const stats = await convertObtainiumFile(MOCK_EXPORT, OUTPUT_JSON, OUTPUT_YAML, {
+      enrich: false
+    });
 
     expect(stats.total).toBe(1);
     expect(stats.reused).toBe(0);
 
     // Verify JSON file exists and has correct data
-    const jsonExists = await fs.access(OUTPUT_JSON).then(() => true).catch(() => false);
+    const jsonExists = await fs
+      .access(OUTPUT_JSON)
+      .then(() => true)
+      .catch(() => false);
     expect(jsonExists).toBe(true);
 
     const jsonRaw = await fs.readFile(OUTPUT_JSON, 'utf-8');
@@ -51,7 +56,10 @@ describe('Obtainium Converter Test Suite', () => {
     expect(jsonData[0].name).toBe('Obtainium');
 
     // Verify YAML file exists
-    const yamlExists = await fs.access(OUTPUT_YAML).then(() => true).catch(() => false);
+    const yamlExists = await fs
+      .access(OUTPUT_YAML)
+      .then(() => true)
+      .catch(() => false);
     expect(yamlExists).toBe(true);
 
     const yamlRaw = await fs.readFile(OUTPUT_YAML, 'utf-8');

@@ -17,7 +17,7 @@ if (!fs.existsSync(ICONS_DIR)) {
 /**
  * Downloads an icon from Font Awesome or other providers as SVG.
  * Falls back to PNG/JPG if SVG is not available.
- * 
+ *
  * @param {string} name - Name of the icon (e.g., 'github', 'user', 'heart')
  * @param {string} [provider='fontawesome'] - Icon provider name ('fontawesome', 'simpleicons', 'lucide')
  * @param {object} [options={}] - Sizing options (e.g. { size: 320 })
@@ -28,11 +28,11 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
   const providerLower = provider.toLowerCase().trim();
   const size = options.size || null;
   const cacheKey = size ? `${cleanName}-${size}` : cleanName;
-  
+
   // First, check if the icon already exists locally to avoid redundant downloads
   try {
     const existingFiles = fs.readdirSync(ICONS_DIR);
-    const matchedFile = existingFiles.find(file => {
+    const matchedFile = existingFiles.find((file) => {
       const ext = path.extname(file);
       const base = path.basename(file, ext);
       return base === cacheKey;
@@ -58,26 +58,52 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
 
   if (providerLower === 'fontawesome') {
     urlsToTry.push(
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/brands/${cleanName}.svg`, ext: 'svg' }
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/brands/${cleanName}.svg`,
+        ext: 'svg'
+      }
     );
   } else if (providerLower === 'simpleicons') {
-    urlsToTry.push(
-      { url: `https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/${cleanName}.svg`, ext: 'svg' }
-    );
+    urlsToTry.push({
+      url: `https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/${cleanName}.svg`,
+      ext: 'svg'
+    });
   } else if (providerLower === 'lucide') {
-    urlsToTry.push(
-      { url: `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${cleanName}.svg`, ext: 'svg' }
-    );
+    urlsToTry.push({
+      url: `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${cleanName}.svg`,
+      ext: 'svg'
+    });
   } else {
     // Attempt Font Awesome, then Lucide, then Simple Icons
     urlsToTry.push(
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/brands/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${cleanName}.svg`, ext: 'svg' },
-      { url: `https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/${cleanName}.svg`, ext: 'svg' }
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/brands/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${cleanName}.svg`,
+        ext: 'svg'
+      },
+      {
+        url: `https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/${cleanName}.svg`,
+        ext: 'svg'
+      }
     );
   }
 
@@ -88,7 +114,9 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
     { url: `https://img.icons8.com/ios-filled/${fallbackPngSize}/${cleanName}.png`, ext: 'png' }
   );
 
-  logger.info(`[IconHelper] Attempting to download icon: "${cleanName}" (Size: ${size || 'original'}) from provider "${providerLower}"`);
+  logger.info(
+    `[IconHelper] Attempting to download icon: "${cleanName}" (Size: ${size || 'original'}) from provider "${providerLower}"`
+  );
 
   for (const entry of urlsToTry) {
     try {
@@ -110,7 +138,7 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
       if (response.ok) {
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        
+
         let ext = targetExt;
         const contentType = response.headers.get('content-type');
         if (contentType) {
@@ -118,13 +146,13 @@ export async function downloadIcon(name, provider = 'fontawesome', options = {})
           else if (contentType.includes('png')) ext = 'png';
           else if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = 'jpg';
         }
-        
+
         const fileName = `${cacheKey}.${ext}`;
         const filePath = path.join(ICONS_DIR, fileName);
-        
+
         fs.writeFileSync(filePath, buffer);
         logger.info(`[IconHelper] Successfully downloaded and saved: ${fileName}`);
-        
+
         return {
           filePath,
           fileName,

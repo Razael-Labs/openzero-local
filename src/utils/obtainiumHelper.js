@@ -104,7 +104,9 @@ export async function updateObtainiumMessage(client) {
 
     const channel = await client.channels.fetch(channelId);
     if (!channel || !channel.isTextBased()) {
-      logger.error(`[Obtainium Helper] Channel ID ${channelId} tidak ditemukan atau bukan channel teks!`);
+      logger.error(
+        `[Obtainium Helper] Channel ID ${channelId} tidak ditemukan atau bukan channel teks!`
+      );
       return false;
     }
 
@@ -120,8 +122,10 @@ export async function updateObtainiumMessage(client) {
       try {
         message = await channel.messages.fetch(targetMessageId);
       } catch (err) {
-        const refType = (storedRef && storedRef.includes('://')) ? 'tautan' : 'ID';
-        logger.info(`[Obtainium Helper] Pesan dengan ${refType} ${storedRef} tidak ditemukan atau telah terhapus. Membuat pesan baru.`);
+        const refType = storedRef && storedRef.includes('://') ? 'tautan' : 'ID';
+        logger.info(
+          `[Obtainium Helper] Pesan dengan ${refType} ${storedRef} tidak ditemukan atau telah terhapus. Membuat pesan baru.`
+        );
       }
     }
 
@@ -142,7 +146,9 @@ export async function updateObtainiumMessage(client) {
         flags: MessageFlags.IsComponentsV2
       });
       setObtainiumMessageId(sentMessage.url);
-      logger.info(`[Obtainium Helper] Berhasil membuat pesan list Obtainium baru dengan tautan: ${sentMessage.url}`);
+      logger.info(
+        `[Obtainium Helper] Berhasil membuat pesan list Obtainium baru dengan tautan: ${sentMessage.url}`
+      );
       return true;
     }
   } catch (error) {
@@ -150,4 +156,3 @@ export async function updateObtainiumMessage(client) {
   }
   return false;
 }
-

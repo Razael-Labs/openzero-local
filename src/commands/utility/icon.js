@@ -7,13 +7,15 @@ export default {
     .setName('icon')
     .setDescription('Download and display an icon from Font Awesome, Lucide, or Simple Icons.')
     .setDMPermission(false)
-    .addStringOption(option =>
-      option.setName('name')
+    .addStringOption((option) =>
+      option
+        .setName('name')
         .setDescription('Name of the icon (e.g., github, heart, star, user)')
         .setRequired(true)
     )
-    .addStringOption(option =>
-      option.setName('provider')
+    .addStringOption((option) =>
+      option
+        .setName('provider')
         .setDescription('Icon provider to use (default: fontawesome)')
         .setRequired(false)
         .addChoices(
@@ -22,8 +24,9 @@ export default {
           { name: 'Simple Icons', value: 'simpleicons' }
         )
     )
-    .addStringOption(option =>
-      option.setName('format')
+    .addStringOption((option) =>
+      option
+        .setName('format')
         .setDescription('Embed display format (default: V2 Embed)')
         .setRequired(false)
         .addChoices(
@@ -50,8 +53,8 @@ export default {
           .setTitle(`Icon: ${name}`)
           .setDescription(
             `*   **Provider:** \`${provider}\`\n` +
-            `*   **File Name:** \`${icon.fileName}\`\n` +
-            `*   **Format/Ext:** \`${icon.ext.toUpperCase()}\``
+              `*   **File Name:** \`${icon.fileName}\`\n` +
+              `*   **Format/Ext:** \`${icon.ext.toUpperCase()}\``
           );
 
         // Associate the downloaded file
@@ -68,13 +71,13 @@ export default {
         });
       } else {
         const attachment = new AttachmentBuilder(icon.filePath, { name: icon.fileName });
-        
+
         const embed = new EmbedBuilder()
           .setTitle(`Icon: ${name}`)
           .setDescription(
             `*   **Provider:** \`${provider}\`\n` +
-            `*   **File Name:** \`${icon.fileName}\`\n` +
-            `*   **Format/Ext:** \`${icon.ext.toUpperCase()}\``
+              `*   **File Name:** \`${icon.fileName}\`\n` +
+              `*   **Format/Ext:** \`${icon.ext.toUpperCase()}\``
           )
           .setThumbnail(icon.localUrl)
           .setColor(0x00ffd2);

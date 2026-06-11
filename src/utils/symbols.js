@@ -4,44 +4,102 @@
 export class Symbols {
   static guild = null;
 
-  static get ENTER() { return '↳'; }
-  static get ARROW_LEFT() { return '⬅️'; }
-  static get ARROW_RIGHT() { return '➡️'; }
-  static get REFRESH() { return '🔄'; }
-  static get INFO() { return 'ℹ 🧭'; }
-  static get WARN() { return '⚠ ⚡'; }
-  static get ERROR() { return '✖ 🔥'; }
-  static get DEBUG() { return '⚙ 🛠'; }
-  static get BULLET() { return '•'; }
-  
+  static get ENTER() {
+    return '↳';
+  }
+  static get ARROW_LEFT() {
+    return '⬅️';
+  }
+  static get ARROW_RIGHT() {
+    return '➡️';
+  }
+  static get REFRESH() {
+    return '🔄';
+  }
+  static get INFO() {
+    return 'ℹ 🧭';
+  }
+  static get WARN() {
+    return '⚠ ⚡';
+  }
+  static get ERROR() {
+    return '✖ 🔥';
+  }
+  static get DEBUG() {
+    return '⚙ 🛠';
+  }
+  static get BULLET() {
+    return '•';
+  }
+
   // UI & Embed Symbols
-  static get SUCCESS() { return '✅'; }
-  static get FAILURE() { return '❌'; }
-  static get WARNING() { return '⚠️'; }
-  static get PING() { return '🏓'; }
-  static get COOLDOWN() { return '⏱️'; }
-  static get MUSIC() { return '🎵'; }
-  static get MICROPHONE() { return '🎤'; }
-  static get HELLO() { return '👋'; }
+  static get SUCCESS() {
+    return '✅';
+  }
+  static get FAILURE() {
+    return '❌';
+  }
+  static get WARNING() {
+    return '⚠️';
+  }
+  static get PING() {
+    return '🏓';
+  }
+  static get COOLDOWN() {
+    return '⏱️';
+  }
+  static get MUSIC() {
+    return '🎵';
+  }
+  static get MICROPHONE() {
+    return '🎤';
+  }
+  static get HELLO() {
+    return '👋';
+  }
 
   // More Emojis used in commands and locales
-  static get USER() { return '👤'; }
-  static get CALENDAR() { return '📅'; }
-  static get SHIELD() { return '🛡️'; }
-  static get CHAT() { return '💬'; }
-  static get STOP() { return '🛑'; }
-  static get HAMMER() { return '🔨'; }
-  static get TRASH() { return '🗑️'; }
-  static get MUTE() { return '🔇'; }
-  static get VOLUME() { return '🔊'; }
-  static get HOURGLASS() { return '⏳'; }
-  static get GLOBE() { return '🌐'; }
-  static get WRENCH() { return '🔧'; }
+  static get USER() {
+    return '👤';
+  }
+  static get CALENDAR() {
+    return '📅';
+  }
+  static get SHIELD() {
+    return '🛡️';
+  }
+  static get CHAT() {
+    return '💬';
+  }
+  static get STOP() {
+    return '🛑';
+  }
+  static get HAMMER() {
+    return '🔨';
+  }
+  static get TRASH() {
+    return '🗑️';
+  }
+  static get MUTE() {
+    return '🔇';
+  }
+  static get VOLUME() {
+    return '🔊';
+  }
+  static get HOURGLASS() {
+    return '⏳';
+  }
+  static get GLOBE() {
+    return '🌐';
+  }
+  static get WRENCH() {
+    return '🔧';
+  }
 }
 
 /**
  * Replaces standard emojis and symbols in text with custom guild emojis if available.
- * 
+ *
  * @param {string} text - The input text to format
  * @param {import('discord.js').Guild|null} guild - The Discord guild to fetch custom emojis from
  * @returns {string} The formatted text
@@ -100,7 +158,7 @@ export function applyGuildEmojis(text, guild) {
       '🏳️': 'oz_flag',
 
       // Sub-parts of logger / system headers
-      'ℹ': 'oz_info',
+      ℹ: 'oz_info',
       '🧭': 'oz_discord',
       '📊': 'oz_letterboxd',
       '⚠': 'oz_warn',
@@ -112,7 +170,7 @@ export function applyGuildEmojis(text, guild) {
     };
 
     for (const [symbol, emojiName] of Object.entries(emojiMapping)) {
-      const customEmoji = emojis.find(e => e.name === emojiName);
+      const customEmoji = emojis.find((e) => e.name === emojiName);
       if (customEmoji) {
         formattedText = formattedText.replaceAll(symbol, customEmoji.toString());
       }
@@ -124,7 +182,7 @@ export function applyGuildEmojis(text, guild) {
 
 /**
  * Resolves a custom guild emoji or fallback standard emoji for buttons/components.
- * 
+ *
  * @param {import('discord.js').Guild|null} guild - The Discord guild to check
  * @param {string} symbolOrName - E.g. '🔄' or 'oz_refresh' or Symbols.REFRESH
  * @param {string} [fallback] - The fallback standard emoji
@@ -163,7 +221,7 @@ export function resolveEmoji(guild, symbolOrName, fallback) {
     '📋': 'oz_clipboard',
     '🖼️': 'oz_image',
     '🏳️': 'oz_flag',
-    'ℹ': 'oz_info',
+    ℹ: 'oz_info',
     '🧭': 'oz_discord',
     '📊': 'oz_letterboxd',
     '⚠': 'oz_warn',
@@ -175,10 +233,11 @@ export function resolveEmoji(guild, symbolOrName, fallback) {
   };
 
   const emojiName = emojiMapping[symbolOrName] || symbolOrName;
-  const customEmoji = targetGuild.emojis && targetGuild.emojis.cache
-    ? targetGuild.emojis.cache.find(e => e.name === emojiName)
-    : null;
-  
+  const customEmoji =
+    targetGuild.emojis && targetGuild.emojis.cache
+      ? targetGuild.emojis.cache.find((e) => e.name === emojiName)
+      : null;
+
   if (customEmoji) {
     return {
       id: customEmoji.id,
@@ -189,4 +248,3 @@ export function resolveEmoji(guild, symbolOrName, fallback) {
 
   return fallback || symbolOrName;
 }
-

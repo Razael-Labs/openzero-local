@@ -11,10 +11,13 @@ export default {
    * @param {import('discord.js').GuildMember} member
    */
   async execute(member) {
-    logger.info(`[GuildMemberAdd] User baru bergabung: ${member.user.tag} (${member.id}) di guild: ${member.guild.name}`);
+    logger.info(
+      `[GuildMemberAdd] User baru bergabung: ${member.user.tag} (${member.id}) di guild: ${member.guild.name}`
+    );
 
     // Tentukan locale berdasarkan preferredLocale server
-    const locale = member.guild.preferredLocale && member.guild.preferredLocale.startsWith('id') ? 'id' : 'en';
+    const locale =
+      member.guild.preferredLocale && member.guild.preferredLocale.startsWith('id') ? 'id' : 'en';
 
     // Ambil channel tujuan untuk pesan welcome
     const channelId = config.welcome?.channelId;
@@ -24,7 +27,9 @@ export default {
       try {
         channel = await member.guild.channels.fetch(channelId);
       } catch (err) {
-        logger.warn(`[GuildMemberAdd] Gagal mengambil channel welcome dari config (${channelId}): ${err.message}`);
+        logger.warn(
+          `[GuildMemberAdd] Gagal mengambil channel welcome dari config (${channelId}): ${err.message}`
+        );
       }
     }
 
@@ -34,7 +39,9 @@ export default {
     }
 
     if (!channel) {
-      logger.warn(`[GuildMemberAdd] Tidak ada channel welcome atau system channel yang terdeteksi di guild: ${member.guild.name}. Membatalkan pesan welcome.`);
+      logger.warn(
+        `[GuildMemberAdd] Tidak ada channel welcome atau system channel yang terdeteksi di guild: ${member.guild.name}. Membatalkan pesan welcome.`
+      );
       return;
     }
 
@@ -50,9 +57,14 @@ export default {
         files: [attachment]
       });
 
-      logger.info(`[GuildMemberAdd] Pesan welcome berhasil dikirim untuk ${member.user.tag} di channel: ${channel.name}`);
+      logger.info(
+        `[GuildMemberAdd] Pesan welcome berhasil dikirim untuk ${member.user.tag} di channel: ${channel.name}`
+      );
     } catch (error) {
-      logger.error(`[GuildMemberAdd] Gagal membuat atau mengirim pesan welcome untuk ${member.user.tag}:`, error);
+      logger.error(
+        `[GuildMemberAdd] Gagal membuat atau mengirim pesan welcome untuk ${member.user.tag}:`,
+        error
+      );
     }
   }
 };

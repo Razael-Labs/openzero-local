@@ -61,10 +61,7 @@ export default {
     if (success) {
       return interaction.reply({
         components: [
-          new V2Embed()
-            .setTitle('Resumed ▶️')
-            .setDescription(t('resumedMusic', locale))
-            .build()
+          new V2Embed().setTitle('Resumed ▶️').setDescription(t('resumedMusic', locale)).build()
         ],
         flags: MessageFlags.IsComponentsV2
       });

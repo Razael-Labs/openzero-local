@@ -12,7 +12,8 @@ jest.unstable_mockModule('../src/utils/logger.js', () => ({
 
 const userInfoCmd = (await import('../src/commands/utility/userInfo.js')).default;
 const messagesRecordCmd = (await import('../src/commands/utility/messagesRecord.js')).default;
-const { recordMessage, getUserMessages, cleanupOldMessages } = await import('../src/utils/supabase.js');
+const { recordMessage, getUserMessages, cleanupOldMessages } =
+  await import('../src/utils/supabase.js');
 const { t } = await import('../src/utils/i18n.js');
 
 describe('i18n Utility', () => {
@@ -33,7 +34,6 @@ describe('i18n Utility', () => {
     expect(t('yes', 'fr')).toBe('Yes'); // fallback to default 'en'
   });
 });
-
 
 describe('Database Utility', () => {
   beforeEach(() => {
@@ -64,15 +64,23 @@ describe('New User Context Menu Commands', () => {
       username: 'TargetUser',
       tag: 'TargetUser#1234',
       createdTimestamp: 1622548800000, // June 1, 2021
-      displayAvatarURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/avatars/target_123/avatar.png'),
-      avatarDecorationURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/avatar-decorations/hash.png'),
+      displayAvatarURL: jest
+        .fn()
+        .mockReturnValue('https://cdn.discordapp.com/avatars/target_123/avatar.png'),
+      avatarDecorationURL: jest
+        .fn()
+        .mockReturnValue('https://cdn.discordapp.com/avatar-decorations/hash.png'),
       bannerURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/banners/hash.png'),
       hexAccentColor: '#ff00aa'
     };
 
     mockMember = {
       avatar: 'guild_avatar_hash',
-      avatarURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/guilds/guild123/users/target_123/avatars/hash.png'),
+      avatarURL: jest
+        .fn()
+        .mockReturnValue(
+          'https://cdn.discordapp.com/guilds/guild123/users/target_123/avatars/hash.png'
+        ),
       joinedTimestamp: 1625140800000, // July 1, 2021
       roles: {
         cache: {
@@ -83,9 +91,7 @@ describe('New User Context Menu Commands', () => {
       },
       presence: {
         status: 'dnd',
-        activities: [
-          { type: 4, state: 'Playing: GTA: V' }
-        ]
+        activities: [{ type: 4, state: 'Playing: GTA: V' }]
       },
       voice: {
         mute: false
@@ -116,12 +122,16 @@ describe('New User Context Menu Commands', () => {
       reply: jest.fn().mockResolvedValue(true),
       client: {
         users: {
-          fetch: jest.fn().mockImplementation((id) => Promise.resolve({
-            ...mockUser,
-            avatarDecorationURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/avatar-decorations/hash.png'),
-            bannerURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/banners/hash.png'),
-            hexAccentColor: '#ff00aa'
-          }))
+          fetch: jest.fn().mockImplementation((id) =>
+            Promise.resolve({
+              ...mockUser,
+              avatarDecorationURL: jest
+                .fn()
+                .mockReturnValue('https://cdn.discordapp.com/avatar-decorations/hash.png'),
+              bannerURL: jest.fn().mockReturnValue('https://cdn.discordapp.com/banners/hash.png'),
+              hexAccentColor: '#ff00aa'
+            })
+          )
         },
         guilds: {
           cache: new Map([
@@ -196,7 +206,7 @@ describe('New User Context Menu Commands', () => {
 
     await cleanupOldMessages();
     const fetchedAfterOldCleanup = await getUserMessages('guild123', 'target_123');
-    const hasOld = fetchedAfterOldCleanup.some(m => m.content === 'Old Message');
+    const hasOld = fetchedAfterOldCleanup.some((m) => m.content === 'Old Message');
     expect(hasOld).toBe(false);
   });
 

@@ -10,12 +10,12 @@ export default {
     .setName('menu')
     .setDescription('Menampilkan daftar perintah bot.')
     .setNameLocalizations({
-      'id': 'menu',
+      id: 'menu',
       'en-US': 'menu',
       'en-GB': 'menu'
     })
     .setDescriptionLocalizations({
-      'id': 'Menampilkan daftar perintah bot.',
+      id: 'Menampilkan daftar perintah bot.',
       'en-US': 'Displays the bot command list.',
       'en-GB': 'Displays the bot command list.'
     })

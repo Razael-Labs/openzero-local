@@ -10,16 +10,18 @@ export default {
     .setDescriptionLocalizations({
       id: 'Memutar lagu dari YouTube'
     })
-    .addStringOption(option =>
-      option.setName('query')
+    .addStringOption((option) =>
+      option
+        .setName('query')
         .setDescription('YouTube URL or search query')
         .setDescriptionLocalizations({
           id: 'URL YouTube atau kata kunci pencarian'
         })
         .setRequired(true)
     )
-    .addBooleanOption(option =>
-      option.setName('twentyfour-seven')
+    .addBooleanOption((option) =>
+      option
+        .setName('twentyfour-seven')
         .setDescription('Keep the bot in the voice channel 24/7')
         .setDescriptionLocalizations({
           id: 'Biarkan bot menetap di saluran suara 24/7'
@@ -93,7 +95,9 @@ export default {
         components: [
           new V2Embed()
             .setTitle(t('errorTitle', locale))
-            .setDescription(`An error occurred while trying to process the track: \`${error.message}\``)
+            .setDescription(
+              `An error occurred while trying to process the track: \`${error.message}\``
+            )
             .setColor(0xff3333)
             .build()
         ],

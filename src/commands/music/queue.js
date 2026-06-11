@@ -44,10 +44,7 @@ export default {
 
     return interaction.reply({
       components: [
-        new V2Embed()
-          .setTitle(t('queueTitle', locale))
-          .setDescription(description)
-          .build()
+        new V2Embed().setTitle(t('queueTitle', locale)).setDescription(description).build()
       ],
       flags: MessageFlags.IsComponentsV2
     });

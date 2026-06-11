@@ -152,7 +152,7 @@ describe('Music Player Slash Commands', () => {
       await playCmd.execute(mockInteraction);
       expect(mockInteraction.deferReply).toHaveBeenCalled();
       expect(mockInteraction.editReply).toHaveBeenCalled();
-      
+
       const session = musicSessions.get('guild_123');
       expect(session).toBeDefined();
       expect(session.isPlaying).toBe(true);
@@ -165,7 +165,12 @@ describe('Music Player Slash Commands', () => {
     beforeEach(() => {
       session = getOrCreateSession('guild_123', mockVoiceChannel, mockTextChannel);
       session.isPlaying = true;
-      session.currentTrack = { title: 'Track 1', url: 'http://track1', duration: '3:00', requestedBy: '<@executor>' };
+      session.currentTrack = {
+        title: 'Track 1',
+        url: 'http://track1',
+        duration: '3:00',
+        requestedBy: '<@executor>'
+      };
     });
 
     test('Skip Command', async () => {
@@ -194,7 +199,9 @@ describe('Music Player Slash Commands', () => {
     });
 
     test('Queue Command', async () => {
-      session.queue = [{ title: 'Track 2', url: 'http://track2', duration: '4:00', requestedBy: '<@executor>' }];
+      session.queue = [
+        { title: 'Track 2', url: 'http://track2', duration: '4:00', requestedBy: '<@executor>' }
+      ];
       await queueCmd.execute(mockInteraction);
       expect(mockInteraction.reply).toHaveBeenCalled();
       const replyArgs = mockInteraction.reply.mock.calls[0][0];

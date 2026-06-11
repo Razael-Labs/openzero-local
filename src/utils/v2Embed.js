@@ -1,4 +1,10 @@
-import { ContainerBuilder, TextDisplayBuilder, SectionBuilder, ThumbnailBuilder, AttachmentBuilder } from 'discord.js';
+import {
+  ContainerBuilder,
+  TextDisplayBuilder,
+  SectionBuilder,
+  ThumbnailBuilder,
+  AttachmentBuilder
+} from 'discord.js';
 import { config } from '../config.js';
 import { Symbols, applyGuildEmojis } from './symbols.js';
 import { downloadIcon } from './iconHelper.js';
@@ -119,7 +125,8 @@ export class V2Embed {
     if (this.context) {
       if (this.context.guild) {
         guild = this.context.guild;
-      } else if (this.context.emojis) { // If context is a Guild
+      } else if (this.context.emojis) {
+        // If context is a Guild
         guild = this.context;
       }
     }

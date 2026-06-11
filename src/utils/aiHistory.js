@@ -50,9 +50,9 @@ export async function recordChat({ guildId, userId, role, content }) {
 
 /**
  * Fetch chat history for a user in a guild
- * @param {string} guildId 
- * @param {string} userId 
- * @param {number} limit 
+ * @param {string} guildId
+ * @param {string} userId
+ * @param {number} limit
  * @returns {Promise<Array>}
  */
 export async function getChatHistory(guildId, userId, limit = 20) {
@@ -81,8 +81,8 @@ export async function getChatHistory(guildId, userId, limit = 20) {
 
 /**
  * Clear chat history
- * @param {string} guildId 
- * @param {string} userId 
+ * @param {string} guildId
+ * @param {string} userId
  */
 export async function clearChatHistory(guildId, userId) {
   if (supabaseClient) {

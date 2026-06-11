@@ -10,22 +10,25 @@ describe('Logger i18n Translation', () => {
 
   describe('translateLog Utility', () => {
     test('should translate English logs to Indonesian when language is id', () => {
-      expect(translateLog('Login successful! Bot is active as Fox#1234', 'id'))
-        .toBe('Login berhasil! Bot aktif sebagai Fox#1234');
-      
-      expect(translateLog('Supabase credentials not configured. Falling back to local database.', 'id'))
-        .toBe('Kredensial Supabase tidak dikonfigurasi. Mengalihkan ke database lokal.');
-      
-      expect(translateLog('Failed to ban user: Invalid Permissions', 'id'))
-        .toBe('Gagal memblokir pengguna: Invalid Permissions');
+      expect(translateLog('Login successful! Bot is active as Fox#1234', 'id')).toBe(
+        'Login berhasil! Bot aktif sebagai Fox#1234'
+      );
+
+      expect(
+        translateLog('Supabase credentials not configured. Falling back to local database.', 'id')
+      ).toBe('Kredensial Supabase tidak dikonfigurasi. Mengalihkan ke database lokal.');
+
+      expect(translateLog('Failed to ban user: Invalid Permissions', 'id')).toBe(
+        'Gagal memblokir pengguna: Invalid Permissions'
+      );
     });
 
     test('should translate Indonesian logs to English when language is en', () => {
-      expect(translateLog('Login berhasil!', 'en'))
-        .toBe('Login successful!');
-      
-      expect(translateLog('Gagal melakukan purge: Error API', 'en'))
-        .toBe('Failed to purge: Error API');
+      expect(translateLog('Login berhasil!', 'en')).toBe('Login successful!');
+
+      expect(translateLog('Gagal melakukan purge: Error API', 'en')).toBe(
+        'Failed to purge: Error API'
+      );
     });
 
     test('should translate logger types correctly', () => {
@@ -39,18 +42,24 @@ describe('Logger i18n Translation', () => {
   describe('resolveLogDetails Integration', () => {
     test('should dynamically translate messages and types based on config.language', () => {
       config.language = 'id';
-      
-      const { loggerType, loggerMessage } = resolveLogDetails('info', '[Client] Login successful! Bot is active as Fox#1234');
-      
+
+      const { loggerType, loggerMessage } = resolveLogDetails(
+        'info',
+        '[Client] Login successful! Bot is active as Fox#1234'
+      );
+
       expect(loggerType).toBe('Klien');
       expect(loggerMessage).toBe('Login berhasil! Bot aktif sebagai Fox#1234');
     });
 
     test('should fall back to original English text if config.language is en', () => {
       config.language = 'en';
-      
-      const { loggerType, loggerMessage } = resolveLogDetails('info', '[Client] Login successful! Bot is active as Fox#1234');
-      
+
+      const { loggerType, loggerMessage } = resolveLogDetails(
+        'info',
+        '[Client] Login successful! Bot is active as Fox#1234'
+      );
+
       expect(loggerType).toBe('Client');
       expect(loggerMessage).toBe('Login successful! Bot is active as Fox#1234');
     });

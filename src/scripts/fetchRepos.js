@@ -17,8 +17,8 @@ function findLatestExportFile() {
   try {
     const files = fs.readdirSync(DATA_DIR);
     const exportFiles = files
-      .filter(f => f.startsWith('obtainium-export-') && f.endsWith('.json'))
-      .map(f => ({
+      .filter((f) => f.startsWith('obtainium-export-') && f.endsWith('.json'))
+      .map((f) => ({
         name: f,
         path: path.join(DATA_DIR, f),
         time: fs.statSync(path.join(DATA_DIR, f)).mtimeMs
@@ -45,14 +45,18 @@ async function start() {
 
   if (!inputPath) {
     logger.error('Error: Tidak ditemukan file obtainium-export-*.json di folder data!');
-    logger.info('Silakan letakkan file export Obtainium (.json) di folder data/ atau berikan path file sebagai argumen.');
+    logger.info(
+      'Silakan letakkan file export Obtainium (.json) di folder data/ atau berikan path file sebagai argumen.'
+    );
     process.exit(1);
   }
 
   logger.info(`Memproses file Obtainium: ${path.basename(inputPath)}`);
-  
-  const stats = await convertObtainiumFile(inputPath, DEFAULT_OUTPUT_JSON, DEFAULT_OUTPUT_YAML, { enrich: true });
-  
+
+  const stats = await convertObtainiumFile(inputPath, DEFAULT_OUTPUT_JSON, DEFAULT_OUTPUT_YAML, {
+    enrich: true
+  });
+
   logger.info('=== Hasil Konversi ===');
   logger.info(`Total Aplikasi: ${stats.total}`);
   logger.info(`Data Direuse  : ${stats.reused}`);

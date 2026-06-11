@@ -4,7 +4,8 @@ import { getMessageCount } from '../utils/database.js';
 export const userInfoPlugin = {
   name: 'userInfo',
   commands: ['User Info'],
-  description: 'Retrieve detailed information about a server member, including nickname, roles, join dates, and total message statistics.',
+  description:
+    'Retrieve detailed information about a server member, including nickname, roles, join dates, and total message statistics.',
   parameters: {
     type: 'object',
     properties: {

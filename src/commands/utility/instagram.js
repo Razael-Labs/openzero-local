@@ -43,8 +43,11 @@ export default {
     if (!enabled) {
       const embed = new V2Embed()
         .setTitle('Plugin Not Installed ⚠️')
-        .setDescription(t('pluginNotInstalledDesc', locale) || 'Plugin ini belum diinstal di server ini. Gunakan `/plugin install instagram` untuk mengaktifkannya.');
-      
+        .setDescription(
+          t('pluginNotInstalledDesc', locale) ||
+            'Plugin ini belum diinstal di server ini. Gunakan `/plugin install instagram` untuk mengaktifkannya.'
+        );
+
       return interaction.reply({
         components: [embed.build()],
         flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2
@@ -60,7 +63,7 @@ export default {
       const embed = new V2Embed()
         .setTitle('Error ❌')
         .setDescription(result.error || 'Terjadi kesalahan.');
-      
+
       return interaction.editReply({
         components: [embed.build()],
         flags: MessageFlags.IsComponentsV2

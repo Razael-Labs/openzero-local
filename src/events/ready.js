@@ -19,7 +19,9 @@ export default {
         const guild = await client.guilds.fetch(config.guildId);
         await guild.emojis.fetch(); // Ensure emojis are in cache
         Symbols.guild = guild;
-        logger.info(`[Client] Custom emojis guild cache reference set globally for guild: ${guild.name}`);
+        logger.info(
+          `[Client] Custom emojis guild cache reference set globally for guild: ${guild.name}`
+        );
       } catch (err) {
         logger.warn(`[Client] Failed to pre-fetch guild for global custom emojis: ${err.message}`);
       }
@@ -60,9 +62,8 @@ export default {
         }
 
         // If in development/test mode (local), automatically set status to 'invisible' (offline)
-        const botStatus = config.nodeEnv === 'production'
-          ? (config.activity?.status || 'online')
-          : 'invisible';
+        const botStatus =
+          config.nodeEnv === 'production' ? config.activity?.status || 'online' : 'invisible';
 
         client.user.setPresence({
           activities: [activityPayload],
@@ -83,13 +84,16 @@ export default {
     try {
       const { cleanupOldMessages } = await import('../utils/supabase.js');
       await cleanupOldMessages();
-      setInterval(async () => {
-        try {
-          await cleanupOldMessages();
-        } catch (err) {
-          logger.error('[Cleanup Interval] Failed to clean up old messages:', err);
-        }
-      }, 24 * 60 * 60 * 1000); // Once every 24 hours
+      setInterval(
+        async () => {
+          try {
+            await cleanupOldMessages();
+          } catch (err) {
+            logger.error('[Cleanup Interval] Failed to clean up old messages:', err);
+          }
+        },
+        24 * 60 * 60 * 1000
+      ); // Once every 24 hours
     } catch (error) {
       logger.error('[Client Startup] Failed to run old messages cleanup:', error);
     }

@@ -77,17 +77,19 @@ async function setupGuildEmojis() {
 
       for (const [targetEmojiName, sourceInfo] of Object.entries(emojiMapping)) {
         // Check if emoji already exists in the server
-        const exists = currentEmojis.find(e => e.name === targetEmojiName);
+        const exists = currentEmojis.find((e) => e.name === targetEmojiName);
         if (exists) {
           logger.info(`[setup-emojis] Skipping "${targetEmojiName}" - already exists as ${exists}`);
           continue;
         }
 
-        logger.info(`[setup-emojis] Downloading icon "${sourceInfo.name}" for "${targetEmojiName}"...`);
+        logger.info(
+          `[setup-emojis] Downloading icon "${sourceInfo.name}" for "${targetEmojiName}"...`
+        );
         try {
           // Download icon as white PNG, size 128
           const icon = await downloadIcon(sourceInfo.name, sourceInfo.provider, { size: 128 });
-          
+
           logger.info(`[setup-emojis] Uploading "${targetEmojiName}" to guild...`);
           const emoji = await guild.emojis.create({
             attachment: icon.filePath,

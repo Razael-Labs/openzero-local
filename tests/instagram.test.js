@@ -71,14 +71,17 @@ describe('Instagram Stalker Plugin & AI Integration', () => {
       Promise.resolve({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({
-          status: 200,
-          result: { username: '@razael' }
-        })
+        json: () =>
+          Promise.resolve({
+            status: 200,
+            result: { username: '@razael' }
+          })
       })
     );
 
-    const response = await runAgent('Fox tolong stalk instagram razael', { guild: { id: testGuildId } });
+    const response = await runAgent('Fox tolong stalk instagram razael', {
+      guild: { id: testGuildId }
+    });
     expect(response.agentExecuted).toBe(true);
     expect(response.pluginUsed).toBe('instagram');
 

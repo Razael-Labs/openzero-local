@@ -90,9 +90,7 @@ export default {
           const pageIndex = parseInt(parts[3], 10) || 0;
           const sessionId = parts.slice(4).join('_');
 
-          const { generateMusicSearchEmbed } = await import(
-            '../commands/utility/musicSearch.js'
-          );
+          const { generateMusicSearchEmbed } = await import('../commands/utility/musicSearch.js');
           const { embed } = generateMusicSearchEmbed(sessionId, pageIndex, interaction.locale);
 
           await interaction.editReply({
@@ -104,10 +102,7 @@ export default {
             `[Button Clicked] ${interaction.customId} diproses (Page: ${pageIndex}) untuk ${interaction.user.tag}`
           );
         } catch (error) {
-          logger.error(
-            '[Button Error] Gagal memproses interaksi tombol music search:',
-            error
-          );
+          logger.error('[Button Error] Gagal memproses interaksi tombol music search:', error);
         }
       } else if (interaction.customId.startsWith('music_search_lyrics_')) {
         try {
@@ -118,9 +113,7 @@ export default {
           const trackIndex = parseInt(parts[3], 10) || 0;
           const sessionId = parts.slice(4).join('_');
 
-          const { getLyricsForTrack } = await import(
-            '../commands/utility/musicSearch.js'
-          );
+          const { getLyricsForTrack } = await import('../commands/utility/musicSearch.js');
           const embed = await getLyricsForTrack(sessionId, trackIndex, interaction.locale);
 
           await interaction.editReply({
@@ -142,7 +135,12 @@ export default {
           await interaction.deferUpdate();
           const category = interaction.customId.replace('help_cat_', '');
           const { generateHelpEmbed } = await import('../commands/utility/help.js');
-          const embed = generateHelpEmbed(interaction.client, interaction.locale, category, interaction);
+          const embed = generateHelpEmbed(
+            interaction.client,
+            interaction.locale,
+            category,
+            interaction
+          );
 
           await interaction.editReply({
             components: [embed],
@@ -169,7 +167,10 @@ export default {
         try {
           await command.autocomplete(interaction);
         } catch (error) {
-          logger.error(`[Autocomplete Error] Gagal memproses autocomplete untuk /${interaction.commandName}:`, error);
+          logger.error(
+            `[Autocomplete Error] Gagal memproses autocomplete untuk /${interaction.commandName}:`,
+            error
+          );
         }
       }
       return;

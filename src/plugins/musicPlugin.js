@@ -4,14 +4,29 @@ import { V2Embed } from '../utils/v2Embed.js';
 export const musicPlugin = {
   name: 'music',
   commands: ['play', 'pause', 'resume', 'skip', 'stop', 'queue'],
-  description: 'Play and control YouTube music playback in voice channels. Actions include "play" (add and play a song), "pause" (pause playback), "resume" (resume playback), "skip" (skip current song), "stop" (stop playback and disconnect), and "queue" (view upcoming songs).',
+  description:
+    'Play and control YouTube music playback in voice channels. Actions include "play" (add and play a song), "pause" (pause playback), "resume" (resume playback), "skip" (skip current song), "stop" (stop playback and disconnect), and "queue" (view upcoming songs).',
   parameters: {
     type: 'object',
     properties: {
-      action: { type: 'string', enum: ['play', 'pause', 'resume', 'skip', 'stop', 'queue'], description: 'The music action to execute.' },
-      query: { type: 'string', description: 'YouTube URL or search keywords (required for "play").' },
-      voiceChannelId: { type: 'string', description: 'The voice channel ID to join (required for "play").' },
-      twentyFourSeven: { type: 'boolean', description: 'If true, the bot will stay in the voice channel 24/7 and won\'t leave when the queue is empty.' }
+      action: {
+        type: 'string',
+        enum: ['play', 'pause', 'resume', 'skip', 'stop', 'queue'],
+        description: 'The music action to execute.'
+      },
+      query: {
+        type: 'string',
+        description: 'YouTube URL or search keywords (required for "play").'
+      },
+      voiceChannelId: {
+        type: 'string',
+        description: 'The voice channel ID to join (required for "play").'
+      },
+      twentyFourSeven: {
+        type: 'boolean',
+        description:
+          "If true, the bot will stay in the voice channel 24/7 and won't leave when the queue is empty."
+      }
     },
     required: ['action']
   },
@@ -31,7 +46,10 @@ export const musicPlugin = {
     }
 
     if (!voiceChannel && action === 'play') {
-      return { success: false, error: 'Anda harus berada di saluran suara (voice channel) atau menyertakan voiceChannelId.' };
+      return {
+        success: false,
+        error: 'Anda harus berada di saluran suara (voice channel) atau menyertakan voiceChannelId.'
+      };
     }
 
     const textChannel = context.channel || context.textChannel;
@@ -76,7 +94,10 @@ export const musicPlugin = {
       };
     } else if (action === 'pause') {
       session.pause();
-      const embed = new V2Embed().setTitle('⏸️ Paused').setDescription('Pemutaran musik ditangguhkan.').build();
+      const embed = new V2Embed()
+        .setTitle('⏸️ Paused')
+        .setDescription('Pemutaran musik ditangguhkan.')
+        .build();
       return {
         success: true,
         method: 'pause',
@@ -85,7 +106,10 @@ export const musicPlugin = {
       };
     } else if (action === 'resume') {
       session.resume();
-      const embed = new V2Embed().setTitle('▶️ Resumed').setDescription('Melanjutkan pemutaran musik.').build();
+      const embed = new V2Embed()
+        .setTitle('▶️ Resumed')
+        .setDescription('Melanjutkan pemutaran musik.')
+        .build();
       return {
         success: true,
         method: 'resume',
@@ -94,7 +118,10 @@ export const musicPlugin = {
       };
     } else if (action === 'skip') {
       session.skip();
-      const embed = new V2Embed().setTitle('⏭️ Skipped').setDescription('Lagu saat ini dilompati.').build();
+      const embed = new V2Embed()
+        .setTitle('⏭️ Skipped')
+        .setDescription('Lagu saat ini dilompati.')
+        .build();
       return {
         success: true,
         method: 'skip',
@@ -103,7 +130,10 @@ export const musicPlugin = {
       };
     } else if (action === 'stop') {
       session.destroy();
-      const embed = new V2Embed().setTitle('⏹️ Stopped').setDescription('Pemutaran dihentikan dan bot keluar dari voice channel.').build();
+      const embed = new V2Embed()
+        .setTitle('⏹️ Stopped')
+        .setDescription('Pemutaran dihentikan dan bot keluar dari voice channel.')
+        .build();
       return {
         success: true,
         method: 'stop',
@@ -118,7 +148,9 @@ export const musicPlugin = {
         desc += `**Playing Now:** [${current.title}](${current.url}) (Diminta oleh: ${current.requestedBy})\n\n`;
       }
       if (q.length > 0) {
-        desc += `**Antrean Selanjutnya:**\n` + q.map((t, idx) => `${idx + 1}. [${t.title}](${t.url})`).join('\n');
+        desc +=
+          `**Antrean Selanjutnya:**\n` +
+          q.map((t, idx) => `${idx + 1}. [${t.title}](${t.url})`).join('\n');
       } else {
         desc += 'Antrean lagu kosong.';
       }

@@ -22,8 +22,18 @@ describe('AI Agent Plugin and Extension System', () => {
 
   describe('AI Chat History Module', () => {
     test('should record and fetch chat history correctly', async () => {
-      await recordChat({ guildId: mockGuildId, userId: mockUserId, role: 'user', content: 'Halo Fox' });
-      await recordChat({ guildId: mockGuildId, userId: mockUserId, role: 'assistant', content: 'Halo! Ada yang bisa kubantu?' });
+      await recordChat({
+        guildId: mockGuildId,
+        userId: mockUserId,
+        role: 'user',
+        content: 'Halo Fox'
+      });
+      await recordChat({
+        guildId: mockGuildId,
+        userId: mockUserId,
+        role: 'assistant',
+        content: 'Halo! Ada yang bisa kubantu?'
+      });
 
       const history = await getChatHistory(mockGuildId, mockUserId);
       expect(history.length).toBe(2);
@@ -36,7 +46,8 @@ describe('AI Agent Plugin and Extension System', () => {
 
   describe('Intent Classification & Routing (Mockup)', () => {
     test('should classify webhook creation request correctly', () => {
-      const prompt = "Fox tolong buatkan aku webhook dengan nama 'Test' dan photo profile URL berikut https://cdn.domain.com/pfp.png dan berikan aku akses webhook URI nya";
+      const prompt =
+        "Fox tolong buatkan aku webhook dengan nama 'Test' dan photo profile URL berikut https://cdn.domain.com/pfp.png dan berikan aku akses webhook URI nya";
       const classification = classifyIntentMock(prompt);
 
       expect(classification).not.toBeNull();
@@ -47,7 +58,7 @@ describe('AI Agent Plugin and Extension System', () => {
     });
 
     test('should classify music playback request correctly', () => {
-      const prompt = "Fox tolong putar lagu lofi hip hop";
+      const prompt = 'Fox tolong putar lagu lofi hip hop';
       const classification = classifyIntentMock(prompt);
 
       expect(classification).not.toBeNull();
@@ -57,7 +68,7 @@ describe('AI Agent Plugin and Extension System', () => {
     });
 
     test('should classify webhook list request correctly', () => {
-      const prompt = "Fox tolong daftarkan semua webhook yang ada";
+      const prompt = 'Fox tolong daftarkan semua webhook yang ada';
       const classification = classifyIntentMock(prompt);
 
       expect(classification).not.toBeNull();
@@ -66,7 +77,7 @@ describe('AI Agent Plugin and Extension System', () => {
     });
 
     test('should return null for unmatched general chat prompt', () => {
-      const prompt = "Apa cuaca hari ini?";
+      const prompt = 'Apa cuaca hari ini?';
       const classification = classifyIntentMock(prompt);
 
       expect(classification).toBeNull();
@@ -113,12 +124,14 @@ describe('AI Agent Plugin and Extension System', () => {
       expect(result.action).toBe('create');
       expect(result.result.success).toBe(true);
       expect(result.result.data.name).toBe('DevWebhook');
-      expect(result.result.data.url).toBe('https://discord.com/api/webhooks/88888888/secret_token_123');
+      expect(result.result.data.url).toBe(
+        'https://discord.com/api/webhooks/88888888/secret_token_123'
+      );
       expect(result.result.responseText).toContain('DevWebhook');
     });
 
     test('should fall back to conversational response on general chats', async () => {
-      const prompt = "Halo Fox, ceritakan lelucon";
+      const prompt = 'Halo Fox, ceritakan lelucon';
       const context = {
         guild: { id: mockGuildId },
         user: { id: mockUserId }
@@ -138,17 +151,17 @@ describe('AI Agent Plugin and Extension System', () => {
       config.nodeEnv = 'development';
 
       const originalFetch = global.fetch;
-      
+
       // Mock the failed Groq API call returning 400 with failed_generation error details
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
         json: async () => ({
           error: {
-            message: "Failed to call a function. Please adjust your prompt.",
-            type: "invalid_request_error",
-            code: "tool_use_failed",
-            failed_generation: "<function=instagram>{\"username\": \"markzuckerberg\"}"
+            message: 'Failed to call a function. Please adjust your prompt.',
+            type: 'invalid_request_error',
+            code: 'tool_use_failed',
+            failed_generation: '<function=instagram>{"username": "markzuckerberg"}'
           }
         })
       });
@@ -163,7 +176,7 @@ describe('AI Agent Plugin and Extension System', () => {
       const originalInstagramExecute = plugins.instagram.execute;
       plugins.instagram.execute = jest.fn().mockResolvedValue(mockInstagramResult);
 
-      const prompt = "cek username instagram mark zuckerberg";
+      const prompt = 'cek username instagram mark zuckerberg';
       const context = {
         guild: { id: mockGuildId },
         user: { id: mockUserId, tag: 'User#1234' }
@@ -174,7 +187,9 @@ describe('AI Agent Plugin and Extension System', () => {
 
         expect(result.agentExecuted).toBe(true);
         expect(result.pluginUsed).toBe('instagram');
-        expect(result.result.responseText).toContain('Successfully stalked instagram markzuckerberg');
+        expect(result.result.responseText).toContain(
+          'Successfully stalked instagram markzuckerberg'
+        );
         expect(plugins.instagram.execute).toHaveBeenCalledWith(
           { username: 'markzuckerberg' },
           context
@@ -197,36 +212,43 @@ describe('AI Agent Plugin and Extension System', () => {
       const originalFetch = global.fetch;
 
       // Mock the successful first response with a tool call, and second response with final answer
-      global.fetch = jest.fn()
+      global.fetch = jest
+        .fn()
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
           json: async () => ({
-            choices: [{
-              message: {
-                role: 'assistant',
-                tool_calls: [{
-                  id: 'call_123',
-                  type: 'function',
-                  function: {
-                    name: 'instagram',
-                    arguments: '{"username": "markzuckerberg"}'
-                  }
-                }]
+            choices: [
+              {
+                message: {
+                  role: 'assistant',
+                  tool_calls: [
+                    {
+                      id: 'call_123',
+                      type: 'function',
+                      function: {
+                        name: 'instagram',
+                        arguments: '{"username": "markzuckerberg"}'
+                      }
+                    }
+                  ]
+                }
               }
-            }]
+            ]
           })
         })
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
           json: async () => ({
-            choices: [{
-              message: {
-                role: 'assistant',
-                content: 'Ini profil Instagram Mark Zuckerberg'
+            choices: [
+              {
+                message: {
+                  role: 'assistant',
+                  content: 'Ini profil Instagram Mark Zuckerberg'
+                }
               }
-            }]
+            ]
           })
         });
 
@@ -239,7 +261,7 @@ describe('AI Agent Plugin and Extension System', () => {
       const originalInstagramExecute = plugins.instagram.execute;
       plugins.instagram.execute = jest.fn().mockResolvedValue(mockInstagramResult);
 
-      const prompt = "cek instagram mark zuckerberg";
+      const prompt = 'cek instagram mark zuckerberg';
       const context = {
         guild: { id: mockGuildId },
         user: { id: mockUserId, tag: 'User#1234' }

@@ -5,7 +5,7 @@ import logger from './logger.js';
 
 /**
  * Mock Pattern Matcher (Intent Classifier) to simulate AI routing without API/token cost.
- * @param {string} prompt 
+ * @param {string} prompt
  * @returns {object|null}
  */
 export function classifyIntentMock(prompt) {
@@ -36,7 +36,10 @@ export function classifyIntentMock(prompt) {
   }
 
   // 2. Webhook - List
-  if (query.includes('webhook') && (query.includes('list') || query.includes('daftar') || query.includes('semua'))) {
+  if (
+    query.includes('webhook') &&
+    (query.includes('list') || query.includes('daftar') || query.includes('semua'))
+  ) {
     return {
       pluginName: 'webhook',
       args: {
@@ -58,9 +61,15 @@ export function classifyIntentMock(prompt) {
   }
 
   // 3. Role - Add/Remove
-  if (query.includes('role') && (query.includes('tambah') || query.includes('add') || query.includes('berikan'))) {
-    const roleIdMatch = prompt.match(/role\s+(?:id\s+)?(\d{15,20})/i) || prompt.match(/(?:role|id)\s*['"]?([a-zA-Z0-9_-]+)/i);
-    const userIdMatch = prompt.match(/user\s+(\d{15,20})/i) || prompt.match(/member\s+(\d{15,20})/i);
+  if (
+    query.includes('role') &&
+    (query.includes('tambah') || query.includes('add') || query.includes('berikan'))
+  ) {
+    const roleIdMatch =
+      prompt.match(/role\s+(?:id\s+)?(\d{15,20})/i) ||
+      prompt.match(/(?:role|id)\s*['"]?([a-zA-Z0-9_-]+)/i);
+    const userIdMatch =
+      prompt.match(/user\s+(\d{15,20})/i) || prompt.match(/member\s+(\d{15,20})/i);
     return {
       pluginName: 'role',
       args: {
@@ -73,8 +82,14 @@ export function classifyIntentMock(prompt) {
 
   // 4. Music - Play
   if (query.includes('play') || query.includes('putar') || query.includes('lagu')) {
-    let is247 = query.includes('24/7') || query.includes('24 jam') || query.includes('menetap') || query.includes('always-on') || query.includes('selamanya');
-    let song = prompt.replace(/fox/i, '')
+    let is247 =
+      query.includes('24/7') ||
+      query.includes('24 jam') ||
+      query.includes('menetap') ||
+      query.includes('always-on') ||
+      query.includes('selamanya');
+    let song = prompt
+      .replace(/fox/i, '')
       .replace(/tolong/i, '')
       .replace(/play/i, '')
       .replace(/putar/i, '')
@@ -115,7 +130,7 @@ export function classifyIntentMock(prompt) {
   }
 
   // 6. Moderation - Purge
-  if (query.includes('purge') || query.includes('hapus') && query.includes('pesan')) {
+  if (query.includes('purge') || (query.includes('hapus') && query.includes('pesan'))) {
     const amountMatch = prompt.match(/(\d+)\s+pesan/i) || prompt.match(/hapus\s+(\d+)/i);
     return {
       pluginName: 'moderation',
@@ -128,7 +143,10 @@ export function classifyIntentMock(prompt) {
 
   // 7. Translate
   if (query.includes('terjemah') || query.includes('translate')) {
-    const textToTranslate = prompt.replace(/translate/i, '').replace(/terjemahkan/i, '').trim();
+    const textToTranslate = prompt
+      .replace(/translate/i, '')
+      .replace(/terjemahkan/i, '')
+      .trim();
     return {
       pluginName: 'translate',
       args: {
@@ -166,16 +184,23 @@ export async function runAgent(prompt, context) {
 
   // 2. Fetch recent chat history
   const history = await getChatHistory(guildId, userId, 15);
-  logger.info(`[AI Agent] Processing user prompt: "${prompt}" with ${history.length} messages of history context.`);
+  logger.info(
+    `[AI Agent] Processing user prompt: "${prompt}" with ${history.length} messages of history context.`
+  );
 
-  const hasApiKey = config.nodeEnv !== 'test' && config.groq.apiKey && config.groq.apiKey !== 'YOUR_GROQ_API_KEY_HERE';
+  const hasApiKey =
+    config.nodeEnv !== 'test' &&
+    config.groq.apiKey &&
+    config.groq.apiKey !== 'YOUR_GROQ_API_KEY_HERE';
 
   if (hasApiKey) {
     try {
-      logger.info(`[AI Agent] Running real AI Agent with Groq provider using model ${config.groq.model}`);
+      logger.info(
+        `[AI Agent] Running real AI Agent with Groq provider using model ${config.groq.model}`
+      );
 
       // Map plugins to OpenAI function calling format
-      const tools = Object.values(plugins).map(p => ({
+      const tools = Object.values(plugins).map((p) => ({
         type: 'function',
         function: {
           name: p.name,
@@ -196,7 +221,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
 
       const messages = [
         systemMessage,
-        ...history.map(h => ({
+        ...history.map((h) => ({
           role: h.role,
           content: h.content
         }))
@@ -206,7 +231,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
       let response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${config.groq.apiKey}`,
+          Authorization: `Bearer ${config.groq.apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -233,7 +258,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
         } catch {
           errorDetails = await response.text();
         }
-        
+
         // Try to recover tool call from failed_generation if any
         if (errBody && errBody.error && errBody.error.failed_generation) {
           const failedGen = errBody.error.failed_generation;
@@ -243,7 +268,10 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
             pluginName = match[1];
             try {
               pluginArgs = JSON.parse(match[2]);
-              logger.info(`[AI Agent] Groq request returned status 400 (tool_use_failed), but successfully recovered tool call from failed_generation: plugin="${pluginName}"`, pluginArgs);
+              logger.info(
+                `[AI Agent] Groq request returned status 400 (tool_use_failed), but successfully recovered tool call from failed_generation: plugin="${pluginName}"`,
+                pluginArgs
+              );
             } catch (e) {
               logger.error(`[AI Agent] Failed to parse recovered tool call args:`, e);
             }
@@ -252,11 +280,13 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
 
         // If we didn't recover a valid tool call, log warning and retry WITHOUT tools
         if (!pluginName || !pluginArgs) {
-          logger.warn(`[AI Agent] Groq request with tools failed (Status ${response.status}). Details: ${errorDetails}. Retrying WITHOUT tools for compatibility...`);
+          logger.warn(
+            `[AI Agent] Groq request with tools failed (Status ${response.status}). Details: ${errorDetails}. Retrying WITHOUT tools for compatibility...`
+          );
           response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${config.groq.apiKey}`,
+              Authorization: `Bearer ${config.groq.apiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -282,19 +312,27 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
               pluginName = xmlMatch[1];
               try {
                 pluginArgs = JSON.parse(xmlMatch[2]);
-                logger.info(`[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`, pluginArgs);
+                logger.info(
+                  `[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`,
+                  pluginArgs
+                );
               } catch (e) {
                 logger.error(`[AI Agent] Failed to parse JSON from XML tool tag:`, e);
               }
             } else {
               // Fallback: Match looser XML tags
-              const looseMatch = assistantMessage.content.match(/<(\w+)>\s*({.*?})["']?\s*<\/(?:\1|function)>/s);
+              const looseMatch = assistantMessage.content.match(
+                /<(\w+)>\s*({.*?})["']?\s*<\/(?:\1|function)>/s
+              );
               if (looseMatch) {
                 pluginName = looseMatch[1];
                 try {
                   const cleanedJson = looseMatch[2].trim();
                   pluginArgs = JSON.parse(cleanedJson);
-                  logger.info(`[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`, pluginArgs);
+                  logger.info(
+                    `[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`,
+                    pluginArgs
+                  );
                 } catch (e) {
                   logger.error(`[AI Agent] Failed to parse loose JSON from XML tool tag:`, e);
                 }
@@ -330,18 +368,26 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
             pluginName = xmlMatch[1];
             try {
               pluginArgs = JSON.parse(xmlMatch[2]);
-              logger.info(`[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`, pluginArgs);
+              logger.info(
+                `[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`,
+                pluginArgs
+              );
             } catch (e) {
               logger.error(`[AI Agent] Failed to parse JSON from XML tool tag:`, e);
             }
           } else {
-            const looseMatch = assistantMessage.content.match(/<(\w+)>\s*({.*?})["']?\s*<\/(?:\1|function)>/s);
+            const looseMatch = assistantMessage.content.match(
+              /<(\w+)>\s*({.*?})["']?\s*<\/(?:\1|function)>/s
+            );
             if (looseMatch) {
               pluginName = looseMatch[1];
               try {
                 const cleanedJson = looseMatch[2].trim();
                 pluginArgs = JSON.parse(cleanedJson);
-                logger.info(`[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`, pluginArgs);
+                logger.info(
+                  `[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`,
+                  pluginArgs
+                );
               } catch (e) {
                 logger.error(`[AI Agent] Failed to parse loose JSON from XML tool tag:`, e);
               }
@@ -371,8 +417,9 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
           }
 
           const result = await plugin.execute(pluginArgs, context);
-          
-          let finalResponseText = result.responseText || `Berhasil mengeksekusi plugin ${pluginName}`;
+
+          let finalResponseText =
+            result.responseText || `Berhasil mengeksekusi plugin ${pluginName}`;
 
           if (toolCallId) {
             // Send tool response back to LLM to generate conversational output
@@ -390,22 +437,26 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
               toolResultMessage
             ];
 
-            const followUpResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${config.groq.apiKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                model: config.groq.model,
-                messages: followUpMessages,
-                temperature: 0.7
-              })
-            });
+            const followUpResponse = await fetch(
+              'https://api.groq.com/openai/v1/chat/completions',
+              {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${config.groq.apiKey}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  model: config.groq.model,
+                  messages: followUpMessages,
+                  temperature: 0.7
+                })
+              }
+            );
 
             if (followUpResponse.ok) {
               const followUpResBody = await followUpResponse.json();
-              finalResponseText = followUpResBody.choices?.[0]?.message?.content || finalResponseText;
+              finalResponseText =
+                followUpResBody.choices?.[0]?.message?.content || finalResponseText;
             }
           }
 
@@ -445,7 +496,10 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
     const plugin = plugins[pluginName];
 
     if (plugin) {
-      logger.info(`[AI Agent] [Mock Fallback] Matched plugin "${pluginName}" with arguments:`, args);
+      logger.info(
+        `[AI Agent] [Mock Fallback] Matched plugin "${pluginName}" with arguments:`,
+        args
+      );
 
       if (pluginName === 'webhook' && args.action === 'create' && context.channel) {
         args.channelId = context.channel.id;
@@ -453,7 +507,8 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
 
       try {
         const result = await plugin.execute(args, context);
-        const assistantText = result.responseText || `Action ${args.action} completed successfully.`;
+        const assistantText =
+          result.responseText || `Action ${args.action} completed successfully.`;
         await recordChat({ guildId, userId, role: 'assistant', content: assistantText });
 
         return {

@@ -112,7 +112,16 @@ export function getMessageCount(guildId, userId) {
 /**
  * Record a message locally
  */
-export function recordMessageLocally(guildId, channelId, channelName, userId, username, content, messageId, createdAt) {
+export function recordMessageLocally(
+  guildId,
+  channelId,
+  channelName,
+  userId,
+  username,
+  content,
+  messageId,
+  createdAt
+) {
   if (!db.messages) db.messages = [];
   db.messages.push({
     guild_id: guildId,
@@ -148,9 +157,7 @@ export function cleanupOldMessagesLocally() {
   if (!db.messages) return;
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const initialCount = db.messages.length;
-  db.messages = db.messages.filter(
-    (msg) => new Date(msg.created_at).getTime() >= sevenDaysAgo
-  );
+  db.messages = db.messages.filter((msg) => new Date(msg.created_at).getTime() >= sevenDaysAgo);
   if (db.messages.length !== initialCount) {
     saveDb();
   }
@@ -205,4 +212,3 @@ export function saveAiChatHistoryLocally(guildId, userId, history) {
   db.aiChatHistory[sessionKey] = history;
   saveDb();
 }
-

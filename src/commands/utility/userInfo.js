@@ -142,7 +142,10 @@ export default {
         }
       }
     }
-    const keyPermsString = keyPermissions.length > 0 ? keyPermissions.join(', ') : `${t('none', locale)} (Regular Member)`;
+    const keyPermsString =
+      keyPermissions.length > 0
+        ? keyPermissions.join(', ')
+        : `${t('none', locale)} (Regular Member)`;
 
     // Setup action buttons for PFP and Banner downloads
     const actionRow = new ActionRowBuilder();

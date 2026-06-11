@@ -55,7 +55,9 @@ export default {
           .trim();
 
         if (cleanPrompt.length === 0) {
-          return message.reply('Ada yang bisa saya bantu? Tanyakan saja atau minta saya menjalankan tugas!');
+          return message.reply(
+            'Ada yang bisa saya bantu? Tanyakan saja atau minta saya menjalankan tugas!'
+          );
         }
 
         // Tunjukkan status sedang mengetik

@@ -1,4 +1,10 @@
-import { SlashCommandBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import {
+  SlashCommandBuilder,
+  MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import { t } from '../../utils/i18n.js';
 import { resolveEmoji } from '../../utils/symbols.js';
@@ -62,9 +68,10 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
         const desc = cmd.description || cmd.data.description || '-';
         const numPrefix = typeof cmd.num === 'number' ? `\`[${cmd.num}]\` ` : '';
 
-        descriptionText += `*   ${numPrefix}**${name}**\n` +
-                           `    *   **${t('helpCommandFormat', locale)}:** \`${cmdSyntax}\`\n` +
-                           `    *   **${t('helpDescriptionFormat', locale)}:** ${desc}\n\n`;
+        descriptionText +=
+          `*   ${numPrefix}**${name}**\n` +
+          `    *   **${t('helpCommandFormat', locale)}:** \`${cmdSyntax}\`\n` +
+          `    *   **${t('helpDescriptionFormat', locale)}:** ${desc}\n\n`;
       }
     }
   } else {
@@ -86,9 +93,10 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
         const desc = cmd.description || cmd.data.description || '-';
         const numPrefix = typeof cmd.num === 'number' ? `\`[${cmd.num}]\` ` : '';
 
-        descriptionText += `*   ${numPrefix}**${name}**\n` +
-                           `    *   **${t('helpCommandFormat', locale)}:** \`${cmdSyntax}\`\n` +
-                           `    *   **${t('helpDescriptionFormat', locale)}:** ${desc}\n\n`;
+        descriptionText +=
+          `*   ${numPrefix}**${name}**\n` +
+          `    *   **${t('helpCommandFormat', locale)}:** \`${cmdSyntax}\`\n` +
+          `    *   **${t('helpDescriptionFormat', locale)}:** ${desc}\n\n`;
       }
     }
   }
@@ -97,7 +105,7 @@ export function generateHelpEmbed(client, locale, selectedCategory = 'all', cont
   const buttonRow = new ActionRowBuilder();
 
   // Add "All" button
-  const guildObj = context ? (context.guild || null) : null;
+  const guildObj = context ? context.guild || null : null;
   buttonRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`help_cat_all`)
@@ -146,12 +154,12 @@ export default {
     .setName('help')
     .setDescription('Menampilkan daftar perintah bot.')
     .setNameLocalizations({
-      'id': 'help',
+      id: 'help',
       'en-US': 'help',
       'en-GB': 'help'
     })
     .setDescriptionLocalizations({
-      'id': 'Menampilkan daftar perintah bot.',
+      id: 'Menampilkan daftar perintah bot.',
       'en-US': 'Displays the bot command list.',
       'en-GB': 'Displays the bot command list.'
     })

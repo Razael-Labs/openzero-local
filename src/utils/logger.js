@@ -18,14 +18,17 @@ function translateLog(message, lang) {
 
   const enToId = {
     'Login successful! Bot is active as': 'Login berhasil! Bot aktif sebagai',
-    'Custom emojis guild cache reference set globally for guild:': 'Referensi cache emoji kustom server disetel secara global untuk server:',
-    'Failed to pre-fetch guild for global custom emojis:': 'Gagal mengambil data server untuk emoji kustom global:',
+    'Custom emojis guild cache reference set globally for guild:':
+      'Referensi cache emoji kustom server disetel secara global untuk server:',
+    'Failed to pre-fetch guild for global custom emojis:':
+      'Gagal mengambil data server untuk emoji kustom global:',
     'Bot activity set to:': 'Aktivitas bot disetel ke:',
     'Failed to set bot activity:': 'Gagal menyetel aktivitas bot:',
     'Failed to run old messages cleanup:': 'Gagal menjalankan pembersihan pesan lama:',
     'Failed to initialize Obtainium Watcher:': 'Gagal menginisialisasi Obtainium Watcher:',
     'Reading raw export from:': 'Membaca ekspor mentah dari:',
-    'No existing enriched JSON found (or failed to read). Fetching all details from scratch.': 'Tidak ada JSON lengkap yang ditemukan (atau gagal membaca). Mengambil semua detail dari awal.',
+    'No existing enriched JSON found (or failed to read). Fetching all details from scratch.':
+      'Tidak ada JSON lengkap yang ditemukan (atau gagal membaca). Mengambil semua detail dari awal.',
     'Saved JSON to': 'Menyimpan JSON ke',
     'Saved YAML to': 'Menyimpan YAML ke',
     'Failed to ban user:': 'Gagal memblokir pengguna:',
@@ -40,10 +43,10 @@ function translateLog(message, lang) {
     'Failed to create emoji:': 'Gagal membuat emoji:',
     'Error fetching tracks:': 'Gagal mengambil trek lagu:',
     'Error fetching lyrics:': 'Gagal mengambil lirik lagu:',
-    'Plugin': 'Plugin',
+    Plugin: 'Plugin',
     'installed for guild': 'terpasang untuk server',
     'uninstalled for guild': 'dihapus dari server',
-    'by': 'oleh',
+    by: 'oleh',
     'Re-deploying commands...': 'Mendaftarkan ulang perintah...',
     'Failed to read custom templates database:': 'Gagal membaca database template kustom:',
     'Failed to write custom templates database:': 'Gagal menulis database template kustom:',
@@ -52,35 +55,39 @@ function translateLog(message, lang) {
     'Failed to fetch role ID info:': 'Gagal mengambil informasi ID role:',
     'Failed to save custom template:': 'Gagal menyimpan template kustom:',
     'Failed to create custom template:': 'Gagal membuat template kustom:',
-    'Supabase credentials not configured. Falling back to local database.': 'Kredensial Supabase tidak dikonfigurasi. Mengalihkan ke database lokal.',
-    'Groq request returned status 400 (tool_use_failed), but successfully recovered tool call from failed_generation: plugin=': 'Request Groq mengembalikan status 400 (tool_use_failed), tetapi berhasil memulihkan panggilan alat dari failed_generation: plugin=',
-    'Successfully recovered tool call from failed_generation: plugin=': 'Berhasil memulihkan panggilan alat dari failed_generation: plugin=',
+    'Supabase credentials not configured. Falling back to local database.':
+      'Kredensial Supabase tidak dikonfigurasi. Mengalihkan ke database lokal.',
+    'Groq request returned status 400 (tool_use_failed), but successfully recovered tool call from failed_generation: plugin=':
+      'Request Groq mengembalikan status 400 (tool_use_failed), tetapi berhasil memulihkan panggilan alat dari failed_generation: plugin=',
+    'Successfully recovered tool call from failed_generation: plugin=':
+      'Berhasil memulihkan panggilan alat dari failed_generation: plugin=',
     'Triggering plugin': 'Menjalankan plugin',
     'with arguments:': 'dengan argumen:',
-    'Running real AI Agent with Groq provider using model': 'Menjalankan AI Agent riil dengan penyedia Groq menggunakan model',
+    'Running real AI Agent with Groq provider using model':
+      'Menjalankan AI Agent riil dengan penyedia Groq menggunakan model',
     'Processing user prompt:': 'Memproses input pengguna:',
-    'with': 'dengan',
+    with: 'dengan',
     'messages of history context.': 'pesan konteks riwayat.'
   };
 
   const idToEnTypes = {
-    'Sistem': 'System'
+    Sistem: 'System'
   };
 
   const enToIdTypes = {
-    'System': 'Sistem',
-    'Client': 'Klien',
+    System: 'Sistem',
+    Client: 'Klien',
     'Cleanup Interval': 'Pembersihan Berkala',
     'Obtainium Watcher': 'Pemantau Obtainium',
     'Obtainium Startup': 'Inisialisasi Obtainium',
     'Obtainium Converter': 'Pengonversi Obtainium',
-    'Emoji': 'Emoji',
+    Emoji: 'Emoji',
     'Emoji Error': 'Error Emoji',
     'Messages Record Command': 'Perintah Riwayat Pesan',
     'Music Search API': 'API Pencarian Musik',
     'Lyrics API': 'API Lirik',
     'Music Search': 'Pencarian Musik',
-    'Plugins': 'Plugin',
+    Plugins: 'Plugin',
     'DB Error': 'Error Database',
     'Role Perms Listed': 'Izin Role Ditampilkan',
     'Role Perms List Error': 'Error Tampilan Izin Role',
@@ -90,7 +97,7 @@ function translateLog(message, lang) {
     'Moderation Error': 'Error Moderasi',
     'AI Agent': 'AI Agent',
     'AI Agent Debug': 'Debug AI Agent',
-    'Cleanup': 'Pembersihan',
+    Cleanup: 'Pembersihan',
     'Instagram Plugin': 'Plugin Instagram'
   };
 
@@ -162,11 +169,27 @@ function resolveLogDetails(level, message, meta = {}) {
     } else {
       // Analyze loggerMessage to guess type
       const msgLower = loggerMessage.toLowerCase();
-      if (msgLower.includes('berhasil') || msgLower.includes('success') || msgLower.includes('aktif') || msgLower.includes('loaded') || msgLower.includes('memuat') || msgLower.includes('set')) {
+      if (
+        msgLower.includes('berhasil') ||
+        msgLower.includes('success') ||
+        msgLower.includes('aktif') ||
+        msgLower.includes('loaded') ||
+        msgLower.includes('memuat') ||
+        msgLower.includes('set')
+      ) {
         type = 'SUCCSESS';
-      } else if (msgLower.includes('selesai') || msgLower.includes('done') || msgLower.includes('cleanup') || msgLower.includes('finish')) {
+      } else if (
+        msgLower.includes('selesai') ||
+        msgLower.includes('done') ||
+        msgLower.includes('cleanup') ||
+        msgLower.includes('finish')
+      ) {
         type = 'DONE';
-      } else if (msgLower.includes('tidak ditemukan') || msgLower.includes('not found') || msgLower.includes('404')) {
+      } else if (
+        msgLower.includes('tidak ditemukan') ||
+        msgLower.includes('not found') ||
+        msgLower.includes('404')
+      ) {
         type = '404';
       } else {
         type = 'UNKNOWN';
@@ -186,7 +209,11 @@ function pruneMetadata(meta) {
   for (const [key, value] of Object.entries(meta)) {
     if (value && typeof value === 'object') {
       const className = value.constructor?.name;
-      if (key === 'interaction' || className === 'ChatInputCommandInteraction' || className === 'ButtonInteraction') {
+      if (
+        key === 'interaction' ||
+        className === 'ChatInputCommandInteraction' ||
+        className === 'ButtonInteraction'
+      ) {
         pruned.interaction = {
           commandName: value.commandName,
           customId: value.customId,

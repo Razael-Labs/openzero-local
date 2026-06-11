@@ -48,7 +48,7 @@ export class MusicSession {
     this.isPlaying = false;
     this.activeProcess = null;
     this.is247 = false;
-    
+
     // Create connection to the voice channel
     this.connection = joinVoiceChannel({
       channelId: voiceChannel.id,
@@ -63,38 +63,54 @@ export class MusicSession {
 
     // Setup state change logs for debugging
     this.connection.on('stateChange', (oldState, newState) => {
-      logger.info(`[Music Manager] Connection state changed from ${oldState.status} to ${newState.status}`, { type: 'CONNECTION' });
+      logger.info(
+        `[Music Manager] Connection state changed from ${oldState.status} to ${newState.status}`,
+        { type: 'CONNECTION' }
+      );
     });
 
     this.player.on('stateChange', (oldState, newState) => {
-      logger.info(`[Music Manager] Player state changed from ${oldState.status} to ${newState.status}`, { type: 'PLAYING' });
+      logger.info(
+        `[Music Manager] Player state changed from ${oldState.status} to ${newState.status}`,
+        { type: 'PLAYING' }
+      );
       updatePresence(this.voiceChannel.client);
     });
 
     // Setup event listeners
     this.player.on(AudioPlayerStatus.Idle, () => {
-      logger.info(`[Music Manager] Player in guild ${this.guildId} became Idle. Playing next track.`, { type: 'IDLE' });
+      logger.info(
+        `[Music Manager] Player in guild ${this.guildId} became Idle. Playing next track.`,
+        { type: 'IDLE' }
+      );
       this.playNext();
     });
 
     this.player.on('error', (error) => {
       logger.error(`[Music Manager] Audio Player Error in guild ${this.guildId}:`, error);
-      this.textChannel.send({
-        components: [
-          new V2Embed()
-            .setTitle('Playback Error ⚠️')
-            .setDescription(`An error occurred during playback: \`${error.message}\`. Skipping to next track.`)
-            .setColor(0xff3333)
-            .build()
-        ],
-        flags: MessageFlags.IsComponentsV2
-      }).catch(() => {});
+      this.textChannel
+        .send({
+          components: [
+            new V2Embed()
+              .setTitle('Playback Error ⚠️')
+              .setDescription(
+                `An error occurred during playback: \`${error.message}\`. Skipping to next track.`
+              )
+              .setColor(0xff3333)
+              .build()
+          ],
+          flags: MessageFlags.IsComponentsV2
+        })
+        .catch(() => {});
       this.playNext();
     });
 
     // Automatically clean up session on disconnect
     this.connection.on(VoiceConnectionStatus.Disconnected, async () => {
-      logger.info(`[Music Manager] Connection disconnected in guild ${this.guildId}. Cleaning up.`, { type: 'DISCONNECTED' });
+      logger.info(
+        `[Music Manager] Connection disconnected in guild ${this.guildId}. Cleaning up.`,
+        { type: 'DISCONNECTED' }
+      );
       this.destroy();
     });
   }
@@ -103,14 +119,18 @@ export class MusicSession {
    * Add a track to the queue
    */
   addTrack(track) {
-    logger.info(`[Music Manager] Pre-fetching stream for added track: ${track.title}`, { type: 'PREFETCH' });
-    track.streamPromise = this.fetchStreamWithRetry(track.url).then(stream => {
-      track.stream = stream;
-      return stream;
-    }).catch(err => {
-      logger.error(`[Music Manager] Pre-fetch failed for track ${track.title}:`, err);
-      throw err;
+    logger.info(`[Music Manager] Pre-fetching stream for added track: ${track.title}`, {
+      type: 'PREFETCH'
     });
+    track.streamPromise = this.fetchStreamWithRetry(track.url)
+      .then((stream) => {
+        track.stream = stream;
+        return stream;
+      })
+      .catch((err) => {
+        logger.error(`[Music Manager] Pre-fetch failed for track ${track.title}:`, err);
+        throw err;
+      });
 
     // Prevent unhandled promise rejection if it rejects before being awaited
     track.streamPromise.catch(() => {});
@@ -134,9 +154,11 @@ export class MusicSession {
       if (ytDlpError.message === 'Aborted') {
         throw ytDlpError;
       }
-      logger.warn(`[Music Manager] yt-dlp failed (${ytDlpError.message}), falling back to play-dl...`);
+      logger.warn(
+        `[Music Manager] yt-dlp failed (${ytDlpError.message}), falling back to play-dl...`
+      );
       if (
-        ytDlpError.message?.includes('Requests') || 
+        ytDlpError.message?.includes('Requests') ||
         ytDlpError.message?.includes('429') ||
         ytDlpError.message?.includes('confirm your session') ||
         ytDlpError.message?.includes('current session') ||
@@ -154,12 +176,15 @@ export class MusicSession {
       const playStream = await play.stream(url, { discordPlayerCompatibility: true });
       return { stream: playStream.stream, type: playStream.type, process: null };
     } catch (error) {
-      const isNetwork = ['ETIMEDOUT','ECONNRESET','ECONNREFUSED'].includes(error.code) ||
+      const isNetwork =
+        ['ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED'].includes(error.code) ||
         error.message?.includes('ETIMEDOUT');
       if (isNetwork && attempt <= MAX_RETRIES) {
         const delay = RETRY_DELAYS[attempt - 1] ?? 5000;
-        logger.warn(`[Music Manager] play-dl attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
-        await new Promise(r => setTimeout(r, delay));
+        logger.warn(
+          `[Music Manager] play-dl attempt ${attempt} failed. Retrying in ${delay / 1000}s...`
+        );
+        await new Promise((r) => setTimeout(r, delay));
         return this.fetchStreamWithRetry(url, attempt + 1);
       }
       throw error;
@@ -175,20 +200,29 @@ export class MusicSession {
     return new Promise((resolve, reject) => {
       const hasCookies = cookiesPath && fs.existsSync(cookiesPath);
       const ytdlpArgs = [
-        '--js-runtimes', 'node',
-        '--remote-components', 'ejs:github',
-        '-f', 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio',
+        '--js-runtimes',
+        'node',
+        '--remote-components',
+        'ejs:github',
+        '-f',
+        'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio',
         '--no-playlist',
-        '-o', '-',        // output to stdout
+        '-o',
+        '-', // output to stdout
         '--quiet',
-        '--socket-timeout', '10',
-        '--retries', '3',
-        '--fragment-retries', '3'
+        '--socket-timeout',
+        '10',
+        '--retries',
+        '3',
+        '--fragment-retries',
+        '3'
       ];
 
       if (hasCookies) {
         ytdlpArgs.push('--cookies', cookiesPath);
-        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
+        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, {
+          type: 'COOKIES'
+        });
       } else {
         ytdlpArgs.push('--extractor-args', 'youtube:player_client=android,web');
       }
@@ -200,7 +234,7 @@ export class MusicSession {
       let resolved = false;
       let stderr = '';
 
-      ytdlp.stderr.on('data', d => {
+      ytdlp.stderr.on('data', (d) => {
         stderr += d.toString();
       });
 
@@ -214,20 +248,24 @@ export class MusicSession {
           ytdlp.stdout.unshift(chunk);
 
           // Detect EBML / WebM signature (1A 45 DF A3)
-          const isWebm = chunk.length >= 4 &&
-            chunk[0] === 0x1A &&
+          const isWebm =
+            chunk.length >= 4 &&
+            chunk[0] === 0x1a &&
             chunk[1] === 0x45 &&
-            chunk[2] === 0xDF &&
-            chunk[3] === 0xA3;
+            chunk[2] === 0xdf &&
+            chunk[3] === 0xa3;
 
           const streamType = isWebm ? StreamType.WebmOpus : StreamType.Arbitrary;
-          logger.info(`[Music Manager] Detected stream format: ${isWebm ? 'WebM/Opus (StreamType.WebmOpus)' : 'Other (StreamType.Arbitrary)'}`, { type: 'STREAM' });
+          logger.info(
+            `[Music Manager] Detected stream format: ${isWebm ? 'WebM/Opus (StreamType.WebmOpus)' : 'Other (StreamType.Arbitrary)'}`,
+            { type: 'STREAM' }
+          );
 
           resolve({ stream: ytdlp.stdout, type: streamType, process: ytdlp });
         }
       });
 
-      ytdlp.on('error', err => {
+      ytdlp.on('error', (err) => {
         if (!resolved) reject(new Error(`yt-dlp spawn error: ${err.message}`));
       });
 
@@ -259,16 +297,23 @@ export class MusicSession {
       this.currentTrack = null;
       this.isPlaying = false;
       if (this.is247) {
-        logger.info(`[Music Manager] Queue finished for guild ${this.guildId}, 24/7 mode active. Auto-playing a random chill track to keep channel active.`, { type: 'DONE' });
-        this.textChannel.send({
-          components: [
-            new V2Embed()
-              .setTitle('24/7 Mode Active 📻')
-              .setDescription('Antrean habis. Memutar musik santai acak untuk menemani saluran suara.')
-              .build()
-          ],
-          flags: MessageFlags.IsComponentsV2
-        }).catch(() => {});
+        logger.info(
+          `[Music Manager] Queue finished for guild ${this.guildId}, 24/7 mode active. Auto-playing a random chill track to keep channel active.`,
+          { type: 'DONE' }
+        );
+        this.textChannel
+          .send({
+            components: [
+              new V2Embed()
+                .setTitle('24/7 Mode Active 📻')
+                .setDescription(
+                  'Antrean habis. Memutar musik santai acak untuk menemani saluran suara.'
+                )
+                .build()
+            ],
+            flags: MessageFlags.IsComponentsV2
+          })
+          .catch(() => {});
 
         const RANDOM_247_MUSIC = [
           'https://www.youtube.com/watch?v=jfKfPfyJRdk', // Lofi Girl
@@ -280,35 +325,39 @@ export class MusicSession {
           'lofi hip hop beats to relax'
         ];
         const randomQuery = RANDOM_247_MUSIC[Math.floor(Math.random() * RANDOM_247_MUSIC.length)];
-        
+
         try {
           // Resolve metadata asynchronously and play it
-          fetchVideoInfoViaYtDlp(randomQuery).then(videoInfo => {
-            const track = {
-              title: videoInfo.title,
-              url: videoInfo.url,
-              duration: videoInfo.duration,
-              thumbnail: videoInfo.thumbnail,
-              requestedBy: 'System (24/7 Mode)'
-            };
-            this.addTrack(track);
-          }).catch(err => {
-            logger.error(`[Music Manager] Failed to resolve random 24/7 track:`, err);
-          });
+          fetchVideoInfoViaYtDlp(randomQuery)
+            .then((videoInfo) => {
+              const track = {
+                title: videoInfo.title,
+                url: videoInfo.url,
+                duration: videoInfo.duration,
+                thumbnail: videoInfo.thumbnail,
+                requestedBy: 'System (24/7 Mode)'
+              };
+              this.addTrack(track);
+            })
+            .catch((err) => {
+              logger.error(`[Music Manager] Failed to resolve random 24/7 track:`, err);
+            });
         } catch (err) {
           logger.error(`[Music Manager] Error queueing random 24/7 track:`, err);
         }
         return;
       }
-      this.textChannel.send({
-        components: [
-          new V2Embed()
-            .setTitle('Queue Finished 🎵')
-            .setDescription('No more tracks in the queue. Leaving the voice channel.')
-            .build()
-        ],
-        flags: MessageFlags.IsComponentsV2
-      }).catch(() => {});
+      this.textChannel
+        .send({
+          components: [
+            new V2Embed()
+              .setTitle('Queue Finished 🎵')
+              .setDescription('No more tracks in the queue. Leaving the voice channel.')
+              .build()
+          ],
+          flags: MessageFlags.IsComponentsV2
+        })
+        .catch(() => {});
       this.destroy();
       return;
     }
@@ -317,12 +366,15 @@ export class MusicSession {
     this.isPlaying = true;
 
     try {
-      logger.info(`[Music Manager] Fetching stream for track: ${this.currentTrack.title} (${this.currentTrack.url})`, { type: 'STREAM' });
+      logger.info(
+        `[Music Manager] Fetching stream for track: ${this.currentTrack.title} (${this.currentTrack.url})`,
+        { type: 'STREAM' }
+      );
       const stream = this.currentTrack.stream
         ? this.currentTrack.stream
-        : (this.currentTrack.streamPromise
-            ? await this.currentTrack.streamPromise
-            : await this.fetchStreamWithRetry(this.currentTrack.url));
+        : this.currentTrack.streamPromise
+          ? await this.currentTrack.streamPromise
+          : await this.fetchStreamWithRetry(this.currentTrack.url);
 
       // Kill previous active process before playing next track
       if (this.activeProcess) {
@@ -350,32 +402,42 @@ export class MusicSession {
       this.player.play(resource);
 
       // Send playing announcement embed
-      this.textChannel.send({
-        components: [
-          new V2Embed()
-            .setTitle('Now Playing 🎶')
-            .setDescription(`**[${this.currentTrack.title}](${this.currentTrack.url})**\n\n⏱️ *Duration:* \`${this.currentTrack.duration}\` ┃ 👤 *Requested By:* ${this.currentTrack.requestedBy}`)
-            .setThumbnail(this.currentTrack.thumbnail)
-            .build()
-        ],
-        flags: MessageFlags.IsComponentsV2
-      }).catch(() => {});
+      this.textChannel
+        .send({
+          components: [
+            new V2Embed()
+              .setTitle('Now Playing 🎶')
+              .setDescription(
+                `**[${this.currentTrack.title}](${this.currentTrack.url})**\n\n⏱️ *Duration:* \`${this.currentTrack.duration}\` ┃ 👤 *Requested By:* ${this.currentTrack.requestedBy}`
+              )
+              .setThumbnail(this.currentTrack.thumbnail)
+              .build()
+          ],
+          flags: MessageFlags.IsComponentsV2
+        })
+        .catch(() => {});
     } catch (error) {
       if (error.message === 'Aborted') {
-        logger.info(`[Music Manager] Stream fetch aborted (user skipped or stopped).`, { type: 'ABORT' });
+        logger.info(`[Music Manager] Stream fetch aborted (user skipped or stopped).`, {
+          type: 'ABORT'
+        });
         return;
       }
       logger.error(`[Music Manager] Failed to stream track ${this.currentTrack.title}:`, error);
-      this.textChannel.send({
-        components: [
-          new V2Embed()
-            .setTitle('Streaming Error ⚠️')
-            .setDescription(`Failed to fetch streaming resource for **${this.currentTrack.title}**: \`${error.message}\`. Skipping track.`)
-            .setColor(0xff3333)
-            .build()
-        ],
-        flags: MessageFlags.IsComponentsV2
-      }).catch(() => {});
+      this.textChannel
+        .send({
+          components: [
+            new V2Embed()
+              .setTitle('Streaming Error ⚠️')
+              .setDescription(
+                `Failed to fetch streaming resource for **${this.currentTrack.title}**: \`${error.message}\`. Skipping track.`
+              )
+              .setColor(0xff3333)
+              .build()
+          ],
+          flags: MessageFlags.IsComponentsV2
+        })
+        .catch(() => {});
       this.playNext();
     }
   }
@@ -444,7 +506,9 @@ export class MusicSession {
     } catch (_) {}
     const client = this.voiceChannel.client;
     musicSessions.delete(this.guildId);
-    logger.info(`[Music Manager] Session destroyed for guild: ${this.guildId}`, { type: 'CLEANUP' });
+    logger.info(`[Music Manager] Session destroyed for guild: ${this.guildId}`, {
+      type: 'CLEANUP'
+    });
     updatePresence(client);
   }
 }
@@ -493,7 +557,7 @@ async function playDlFallback(query) {
     }
     videoInfo = await play.video_basic_info(searchResults[0].url);
   }
-  
+
   return {
     title: videoInfo.video_details.title,
     url: videoInfo.video_details.url,
@@ -527,16 +591,23 @@ export async function fetchVideoInfoViaYtDlp(query) {
 
   const result = await (async () => {
     if (process.env.NODE_ENV === 'test') {
-      logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.', { type: 'INFO' });
+      logger.info(
+        '[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.',
+        { type: 'INFO' }
+      );
       return playDlFallback(query);
     }
 
     try {
       const isYtUrl = play.yt_validate(query) === 'video';
       if (isYtUrl) {
-        logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`, { type: 'METADATA' });
+        logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`, {
+          type: 'METADATA'
+        });
         const videoInfo = await play.video_basic_info(query);
-        const durationStr = videoInfo.video_details.durationRaw || formatDuration(videoInfo.video_details.durationInSec);
+        const durationStr =
+          videoInfo.video_details.durationRaw ||
+          formatDuration(videoInfo.video_details.durationInSec);
         const thumbnail = videoInfo.video_details.thumbnails?.[0]?.url || null;
         return {
           title: videoInfo.video_details.title,
@@ -552,28 +623,34 @@ export async function fetchVideoInfoViaYtDlp(query) {
         };
       }
     } catch (fastResolveError) {
-      logger.warn(`[Music Manager] Fast-resolving YouTube URL metadata failed (${fastResolveError.message}). Falling back to yt-dlp resolver.`);
+      logger.warn(
+        `[Music Manager] Fast-resolving YouTube URL metadata failed (${fastResolveError.message}). Falling back to yt-dlp resolver.`
+      );
     }
 
     try {
       const isUrl = query.startsWith('http://') || query.startsWith('https://');
       const target = isUrl ? query : `ytsearch1:${query}`;
-      
+
       let cookiesFlag = '';
       let extractorArgsFlag = '--extractor-args "youtube:player_client=android,web" ';
       if (cookiesPath && fs.existsSync(cookiesPath)) {
         cookiesFlag = `--cookies ${JSON.stringify(cookiesPath)} `;
         extractorArgsFlag = '';
-        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
+        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, {
+          type: 'COOKIES'
+        });
       }
 
       logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`, { type: 'METADATA' });
-      const { stdout } = await execAsync(`yt-dlp --js-runtimes node --remote-components ejs:github --socket-timeout 10 --retries 3 --flat-playlist --no-check-certificates --no-call-home ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`);
+      const { stdout } = await execAsync(
+        `yt-dlp --js-runtimes node --remote-components ejs:github --socket-timeout 10 --retries 3 --flat-playlist --no-check-certificates --no-call-home ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`
+      );
       const data = JSON.parse(stdout);
-      
+
       const durationStr = data.duration_string || formatDuration(data.duration);
       const thumbnail = data.thumbnail || (data.thumbnails && data.thumbnails[0]?.url) || null;
-      
+
       return {
         title: data.title,
         url: data.webpage_url || data.original_url || query,
@@ -587,7 +664,9 @@ export async function fetchVideoInfoViaYtDlp(query) {
         }
       };
     } catch (error) {
-      logger.warn(`[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`);
+      logger.warn(
+        `[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`
+      );
       return playDlFallback(query);
     }
   })();
@@ -606,13 +685,16 @@ export async function fetchVideoInfoViaYtDlp(query) {
 export function updatePresence(client) {
   if (!client || !client.user) return;
 
-  const botStatus = config.nodeEnv === 'production'
-    ? (config.activity?.status || 'online')
-    : 'invisible';
+  const botStatus =
+    config.nodeEnv === 'production' ? config.activity?.status || 'online' : 'invisible';
 
   let activeTrack = null;
   for (const session of musicSessions.values()) {
-    if (session.isPlaying && session.currentTrack && session.player?.state?.status === AudioPlayerStatus.Playing) {
+    if (
+      session.isPlaying &&
+      session.currentTrack &&
+      session.player?.state?.status === AudioPlayerStatus.Playing
+    ) {
       activeTrack = session.currentTrack;
       break;
     }
@@ -620,18 +702,22 @@ export function updatePresence(client) {
 
   if (activeTrack) {
     client.user.setPresence({
-      activities: [{
-        name: activeTrack.title,
-        type: ActivityType.Listening
-      }],
+      activities: [
+        {
+          name: activeTrack.title,
+          type: ActivityType.Listening
+        }
+      ],
       status: botStatus
     });
   } else {
     client.user.setPresence({
-      activities: [{
-        name: '/help | /menu',
-        type: ActivityType.Watching
-      }],
+      activities: [
+        {
+          name: '/help | /menu',
+          type: ActivityType.Watching
+        }
+      ],
       status: botStatus
     });
   }

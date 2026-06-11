@@ -155,9 +155,10 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
   let description = `${t('musicResultsFor', locale, { query })}\n`;
 
   const topTrack = pageItems[0];
-  const artworkUrl = topTrack && topTrack.artworkUrl100
-    ? topTrack.artworkUrl100.replace('100x100bb', '400x400bb')
-    : null;
+  const artworkUrl =
+    topTrack && topTrack.artworkUrl100
+      ? topTrack.artworkUrl100.replace('100x100bb', '400x400bb')
+      : null;
 
   if (artworkUrl) {
     description += `![Cover Art](${artworkUrl})\n\n`;
@@ -232,9 +233,7 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
     }
   }
 
-  const embed = new V2Embed()
-    .setTitle(t('musicSearchTitle', locale))
-    .setDescription(description);
+  const embed = new V2Embed().setTitle(t('musicSearchTitle', locale)).setDescription(description);
 
   for (const row of actionRows) {
     embed.addActionRow(row);
@@ -258,7 +257,7 @@ export default {
       id: 'Mencari lagu atau musik secara online.',
       'en-US': 'Search songs or music online.'
     })
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('query')
         .setNameLocalizations({
@@ -306,9 +305,12 @@ export default {
     });
 
     // Clean up cache after 10 minutes to save memory
-    setTimeout(() => {
-      musicSearchCache.delete(sessionId);
-    }, 10 * 60 * 1000);
+    setTimeout(
+      () => {
+        musicSearchCache.delete(sessionId);
+      },
+      10 * 60 * 1000
+    );
 
     const { embed } = generateMusicSearchEmbed(sessionId, 0, locale);
 

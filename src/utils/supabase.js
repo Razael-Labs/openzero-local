@@ -17,9 +17,7 @@ const isSupabaseConfigured =
   supabaseKey &&
   supabaseKey !== 'YOUR_SUPABASE_ANON_KEY_HERE';
 
-export const supabaseClient = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseKey)
-  : null;
+export const supabaseClient = isSupabaseConfigured ? createClient(supabaseUrl, supabaseKey) : null;
 
 if (isSupabaseConfigured) {
   logger.info('[Supabase] Supabase client initialized successfully!');
@@ -30,11 +28,29 @@ if (isSupabaseConfigured) {
 /**
  * Record a user message to Supabase (or fallback to local DB)
  */
-export async function recordMessage({ guildId, channelId, channelName, userId, username, content, messageId, createdAt }) {
+export async function recordMessage({
+  guildId,
+  channelId,
+  channelName,
+  userId,
+  username,
+  content,
+  messageId,
+  createdAt
+}) {
   const dateStr = createdAt instanceof Date ? createdAt.toISOString() : createdAt;
 
   // Always write locally for local observability/fallback
-  recordMessageLocally(guildId, channelId, channelName, userId, username, content, messageId, dateStr);
+  recordMessageLocally(
+    guildId,
+    channelId,
+    channelName,
+    userId,
+    username,
+    content,
+    messageId,
+    dateStr
+  );
 
   if (!supabaseClient) {
     return { success: true, method: 'local' };
@@ -61,8 +77,15 @@ export async function recordMessage({ guildId, channelId, channelName, userId, u
 
     return { success: true, method: 'supabase' };
   } catch (err) {
-    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
-      logger.warn(`[Supabase] Gagal menyimpan pesan ke cloud (Offline/Network Error): ${err.message}. Tersimpan lokal.`);
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
+      logger.warn(
+        `[Supabase] Gagal menyimpan pesan ke cloud (Offline/Network Error): ${err.message}. Tersimpan lokal.`
+      );
     } else {
       logger.error('[Supabase] Exception saat menyimpan pesan:', err);
     }
@@ -96,8 +119,15 @@ export async function getUserMessages(guildId, userId) {
 
     return data || [];
   } catch (err) {
-    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
-      logger.warn(`[Supabase] Gagal fetch dari cloud (Offline/Network Error): ${err.message}. Mengambil dari lokal.`);
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
+      logger.warn(
+        `[Supabase] Gagal fetch dari cloud (Offline/Network Error): ${err.message}. Mengambil dari lokal.`
+      );
     } else {
       logger.error('[Supabase] Exception saat fetch record pesan:', err);
     }
@@ -130,7 +160,12 @@ export async function cleanupOldMessages() {
     logger.info('[Supabase] Pembersihan berkala (cleanup) pesan berumur > 7 hari selesai.');
     return { success: true, method: 'supabase' };
   } catch (err) {
-    if (err.message && (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED'))) {
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
       logger.warn(`[Supabase] Cleanup ditangguhkan (Offline/Network Error): ${err.message}`);
     } else {
       logger.error('[Supabase] Exception saat cleanup pesan lama:', err);

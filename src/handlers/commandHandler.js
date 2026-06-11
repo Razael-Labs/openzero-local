@@ -40,7 +40,9 @@ export async function loadCommands(client) {
         const command = commandModule.default;
 
         if (!command || !command.data || !command.execute) {
-          logger.warn(`Command file ${file} does not have a 'data' property or an 'execute' function.`);
+          logger.warn(
+            `Command file ${file} does not have a 'data' property or an 'execute' function.`
+          );
           continue;
         }
 

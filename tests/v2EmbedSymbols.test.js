@@ -15,22 +15,22 @@ describe('V2Embed Symbols Auto-Formatting Test Suite', () => {
   });
 
   test('should automatically replace emojis and layout symbols in title', () => {
-    new V2Embed()
-      .setTitle('Action Failed ❌ and Success ✅! 🏓 ⏱️')
-      .build();
+    new V2Embed().setTitle('Action Failed ❌ and Success ✅! 🏓 ⏱️').build();
 
     expect(setContentSpy).toHaveBeenCalledWith(
-      expect.stringContaining(`Action Failed ${Symbols.FAILURE} and Success ${Symbols.SUCCESS}! ${Symbols.PING} ${Symbols.COOLDOWN}`)
+      expect.stringContaining(
+        `Action Failed ${Symbols.FAILURE} and Success ${Symbols.SUCCESS}! ${Symbols.PING} ${Symbols.COOLDOWN}`
+      )
     );
   });
 
   test('should automatically replace layout symbols in description', () => {
-    new V2Embed()
-      .setDescription('↳ Step 1: 🎵 Play music 🎤 Sing along')
-      .build();
+    new V2Embed().setDescription('↳ Step 1: 🎵 Play music 🎤 Sing along').build();
 
     expect(setContentSpy).toHaveBeenCalledWith(
-      expect.stringContaining(`${Symbols.ENTER} Step 1: ${Symbols.MUSIC} Play music ${Symbols.MICROPHONE} Sing along`)
+      expect.stringContaining(
+        `${Symbols.ENTER} Step 1: ${Symbols.MUSIC} Play music ${Symbols.MICROPHONE} Sing along`
+      )
     );
   });
 
@@ -44,9 +44,7 @@ describe('V2Embed Symbols Auto-Formatting Test Suite', () => {
       }
     };
 
-    new V2Embed(mockGuild)
-      .setTitle('Status: ✅ and ❌')
-      .build();
+    new V2Embed(mockGuild).setTitle('Status: ✅ and ❌').build();
 
     expect(setContentSpy).toHaveBeenCalledWith(
       expect.stringContaining('Status: <:oz_success:1122334455> and <:oz_failure:6677889900>')
@@ -101,4 +99,3 @@ describe('resolveEmoji Unit Tests', () => {
     expect(result).toBe('⬅️');
   });
 });
-

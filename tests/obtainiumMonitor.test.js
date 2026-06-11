@@ -14,7 +14,9 @@ jest.unstable_mockModule('../src/utils/database.js', () => {
   let mockMsgId = '1234567890';
   return {
     getObtainiumMessageId: jest.fn(() => mockMsgId),
-    setObtainiumMessageId: jest.fn((id) => { mockMsgId = id; })
+    setObtainiumMessageId: jest.fn((id) => {
+      mockMsgId = id;
+    })
   };
 });
 
@@ -62,7 +64,7 @@ describe('Obtainium Message Monitor & Persistent Recreate Test Suite', () => {
 
   test('should edit existing message if it is found', async () => {
     getObtainiumMessageId.mockReturnValueOnce('https://discord.com/channels/123/456/1234567890');
-    
+
     await updateObtainiumMessage(mockClient);
 
     expect(mockChannel.messages.fetch).toHaveBeenCalledWith('1234567890');
@@ -79,13 +81,15 @@ describe('Obtainium Message Monitor & Persistent Recreate Test Suite', () => {
 
     expect(mockChannel.messages.fetch).toHaveBeenCalledWith('1234567890');
     expect(mockChannel.send).toHaveBeenCalled();
-    expect(setObtainiumMessageId).toHaveBeenCalledWith('https://discord.com/channels/123/456/9999999999');
+    expect(setObtainiumMessageId).toHaveBeenCalledWith(
+      'https://discord.com/channels/123/456/9999999999'
+    );
   });
 
   test('should trigger recreation when monitored message is deleted', async () => {
     // Mock the deleted message
     const deletedMessage = { id: '1234567890' };
-    
+
     // Mock message fetch to reject during recreation to force a new send
     mockChannel.messages.fetch.mockRejectedValueOnce(new Error('Unknown Message'));
     getObtainiumMessageId.mockReturnValue('https://discord.com/channels/123/456/1234567890');
@@ -93,7 +97,9 @@ describe('Obtainium Message Monitor & Persistent Recreate Test Suite', () => {
     await messageDeleteEvent.execute(deletedMessage, mockClient);
 
     expect(mockChannel.send).toHaveBeenCalled();
-    expect(setObtainiumMessageId).toHaveBeenCalledWith('https://discord.com/channels/123/456/9999999999');
+    expect(setObtainiumMessageId).toHaveBeenCalledWith(
+      'https://discord.com/channels/123/456/9999999999'
+    );
   });
 
   test('should not trigger recreation if a different message is deleted', async () => {

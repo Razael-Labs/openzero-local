@@ -1,4 +1,9 @@
-import { getInstalledPlugins, installPlugin, uninstallPlugin, isCommandEnabled } from '../src/utils/pluginManager.js';
+import {
+  getInstalledPlugins,
+  installPlugin,
+  uninstallPlugin,
+  isCommandEnabled
+} from '../src/utils/pluginManager.js';
 import fs from 'fs';
 import { config } from '../src/config.js';
 
@@ -32,7 +37,7 @@ describe('Plugin Installer and Command Registry System', () => {
 
   test('should disable command registration when plugin is uninstalled', async () => {
     await uninstallPlugin(testGuildId, 'webhook');
-    
+
     const installed = await getInstalledPlugins(testGuildId);
     expect(installed).not.toContain('webhook');
     expect(await isCommandEnabled(testGuildId, 'webhook')).toBe(false);
@@ -40,7 +45,7 @@ describe('Plugin Installer and Command Registry System', () => {
 
   test('should enable command registration when plugin is re-installed', async () => {
     await installPlugin(testGuildId, 'webhook');
-    
+
     const installed = await getInstalledPlugins(testGuildId);
     expect(installed).toContain('webhook');
     expect(await isCommandEnabled(testGuildId, 'webhook')).toBe(true);

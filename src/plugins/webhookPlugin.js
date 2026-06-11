@@ -5,15 +5,23 @@ import { resolveEmoji } from '../utils/symbols.js';
 export const webhookPlugin = {
   name: 'webhook',
   commands: ['webhook'],
-  description: 'Manage webhooks in the guild. Actions include "create" (creates a new webhook in a channel), "info" (retrieves info about an existing webhook by ID or URL), and "list" (lists all webhooks in the guild).',
+  description:
+    'Manage webhooks in the guild. Actions include "create" (creates a new webhook in a channel), "info" (retrieves info about an existing webhook by ID or URL), and "list" (lists all webhooks in the guild).',
   parameters: {
     type: 'object',
     properties: {
-      action: { type: 'string', enum: ['create', 'info', 'list'], description: 'The webhook action to perform.' },
+      action: {
+        type: 'string',
+        enum: ['create', 'info', 'list'],
+        description: 'The webhook action to perform.'
+      },
       title: { type: 'string', description: 'Name of the webhook to create.' },
       channelId: { type: 'string', description: 'Channel ID where the webhook should be created.' },
       pfp: { type: 'string', description: 'Optional profile picture URL for the webhook.' },
-      id_or_url: { type: 'string', description: 'Webhook ID or full URL for information inspection.' }
+      id_or_url: {
+        type: 'string',
+        description: 'Webhook ID or full URL for information inspection.'
+      }
     },
     required: ['action']
   },
@@ -33,11 +41,19 @@ export const webhookPlugin = {
 
     if (action === 'create') {
       if (!title || !channelId) {
-        return { success: false, error: 'Creating a webhook requires a "title" and a "channelId".' };
+        return {
+          success: false,
+          error: 'Creating a webhook requires a "title" and a "channelId".'
+        };
       }
 
       const channel = guild.channels.cache.get(channelId);
-      if (!channel || ![ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(channel.type)) {
+      if (
+        !channel ||
+        ![ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice].includes(
+          channel.type
+        )
+      ) {
         return { success: false, error: `Invalid text channel: ${channelId}` };
       }
 
@@ -163,7 +179,7 @@ export const webhookPlugin = {
 
       let desc = '';
       const listData = [];
-      webhooks.forEach(webhook => {
+      webhooks.forEach((webhook) => {
         const channel = guild.channels.cache.get(webhook.channelId) || `<#${webhook.channelId}>`;
         desc += `*   **Name:** \`${webhook.name}\` ┃ **Channel:** ${channel} ┃ **ID:** \`${webhook.id}\` ┃ [Link](${webhook.url})\n`;
         listData.push({

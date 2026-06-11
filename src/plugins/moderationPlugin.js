@@ -3,16 +3,30 @@ import { V2Embed } from '../utils/v2Embed.js';
 export const moderationPlugin = {
   name: 'moderation',
   commands: ['ban', 'deafen', 'kick', 'mute', 'purge', 'timeout', 'undeafen', 'unmute'],
-  description: 'Perform moderation actions on members or text channels. Actions include "kick", "ban", "mute", "unmute", "timeout" (time-out a user), and "purge" (delete messages).',
+  description:
+    'Perform moderation actions on members or text channels. Actions include "kick", "ban", "mute", "unmute", "timeout" (time-out a user), and "purge" (delete messages).',
   parameters: {
     type: 'object',
     properties: {
-      action: { type: 'string', enum: ['kick', 'ban', 'mute', 'unmute', 'timeout', 'purge'], description: 'Moderation action to perform.' },
+      action: {
+        type: 'string',
+        enum: ['kick', 'ban', 'mute', 'unmute', 'timeout', 'purge'],
+        description: 'Moderation action to perform.'
+      },
       targetId: { type: 'string', description: 'User ID of the target member.' },
       reason: { type: 'string', description: 'Reason for the moderation action.' },
-      duration: { type: 'integer', description: 'Timeout duration in minutes (required for "timeout").' },
-      amount: { type: 'integer', description: 'Amount of messages to delete (1-100, default 100, required for "purge").' },
-      channelId: { type: 'string', description: 'Channel ID to purge messages in (required for "purge").' }
+      duration: {
+        type: 'integer',
+        description: 'Timeout duration in minutes (required for "timeout").'
+      },
+      amount: {
+        type: 'integer',
+        description: 'Amount of messages to delete (1-100, default 100, required for "purge").'
+      },
+      channelId: {
+        type: 'string',
+        description: 'Channel ID to purge messages in (required for "purge").'
+      }
     },
     required: ['action']
   },
@@ -65,7 +79,10 @@ export const moderationPlugin = {
 
     if (action === 'kick') {
       await target.kick(cleanReason);
-      const embed = new V2Embed().setTitle('Member Kicked! 👢').setDescription(`Successfully kicked **${target.user.tag}**. Reason: ${cleanReason}`).build();
+      const embed = new V2Embed()
+        .setTitle('Member Kicked! 👢')
+        .setDescription(`Successfully kicked **${target.user.tag}**. Reason: ${cleanReason}`)
+        .build();
       return {
         success: true,
         method: 'kick',
@@ -74,7 +91,10 @@ export const moderationPlugin = {
       };
     } else if (action === 'ban') {
       await target.ban({ reason: cleanReason });
-      const embed = new V2Embed().setTitle('Member Banned! 🔨').setDescription(`Successfully banned **${target.user.tag}**. Reason: ${cleanReason}`).build();
+      const embed = new V2Embed()
+        .setTitle('Member Banned! 🔨')
+        .setDescription(`Successfully banned **${target.user.tag}**. Reason: ${cleanReason}`)
+        .build();
       return {
         success: true,
         method: 'ban',
@@ -87,11 +107,14 @@ export const moderationPlugin = {
         await target.voice.setMute(true, cleanReason);
       }
       // Apply Muted role
-      const mutedRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'muted');
+      const mutedRole = guild.roles.cache.find((r) => r.name.toLowerCase() === 'muted');
       if (mutedRole) {
         await target.roles.add(mutedRole);
       }
-      const embed = new V2Embed().setTitle('Member Muted! 🔇').setDescription(`Successfully muted **${target.user.tag}**.`).build();
+      const embed = new V2Embed()
+        .setTitle('Member Muted! 🔇')
+        .setDescription(`Successfully muted **${target.user.tag}**.`)
+        .build();
       return {
         success: true,
         method: 'mute',
@@ -102,11 +125,14 @@ export const moderationPlugin = {
       if (target.voice?.channel) {
         await target.voice.setMute(false, cleanReason);
       }
-      const mutedRole = guild.roles.cache.find(r => r.name.toLowerCase() === 'muted');
+      const mutedRole = guild.roles.cache.find((r) => r.name.toLowerCase() === 'muted');
       if (mutedRole) {
         await target.roles.remove(mutedRole);
       }
-      const embed = new V2Embed().setTitle('Member Unmuted! 🔊').setDescription(`Successfully unmuted **${target.user.tag}**.`).build();
+      const embed = new V2Embed()
+        .setTitle('Member Unmuted! 🔊')
+        .setDescription(`Successfully unmuted **${target.user.tag}**.`)
+        .build();
       return {
         success: true,
         method: 'unmute',
@@ -116,7 +142,12 @@ export const moderationPlugin = {
     } else if (action === 'timeout') {
       const ms = (duration || 60) * 60 * 1000;
       await target.timeout(ms, cleanReason);
-      const embed = new V2Embed().setTitle('Member Timed Out! ⏱️').setDescription(`Successfully timed out **${target.user.tag}** for ${duration || 60} minutes.`).build();
+      const embed = new V2Embed()
+        .setTitle('Member Timed Out! ⏱️')
+        .setDescription(
+          `Successfully timed out **${target.user.tag}** for ${duration || 60} minutes.`
+        )
+        .build();
       return {
         success: true,
         method: 'timeout',

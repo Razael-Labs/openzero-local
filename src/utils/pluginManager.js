@@ -22,7 +22,7 @@ export async function loadPluginsDynamically() {
     return;
   }
 
-  const files = fs.readdirSync(pluginsDir).filter(f => f.endsWith('.js'));
+  const files = fs.readdirSync(pluginsDir).filter((f) => f.endsWith('.js'));
   for (const file of files) {
     const filePath = path.join(pluginsDir, file);
     const fileUrl = pathToFileURL(filePath).href;
@@ -31,7 +31,7 @@ export async function loadPluginsDynamically() {
       const module = await import(fileUrl);
       // Try to find any exported object that looks like a plugin (has name, description, execute)
       const pluginObj = Object.values(module).find(
-        val => val && typeof val === 'object' && val.name && val.execute
+        (val) => val && typeof val === 'object' && val.name && val.execute
       );
 
       if (pluginObj) {
@@ -76,10 +76,16 @@ export async function getInstalledPlugins(guildId) {
         return data.installed_plugins || [];
       }
       if (error) {
-        logger.error(`[Plugin Manager] Supabase error fetching plugins for guild ${guildId}:`, error);
+        logger.error(
+          `[Plugin Manager] Supabase error fetching plugins for guild ${guildId}:`,
+          error
+        );
       }
     } catch (err) {
-      logger.error(`[Plugin Manager] Exception fetching plugins from Supabase for guild ${guildId}:`, err);
+      logger.error(
+        `[Plugin Manager] Exception fetching plugins from Supabase for guild ${guildId}:`,
+        err
+      );
     }
   }
 
@@ -101,7 +107,7 @@ export async function getInstalledPlugins(guildId) {
 /**
  * Save the installed plugins list to Supabase and local DB for a specific guild
  * @param {string} guildId
- * @param {string[]} installedPlugins 
+ * @param {string[]} installedPlugins
  */
 async function saveInstalledPlugins(guildId, installedPlugins) {
   if (!guildId) return;
@@ -109,19 +115,23 @@ async function saveInstalledPlugins(guildId, installedPlugins) {
   // Save to Supabase first if available
   if (supabaseClient) {
     try {
-      const { error } = await supabaseClient
-        .from('guild_plugins')
-        .upsert({
+      const { error } = await supabaseClient.from('guild_plugins').upsert(
+        {
           guild_id: guildId,
           installed_plugins: installedPlugins,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'guild_id' });
+        },
+        { onConflict: 'guild_id' }
+      );
 
       if (error) {
         logger.error(`[Plugin Manager] Supabase error saving plugins for guild ${guildId}:`, error);
       }
     } catch (err) {
-      logger.error(`[Plugin Manager] Exception saving plugins to Supabase for guild ${guildId}:`, err);
+      logger.error(
+        `[Plugin Manager] Exception saving plugins to Supabase for guild ${guildId}:`,
+        err
+      );
     }
   }
 
@@ -142,7 +152,7 @@ async function saveInstalledPlugins(guildId, installedPlugins) {
 /**
  * Install a plugin for a specific guild
  * @param {string} guildId
- * @param {string} pluginName 
+ * @param {string} pluginName
  * @returns {Promise<boolean>}
  */
 export async function installPlugin(guildId, pluginName) {
@@ -158,7 +168,7 @@ export async function installPlugin(guildId, pluginName) {
 /**
  * Uninstall a plugin for a specific guild
  * @param {string} guildId
- * @param {string} pluginName 
+ * @param {string} pluginName
  * @returns {Promise<boolean>}
  */
 export async function uninstallPlugin(guildId, pluginName) {
@@ -166,7 +176,7 @@ export async function uninstallPlugin(guildId, pluginName) {
   const installed = await getInstalledPlugins(guildId);
   if (!installed.includes(pluginName)) return true; // Already uninstalled
 
-  const filtered = installed.filter(name => name !== pluginName);
+  const filtered = installed.filter((name) => name !== pluginName);
   await saveInstalledPlugins(guildId, filtered);
   return true;
 }
@@ -174,7 +184,7 @@ export async function uninstallPlugin(guildId, pluginName) {
 /**
  * Checks if a specific command is enabled based on its parent plugin installation state for a guild
  * @param {string} guildId
- * @param {string} commandName 
+ * @param {string} commandName
  * @returns {Promise<boolean>}
  */
 export async function isCommandEnabled(guildId, commandName) {

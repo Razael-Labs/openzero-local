@@ -67,13 +67,17 @@ describe('Icon to Emoji Slash Command Test Suite', () => {
     await iconToEmojiCmd.execute(mockInteraction);
 
     expect(mockInteraction.deferReply).toHaveBeenCalled();
-    expect(mockEmojisCreate).toHaveBeenCalledWith(expect.objectContaining({
-      attachment: '/dummy/path/github.png',
-      name: 'github'
-    }));
-    expect(mockInteraction.editReply).toHaveBeenCalledWith(expect.objectContaining({
-      components: expect.any(Array)
-    }));
+    expect(mockEmojisCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachment: '/dummy/path/github.png',
+        name: 'github'
+      })
+    );
+    expect(mockInteraction.editReply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        components: expect.any(Array)
+      })
+    );
   });
 
   test('should fail if emoji name is invalid/too short', async () => {
