@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { runAgent, classifyIntentMock } from '../src/utils/aiManager.js';
+import { runAgent, classifyIntentMock, safeJsonParse } from '../src/utils/aiManager.js';
 import { recordChat, getChatHistory, clearChatHistory } from '../src/utils/aiHistory.js';
 import { config } from '../src/config.js';
 
@@ -277,6 +277,62 @@ describe('AI Agent Plugin and Extension System', () => {
           { username: 'markzuckerberg' },
           context
         );
+      } finally {
+        global.fetch = originalFetch;
+        config.groq.apiKey = originalApiKey;
+        config.nodeEnv = originalNodeEnv;
+        plugins.instagram.execute = originalInstagramExecute;
+      }
+    });
+
+    test('should safely parse JSON strings and remove trailing commas', () => {
+      expect(safeJsonParse('{"action": "list",}')).toEqual({ action: 'list' });
+      expect(safeJsonParse('{"arr": [1, 2, 3,], "val": 10,}')).toEqual({ arr: [1, 2, 3], val: 10 });
+    });
+
+    test('should recover tool call from failed_generation with trailing comma', async () => {
+      const originalApiKey = config.groq.apiKey;
+      const originalNodeEnv = config.nodeEnv;
+      config.groq.apiKey = 'mock-key';
+      config.nodeEnv = 'development';
+
+      const originalFetch = global.fetch;
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: async () => ({
+          error: {
+            message: 'Failed to call a function. Please adjust your prompt.',
+            type: 'invalid_request_error',
+            code: 'tool_use_failed',
+            failed_generation: '<function=instagram>{"username": "zuck",}'
+          }
+        })
+      });
+
+      const mockInstagramResult = {
+        success: true,
+        responseText: 'Successfully stalked instagram zuck'
+      };
+
+      const { plugins } = await import('../src/utils/pluginManager.js');
+      const originalInstagramExecute = plugins.instagram.execute;
+      plugins.instagram.execute = jest.fn().mockResolvedValue(mockInstagramResult);
+
+      const prompt = 'cek username instagram zuck';
+      const context = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' }
+      };
+
+      try {
+        const result = await runAgent(prompt, context);
+
+        expect(result.agentExecuted).toBe(true);
+        expect(result.pluginUsed).toBe('instagram');
+        expect(result.result.responseText).toContain('Successfully stalked instagram zuck');
+        expect(plugins.instagram.execute).toHaveBeenCalledWith({ username: 'zuck' }, context);
       } finally {
         global.fetch = originalFetch;
         config.groq.apiKey = originalApiKey;

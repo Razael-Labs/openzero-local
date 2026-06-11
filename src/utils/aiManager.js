@@ -170,6 +170,17 @@ export function classifyIntentMock(prompt) {
 }
 
 /**
+ * Safely parse JSON strings, removing trailing commas in objects/arrays.
+ * @param {string} str - JSON string to parse
+ * @returns {any} Parsed JSON object
+ */
+export function safeJsonParse(str) {
+  if (typeof str !== 'string') return str;
+  const sanitized = str.trim().replace(/,\s*([}\]])/g, '$1');
+  return JSON.parse(sanitized);
+}
+
+/**
  * Main entrypoint for the AI agent execution.
  * @param {string} prompt - User request string
  * @param {object} context - Execution context { client, guild, channel, member, user }
@@ -267,7 +278,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
           if (match) {
             pluginName = match[1];
             try {
-              pluginArgs = JSON.parse(match[2]);
+              pluginArgs = safeJsonParse(match[2]);
               logger.info(
                 `[AI Agent] Groq request returned status 400 (tool_use_failed), but successfully recovered tool call from failed_generation: plugin="${pluginName}"`,
                 pluginArgs
@@ -311,7 +322,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
             if (xmlMatch) {
               pluginName = xmlMatch[1];
               try {
-                pluginArgs = JSON.parse(xmlMatch[2]);
+                pluginArgs = safeJsonParse(xmlMatch[2]);
                 logger.info(
                   `[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`,
                   pluginArgs
@@ -328,7 +339,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
                 pluginName = looseMatch[1];
                 try {
                   const cleanedJson = looseMatch[2].trim();
-                  pluginArgs = JSON.parse(cleanedJson);
+                  pluginArgs = safeJsonParse(cleanedJson);
                   logger.info(
                     `[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`,
                     pluginArgs
@@ -359,7 +370,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
         if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
           const toolCall = assistantMessage.tool_calls[0];
           pluginName = toolCall.function.name;
-          pluginArgs = JSON.parse(toolCall.function.arguments);
+          pluginArgs = safeJsonParse(toolCall.function.arguments);
           toolCallId = toolCall.id;
         } else if (assistantMessage?.content) {
           // Match standard XML format
@@ -367,7 +378,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
           if (xmlMatch) {
             pluginName = xmlMatch[1];
             try {
-              pluginArgs = JSON.parse(xmlMatch[2]);
+              pluginArgs = safeJsonParse(xmlMatch[2]);
               logger.info(
                 `[AI Agent] Extracted tool call from text content: plugin="${pluginName}"`,
                 pluginArgs
@@ -383,7 +394,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
               pluginName = looseMatch[1];
               try {
                 const cleanedJson = looseMatch[2].trim();
-                pluginArgs = JSON.parse(cleanedJson);
+                pluginArgs = safeJsonParse(cleanedJson);
                 logger.info(
                   `[AI Agent] Extracted loose tool call from text content: plugin="${pluginName}"`,
                   pluginArgs
