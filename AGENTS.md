@@ -133,6 +133,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
 ### 7. Dual Database Pipeline (Supabase + Local fallback)
 - Logging/Audit records should run through `src/utils/supabase.js`.
 - Always ensure there is a clean fallback to `src/utils/database.js` local JSON methods when Supabase is not configured. This preserves offline testing and keeps the CI/CD test suite green without external API calls.
+- Write operations like message logging must utilize `upsert` with constraint targets (e.g. `onConflict: 'message_id'`) rather than raw `insert` to gracefully handle duplicate event triggers or updates.
 
 ### 8. Automated Version Bumping (SemVer)
 - To update the version across all files, do not manually edit files. Run the automated script:
@@ -156,6 +157,12 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - **24/7 Autoplay:** When 24/7 mode is active and the queue is finished, the bot automatically selects and plays a random chill/lofi track from a predefined list to keep the voice channel active.
 - **Test Bypass:** To keep the test suite fast and robust, `yt-dlp` execution is skipped in test mode (`process.env.NODE_ENV === 'test'`), redirecting immediately to the mocked `play-dl` client.
 
+### 11. AI Moderation & 3-Layer Filter System
+- **Layer 1 (Pre-filter):** All message content must be pre-filtered locally in `src/moderation/preFilter.js` using robust regular expressions to match common variations of bad words (including space dividers and character repetition) before invoking the AI.
+- **Layer 2 (User Cooldown):** Enforces a 10-second cooldown in `src/moderation/cooldown.js` to prevent spamming the AI APIs.
+- **Layer 3 (AI Evaluation):** Forwards messages contextually to the Groq API (`llama-3.1-8b-instant`) in `src/moderation/aiAnalyzer.js` for final confirmation. If clean, it outputs `CLEAN` to ignore silently.
+- **Modularity:** Slash commands managing filters (e.g., `/bad-word`) must be mapped to an optional plugin structure (e.g., `badWordPlugin`) that defaults to **uninstalled** unless enabled on a per-guild basis.
+
 ---
 
 ## Logging Guidelines
@@ -178,3 +185,4 @@ Test files are situated under the `tests/` directory (e.g. `tests/moderation.tes
 As an AI Agent, you must adhere to the branching workflow rules:
 * **Active Development**: All code modifications, new feature additions, and script improvements must be written, committed, and pushed on the **`dev`** branch using personal developer credentials (`razaeldotexe`).
 * **Stable Releases**: Changes must be merged into the **`release`** branch (default branch) using **Razael-Fox Bot** credentials (`bot@razael-fox.my.id`). Do not push code directly to `release` from your own git profile; always use the bot credentials when merging/committing on this branch.
+

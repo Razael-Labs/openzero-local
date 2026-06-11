@@ -212,3 +212,45 @@ export function saveAiChatHistoryLocally(guildId, userId, history) {
   db.aiChatHistory[sessionKey] = history;
   saveDb();
 }
+
+/**
+ * Get custom bad words list
+ * @returns {string[]}
+ */
+export function getBadWordsLocally() {
+  if (!db.badWords) db.badWords = [];
+  return db.badWords;
+}
+
+/**
+ * Add a custom bad word
+ * @param {string} word
+ * @returns {boolean} True if added, false if already exists
+ */
+export function addBadWordLocally(word) {
+  if (!db.badWords) db.badWords = [];
+  const cleanWord = word.trim().toLowerCase();
+  if (db.badWords.includes(cleanWord)) {
+    return false;
+  }
+  db.badWords.push(cleanWord);
+  saveDb();
+  return true;
+}
+
+/**
+ * Remove a custom bad word
+ * @param {string} word
+ * @returns {boolean} True if removed, false if not found
+ */
+export function removeBadWordLocally(word) {
+  if (!db.badWords) db.badWords = [];
+  const cleanWord = word.trim().toLowerCase();
+  const index = db.badWords.indexOf(cleanWord);
+  if (index === -1) {
+    return false;
+  }
+  db.badWords.splice(index, 1);
+  saveDb();
+  return true;
+}

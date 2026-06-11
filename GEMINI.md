@@ -39,7 +39,7 @@ Sistem pertahanan bot yang membatasi eksekusi command sebesar **3 detik** per pe
 Menyediakan utilitas `t(key, locale, replaceData)` untuk menerjemahkan teks respon bot secara dinamis berdasarkan bahasa klien (Discord client locale) pengguna yang melakukan interaksi. Mendukung Bahasa Indonesia (`id`) dan Inggris (`en`) (secara bawaan/default menggunakan **Bahasa Inggris**). File kamus bahasa disimpan di folder `src/locales/`.
 
 ### 7. Integrasi Supabase & Fallback Database Lokal (`src/utils/supabase.js` & `src/utils/database.js`)
-*   **Supabase Log:** Mencatat seluruh pesan guild yang masuk ke tabel Supabase `message_records` untuk keperluan pemantauan perilaku buruk (*bad behavior monitoring*).
+*   **Supabase Log & Upsert:** Mencatat seluruh pesan guild yang masuk ke tabel Supabase `message_records` menggunakan operasi `upsert` (pada konflik `message_id`) guna menghindari error constraint kunci duplikat. Digunakan untuk keperluan pemantauan perilaku buruk (*bad behavior monitoring*).
 *   **7-Day Auto Cleanup:** Bot secara rutin menghapus pesan berumur lebih dari 7 hari dari database pada startup dan setiap interval 24 jam sekali.
 *   **Local Fallback:** Jika berkas `.env` belum dikonfigurasi dengan URL & Key Supabase, sistem secara otomatis mengalihkan penyimpanan data pesan secara lokal ke dalam `data/database.json`. Hal ini membuat bot aman dari crash dan mudah ditest secara offline.
 
@@ -127,13 +127,27 @@ Menginstal dan menghapus modul plugin AI secara dinamis tanpa perlu me-restart b
 *   **`/plugin install [name]`**: Mengaktifkan plugin dan mendaftarkan perintah terkait ke Discord API secara instan.
 *   **`/plugin uninstall [name]`**: Menonaktifkan plugin dan menghapus perintah terkait dari Discord API secara instan.
 
+### 12. Perintah `/bad-word` (Moderation / Bad Word Plugin)
+Mengelola daftar kata kasar kustom di server. Default statusnya adalah **tidak terinstal (disabled)** dan memerlukan `/plugin install badWord` untuk diaktifkan.
+*   **`/bad-word add [content]`**: Menambahkan kata kasar kustom baru. Bot secara otomatis memproses kata tersebut ke regex pre-filter dinamis (mendukung spasi, repetisi, dan simbol).
+*   **`/bad-word remove [content]`**: Menghapus kata kasar kustom dari database.
+*   **`/bad-word list`**: Menampilkan seluruh daftar kata kasar kustom aktif.
+
+---
+
+## Sistem AI Moderasi (3-Layer Filtering)
+Menerapkan sistem penyaringan pesan efisien biaya (eksekusi Groq API terkontrol) di saluran Discord:
+*   **Layer 1 (Pre-filter Lokal):** Memeriksa kecocokan pesan dengan regex kata kasar umum (default & kustom) secara instan tanpa API call.
+*   **Layer 2 (User Cooldown):** Membatasi scanning dengan cooldown 10 detik per pengguna demi menjaga rate limit API.
+*   **Layer 3 (Groq AI Analysis):** Menganalisis makna kontekstual menggunakan model `llama-3.1-8b-instant`. AI akan merespons pesan peringatan ramah atau membalas `CLEAN` untuk tetap diam jika dirasa aman.
+
 ---
 
 ## Integrasi Sistem AI Agent & Plugin
 Bot ini dilengkapi dengan arsitektur agen cerdas modular di bawah direktori `src/plugins/`:
 *   **AI Engine**: Menggunakan API OpenAI-compatible dari Groq.com dengan penanganan fallback otomatis. Jika model tidak mendukung *tool calling* (seperti gemma2-9b-it), request secara otomatis dikirim ulang tanpa parameter tools untuk menjamin bot tetap memberikan respon obrolan.
 *   **Histori Obrolan Persisten**: Percakapan pengguna disimpan secara berurutan ke tabel Supabase `ai_chat_history`. Jika koneksi terputus atau tabel belum dibuat, sistem secara otomatis mengalihkan penyimpanan (*failover*) secara lokal ke `data/database.json`.
-*   **Modularitas Plugin**: Setiap fungsi bot dibungkus sebagai plugin terisolasi (seperti `webhookPlugin`, `musicPlugin`, `rolePlugin`). Status keaktifan plugin dikontrol oleh `/plugin` dan dipantau oleh `src/utils/pluginManager.js`.
+*   **Modularitas Plugin**: Setiap fungsi bot dibungkus sebagai plugin terisolasi (seperti `webhookPlugin`, `musicPlugin`, `rolePlugin`, `badWordPlugin`). Status keaktifan plugin dikontrol oleh `/plugin` dan dipantau oleh `src/utils/pluginManager.js`.
 
 ---
 
@@ -157,3 +171,4 @@ Bot ini dilengkapi dengan arsitektur agen cerdas modular di bawah direktori `src
 
 * **`release`**: Merupakan branch utama/produksi yang stabil. Semua update di branch ini dikelola dan digabungkan oleh **Razael-Fox Bot**.
 * **`dev`**: Merupakan branch aktif untuk pengerjaan kode/perbaikan oleh pengembang menggunakan profil pengguna personal (`razaeldotexe`).
+

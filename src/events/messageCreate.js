@@ -4,6 +4,9 @@ import { incrementMessageCount } from '../utils/database.js';
 import { recordMessage } from '../utils/supabase.js';
 import { handleSticker } from '../handlers/stickerHandler.js';
 import { handleDevCommand } from '../handlers/devCommandHandler.js';
+import { needsAIReview } from '../moderation/preFilter.js';
+import { isOnCooldown, setCooldown } from '../moderation/cooldown.js';
+import { analyzeWithAI } from '../moderation/aiAnalyzer.js';
 
 export default {
   name: Events.MessageCreate,
@@ -42,6 +45,19 @@ export default {
     logger.info(
       `[Message] [${message.guild?.name || 'DM'}] #${message.channel.name || 'unknown'} | ${message.author.tag}: ${finalContent}`
     );
+
+    // AI Moderation Filters
+    if (needsAIReview(finalContent) && !isOnCooldown(message.author.id)) {
+      setCooldown(message.author.id);
+      try {
+        const moderationResult = await analyzeWithAI(message);
+        if (moderationResult && moderationResult.trim().toUpperCase() !== 'CLEAN') {
+          await message.reply(moderationResult);
+        }
+      } catch (err) {
+        logger.error('[AI Moderation] Failed to run moderation checks:', err);
+      }
+    }
 
     // AI Trigger: Jika bot di-mention, panggil AI Agent runAgent
     const botMention = `<@${message.client.user.id}>`;

@@ -92,6 +92,7 @@ A 3-second cooldown is enforced globally per command per user in `src/events/int
 - **`Messages Record`** (Context Menu Command): Retrieves and lists the last 15 messages sent by the user in this guild over the past 7 days. Facilitates behavioral monitoring. Fully localizable.
 - **`/fox`** (AI Agent / Utility): Direct prompt assistant query. Supports **Groq API** (`gemma2-9b-it`) and uses function calling schema to trigger plugins automatically. Also responds to mentions/pings.
 - **`/plugin`** (Plugin Manager / Utility): Administrators can view (`/plugin list`), enable (`/plugin install`), and disable (`/plugin uninstall`) AI plugins. Command registrations to the Discord API are dynamically added/removed instantly.
+- **`/bad-word`** (Moderation / Bad Word Plugin): Manage custom bad words. Defaults to disabled (uninstalled) and can be activated with `/plugin install badWord`. Features `add`, `remove`, and `list` subcommands. Words are dynamically compiled into pre-filter regex matching spaces and repeated character variations.
 
 ---
 
@@ -106,9 +107,16 @@ The bot features a highly modular, decoupled AI agent architecture:
 ---
 
 ## Supabase Logging & 7-Day Pruning
-*   **Logging:** All guild message events trigger `recordMessage` which saves the message details to Supabase.
+*   **Logging:** All guild message events trigger `recordMessage` which saves the message details to Supabase. Operates using `upsert` with `onConflict: 'message_id'` to avoid duplicate key exceptions.
 *   **Pruning:** A cleanup task running on startup and repeating every 24 hours deletes message records older than 7 days (`cleanupOldMessages`).
 *   **Fallback:** If `SUPABASE_URL` and `SUPABASE_KEY` are not set in `.env`, the bot silently logs messages locally in `data/database.json`.
+
+---
+
+## AI Moderation System (3-Layer Filtering)
+- **Layer 1 (Pre-filter):** Validates message content against regex patterns in `src/moderation/preFilter.js`. It dynamically parses custom bad words from the database, compiling them into patterns matching spacing and symbol dividers (e.g. `p a n t e k` or `p*a*n*t*e*k`).
+- **Layer 2 (User Cooldown):** Limits AI scan requests in `src/moderation/cooldown.js` to a 10-second window per user.
+- **Layer 3 (AI Verification):** Calls the Groq Completions API with the `llama-3.1-8b-instant` model to confirm context in `src/moderation/aiAnalyzer.js`. Returns `CLEAN` to ignore safe flags.
 
 ---
 

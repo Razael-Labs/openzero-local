@@ -57,18 +57,21 @@ export async function recordMessage({
   }
 
   try {
-    const { error } = await supabaseClient.from('message_records').insert([
-      {
-        guild_id: guildId,
-        channel_id: channelId,
-        channel_name: channelName,
-        user_id: userId,
-        username: username,
-        content: content,
-        message_id: messageId,
-        created_at: dateStr
-      }
-    ]);
+    const { error } = await supabaseClient.from('message_records').upsert(
+      [
+        {
+          guild_id: guildId,
+          channel_id: channelId,
+          channel_name: channelName,
+          user_id: userId,
+          username: username,
+          content: content,
+          message_id: messageId,
+          created_at: dateStr
+        }
+      ],
+      { onConflict: 'message_id' }
+    );
 
     if (error) {
       logger.error('[Supabase] Failed to save message:', error);
