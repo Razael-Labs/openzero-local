@@ -1,6 +1,6 @@
 {
   "name": "openzero-local",
-  "version": "1.7.85",
+  "version": "1.7.86",
   "description": "Discord Bot for OpenZero Local with dynamic modules and AI capability",
   "main": "src/index.js",
   "type": "module",

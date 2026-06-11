@@ -187,5 +187,80 @@ describe('AI Agent Plugin and Extension System', () => {
         plugins.instagram.execute = originalInstagramExecute;
       }
     });
+
+    test('should execute plugin and send follow-up on successful Groq tool call response', async () => {
+      const originalApiKey = config.groq.apiKey;
+      const originalNodeEnv = config.nodeEnv;
+      config.groq.apiKey = 'mock-key';
+      config.nodeEnv = 'development';
+
+      const originalFetch = global.fetch;
+
+      // Mock the successful first response with a tool call, and second response with final answer
+      global.fetch = jest.fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            choices: [{
+              message: {
+                role: 'assistant',
+                tool_calls: [{
+                  id: 'call_123',
+                  type: 'function',
+                  function: {
+                    name: 'instagram',
+                    arguments: '{"username": "markzuckerberg"}'
+                  }
+                }]
+              }
+            }]
+          })
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            choices: [{
+              message: {
+                role: 'assistant',
+                content: 'Ini profil Instagram Mark Zuckerberg'
+              }
+            }]
+          })
+        });
+
+      const mockInstagramResult = {
+        success: true,
+        responseText: 'Stalked instagram markzuckerberg'
+      };
+
+      const { plugins } = await import('../src/utils/pluginManager.js');
+      const originalInstagramExecute = plugins.instagram.execute;
+      plugins.instagram.execute = jest.fn().mockResolvedValue(mockInstagramResult);
+
+      const prompt = "cek instagram mark zuckerberg";
+      const context = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' }
+      };
+
+      try {
+        const result = await runAgent(prompt, context);
+
+        expect(result.agentExecuted).toBe(true);
+        expect(result.pluginUsed).toBe('instagram');
+        expect(result.result.responseText).toContain('Ini profil Instagram Mark Zuckerberg');
+        expect(plugins.instagram.execute).toHaveBeenCalledWith(
+          { username: 'markzuckerberg' },
+          context
+        );
+      } finally {
+        global.fetch = originalFetch;
+        config.groq.apiKey = originalApiKey;
+        config.nodeEnv = originalNodeEnv;
+        plugins.instagram.execute = originalInstagramExecute;
+      }
+    });
   });
 });

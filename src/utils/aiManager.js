@@ -222,6 +222,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
       let pluginName = null;
       let pluginArgs = null;
       let toolCallId = null;
+      let assistantMessage = null;
 
       if (!response.ok) {
         let errorDetails = '';
@@ -272,7 +273,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
           const resBody = await response.json();
           logger.info(`[AI Agent Debug] Groq raw response: ${JSON.stringify(resBody)}`);
           const choice = resBody.choices?.[0];
-          const assistantMessage = choice?.message;
+          assistantMessage = choice?.message;
 
           if (assistantMessage?.content) {
             // Match standard XML format: <instagram={"username": "test"}></instagram>
@@ -315,7 +316,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
         const resBody = await response.json();
         logger.info(`[AI Agent Debug] Groq raw response: ${JSON.stringify(resBody)}`);
         const choice = resBody.choices?.[0];
-        const assistantMessage = choice?.message;
+        assistantMessage = choice?.message;
 
         if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
           const toolCall = assistantMessage.tool_calls[0];
