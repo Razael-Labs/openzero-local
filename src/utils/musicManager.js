@@ -28,6 +28,7 @@ export class MusicSession {
     this.currentTrack = null;
     this.isPlaying = false;
     this.activeProcess = null;
+    this.is247 = false;
     
     // Create connection to the voice channel
     this.connection = joinVoiceChannel({
@@ -203,6 +204,19 @@ export class MusicSession {
     if (this.queue.length === 0) {
       this.currentTrack = null;
       this.isPlaying = false;
+      if (this.is247) {
+        logger.info(`[Music Manager] Queue finished for guild ${this.guildId}, but staying in voice channel (24/7 mode active).`);
+        this.textChannel.send({
+          components: [
+            new V2Embed()
+              .setTitle('Queue Finished 🎵')
+              .setDescription('No more tracks in the queue. The bot will stay in the voice channel (24/7 mode is active).')
+              .build()
+          ],
+          flags: MessageFlags.IsComponentsV2
+        }).catch(() => {});
+        return;
+      }
       this.textChannel.send({
         components: [
           new V2Embed()

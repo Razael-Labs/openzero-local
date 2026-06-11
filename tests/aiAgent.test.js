@@ -55,6 +55,15 @@ describe('AI Agent Plugin and Extension System', () => {
       expect(classification.args.query).toBe('lofi hip hop');
     });
 
+    test('should classify webhook list request correctly', () => {
+      const prompt = "Fox tolong daftarkan semua webhook yang ada";
+      const classification = classifyIntentMock(prompt);
+
+      expect(classification).not.toBeNull();
+      expect(classification.pluginName).toBe('webhook');
+      expect(classification.args.action).toBe('list');
+    });
+
     test('should return null for unmatched general chat prompt', () => {
       const prompt = "Apa cuaca hari ini?";
       const classification = classifyIntentMock(prompt);

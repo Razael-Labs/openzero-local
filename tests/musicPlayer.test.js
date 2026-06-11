@@ -112,7 +112,8 @@ describe('Music Player Slash Commands', () => {
         }
       },
       options: {
-        getString: jest.fn().mockReturnValue('https://youtube.com/watch?v=Numb')
+        getString: jest.fn().mockReturnValue('https://youtube.com/watch?v=Numb'),
+        getBoolean: jest.fn().mockReturnValue(false)
       },
       user: {
         toString: () => '<@executor>'

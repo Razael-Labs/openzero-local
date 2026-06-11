@@ -10,13 +10,14 @@ export const musicPlugin = {
     properties: {
       action: { type: 'string', enum: ['play', 'pause', 'resume', 'skip', 'stop', 'queue'], description: 'The music action to execute.' },
       query: { type: 'string', description: 'YouTube URL or search keywords (required for "play").' },
-      voiceChannelId: { type: 'string', description: 'The voice channel ID to join (required for "play").' }
+      voiceChannelId: { type: 'string', description: 'The voice channel ID to join (required for "play").' },
+      twentyFourSeven: { type: 'boolean', description: 'If true, the bot will stay in the voice channel 24/7 and won\'t leave when the queue is empty.' }
     },
     required: ['action']
   },
 
   async execute(args, context) {
-    const { action, query, voiceChannelId } = args;
+    const { action, query, voiceChannelId, twentyFourSeven } = args;
     const { guild, member } = context;
 
     if (!guild) {
@@ -33,7 +34,12 @@ export const musicPlugin = {
       return { success: false, error: 'Anda harus berada di saluran suara (voice channel) atau menyertakan voiceChannelId.' };
     }
 
-    const session = getOrCreateSession(guild.id, guild.client);
+    const textChannel = context.channel || context.textChannel;
+    const session = getOrCreateSession(guild.id, voiceChannel, textChannel);
+
+    if (twentyFourSeven !== undefined) {
+      session.is247 = twentyFourSeven;
+    }
 
     if (action === 'play') {
       if (!query) {
@@ -60,9 +66,19 @@ export const musicPlugin = {
         }
       }
 
-      // Join and enqueue
-      await session.connect(voiceChannel);
-      await session.enqueue({ url: videoUrl, title: videoTitle, requestedBy: member?.user?.tag || 'AI Agent' });
+      const info = await play.video_basic_info(videoUrl).catch(() => null);
+      const duration = info?.video_details?.durationRaw || 'N/A';
+      const thumbnail = info?.video_details?.thumbnails?.[0]?.url || null;
+
+      const track = {
+        title: videoTitle,
+        url: videoUrl,
+        duration: duration,
+        thumbnail: thumbnail,
+        requestedBy: member?.user?.tag || 'AI Agent'
+      };
+
+      session.addTrack(track);
 
       const embed = new V2Embed()
         .setTitle('🎵 Added to Queue')

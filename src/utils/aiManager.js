@@ -52,7 +52,17 @@ export function classifyIntentMock(prompt) {
     };
   }
 
-  // 2. Webhook - Info
+  // 2. Webhook - List
+  if (query.includes('webhook') && (query.includes('list') || query.includes('daftar') || query.includes('semua'))) {
+    return {
+      pluginName: 'webhook',
+      args: {
+        action: 'list'
+      }
+    };
+  }
+
+  // 3. Webhook - Info
   if (query.includes('webhook') && (query.includes('info') || query.includes('detail'))) {
     const urlMatch = prompt.match(/(https?:\/\/[^\s]+)/) || prompt.match(/(\d{15,20})/);
     return {
@@ -80,12 +90,23 @@ export function classifyIntentMock(prompt) {
 
   // 4. Music - Play
   if (query.includes('play') || query.includes('putar') || query.includes('lagu')) {
-    let song = prompt.replace(/fox/i, '').replace(/tolong/i, '').replace(/play/i, '').replace(/putar/i, '').replace(/lagu/i, '').trim();
+    let is247 = query.includes('24/7') || query.includes('24 jam') || query.includes('menetap') || query.includes('always-on') || query.includes('selamanya');
+    let song = prompt.replace(/fox/i, '')
+      .replace(/tolong/i, '')
+      .replace(/play/i, '')
+      .replace(/putar/i, '')
+      .replace(/lagu/i, '')
+      .replace(/24\/7/i, '')
+      .replace(/24 jam/i, '')
+      .replace(/menetap/i, '')
+      .replace(/selamanya/i, '')
+      .trim();
     return {
       pluginName: 'music',
       args: {
         action: 'play',
-        query: song || 'lofi beats'
+        query: song || 'lofi beats',
+        twentyFourSeven: is247
       }
     };
   }

@@ -19,6 +19,14 @@ export default {
         })
         .setRequired(true)
     )
+    .addBooleanOption(option =>
+      option.setName('twentyfour-seven')
+        .setDescription('Keep the bot in the voice channel 24/7')
+        .setDescriptionLocalizations({
+          id: 'Biarkan bot menetap di saluran suara 24/7'
+        })
+        .setRequired(false)
+    )
     .setDMPermission(false),
 
   async execute(interaction) {
@@ -88,7 +96,10 @@ export default {
         requestedBy: interaction.user.toString()
       };
 
+      const twentyFourSeven = interaction.options.getBoolean('twentyfour-seven') ?? false;
+
       const session = getOrCreateSession(interaction.guildId, voiceChannel, interaction.channel);
+      session.is247 = twentyFourSeven;
       session.addTrack(track);
 
       const embed = new V2Embed()
