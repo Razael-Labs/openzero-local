@@ -240,6 +240,7 @@ Always respond politely in Indonesian unless requested otherwise. Current User: 
       }
 
       const resBody = await response.json();
+      logger.info(`[AI Agent Debug] Groq raw response: ${JSON.stringify(resBody)}`);
       const choice = resBody.choices?.[0];
       const assistantMessage = choice?.message;
 
