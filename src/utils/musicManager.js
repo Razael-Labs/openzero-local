@@ -505,76 +505,96 @@ async function playDlFallback(query) {
   };
 }
 
+// Cache for resolved track metadata
+const metadataCache = new Map();
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes TTL
+
 /**
  * Resolves track metadata (title, URL, duration, thumbnail) via yt-dlp.
  * If yt-dlp fails, it automatically falls back to play-dl.
  * @param {string} query - The search query or video URL
  */
 export async function fetchVideoInfoViaYtDlp(query) {
-  if (process.env.NODE_ENV === 'test') {
-    logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.', { type: 'INFO' });
-    return playDlFallback(query);
+  const cacheKey = String(query).trim();
+  const cached = metadataCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    logger.info(`[Music Manager] Metadata cache hit for: ${cacheKey}`, { type: 'METADATA' });
+    return cached.data;
   }
 
-  try {
-    const isYtUrl = play.yt_validate(query) === 'video';
-    if (isYtUrl) {
-      logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`, { type: 'METADATA' });
-      const videoInfo = await play.video_basic_info(query);
-      const durationStr = videoInfo.video_details.durationRaw || formatDuration(videoInfo.video_details.durationInSec);
-      const thumbnail = videoInfo.video_details.thumbnails?.[0]?.url || null;
+  const result = await (async () => {
+    if (process.env.NODE_ENV === 'test') {
+      logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.', { type: 'INFO' });
+      return playDlFallback(query);
+    }
+
+    try {
+      const isYtUrl = play.yt_validate(query) === 'video';
+      if (isYtUrl) {
+        logger.info(`[Music Manager] Fast-resolving YouTube URL metadata via play-dl: ${query}`, { type: 'METADATA' });
+        const videoInfo = await play.video_basic_info(query);
+        const durationStr = videoInfo.video_details.durationRaw || formatDuration(videoInfo.video_details.durationInSec);
+        const thumbnail = videoInfo.video_details.thumbnails?.[0]?.url || null;
+        return {
+          title: videoInfo.video_details.title,
+          url: videoInfo.video_details.url,
+          duration: durationStr,
+          thumbnail: thumbnail,
+          video_details: {
+            title: videoInfo.video_details.title,
+            url: videoInfo.video_details.url,
+            durationRaw: durationStr,
+            thumbnails: [{ url: thumbnail }]
+          }
+        };
+      }
+    } catch (fastResolveError) {
+      logger.warn(`[Music Manager] Fast-resolving YouTube URL metadata failed (${fastResolveError.message}). Falling back to yt-dlp resolver.`);
+    }
+
+    try {
+      const isUrl = query.startsWith('http://') || query.startsWith('https://');
+      const target = isUrl ? query : `ytsearch1:${query}`;
+      
+      let cookiesFlag = '';
+      let extractorArgsFlag = '--extractor-args "youtube:player_client=android,web" ';
+      if (cookiesPath && fs.existsSync(cookiesPath)) {
+        cookiesFlag = `--cookies ${JSON.stringify(cookiesPath)} `;
+        extractorArgsFlag = '';
+        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
+      }
+
+      logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`, { type: 'METADATA' });
+      const { stdout } = await execAsync(`yt-dlp --js-runtimes node --remote-components ejs:github --socket-timeout 10 --retries 3 --flat-playlist --no-check-certificates --no-call-home ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`);
+      const data = JSON.parse(stdout);
+      
+      const durationStr = data.duration_string || formatDuration(data.duration);
+      const thumbnail = data.thumbnail || (data.thumbnails && data.thumbnails[0]?.url) || null;
+      
       return {
-        title: videoInfo.video_details.title,
-        url: videoInfo.video_details.url,
+        title: data.title,
+        url: data.webpage_url || data.original_url || query,
         duration: durationStr,
         thumbnail: thumbnail,
         video_details: {
-          title: videoInfo.video_details.title,
-          url: videoInfo.video_details.url,
+          title: data.title,
+          url: data.webpage_url || data.original_url || query,
           durationRaw: durationStr,
           thumbnails: [{ url: thumbnail }]
         }
       };
+    } catch (error) {
+      logger.warn(`[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`);
+      return playDlFallback(query);
     }
-  } catch (fastResolveError) {
-    logger.warn(`[Music Manager] Fast-resolving YouTube URL metadata failed (${fastResolveError.message}). Falling back to yt-dlp resolver.`);
-  }
+  })();
 
-  try {
-    const isUrl = query.startsWith('http://') || query.startsWith('https://');
-    const target = isUrl ? query : `ytsearch1:${query}`;
-    
-    let cookiesFlag = '';
-    let extractorArgsFlag = '--extractor-args "youtube:player_client=android,web" ';
-    if (cookiesPath && fs.existsSync(cookiesPath)) {
-      cookiesFlag = `--cookies ${JSON.stringify(cookiesPath)} `;
-      extractorArgsFlag = '';
-      logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`, { type: 'COOKIES' });
-    }
+  metadataCache.set(cacheKey, {
+    data: result,
+    expiry: Date.now() + CACHE_TTL
+  });
 
-    logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`, { type: 'METADATA' });
-    const { stdout } = await execAsync(`yt-dlp --js-runtimes node --remote-components ejs:github --socket-timeout 10 --retries 3 ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`);
-    const data = JSON.parse(stdout);
-    
-    const durationStr = data.duration_string || formatDuration(data.duration);
-    const thumbnail = data.thumbnail || (data.thumbnails && data.thumbnails[0]?.url) || null;
-    
-    return {
-      title: data.title,
-      url: data.webpage_url || data.original_url || query,
-      duration: durationStr,
-      thumbnail: thumbnail,
-      video_details: {
-        title: data.title,
-        url: data.webpage_url || data.original_url || query,
-        durationRaw: durationStr,
-        thumbnails: [{ url: thumbnail }]
-      }
-    };
-  } catch (error) {
-    logger.warn(`[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`);
-    return playDlFallback(query);
-  }
+  return result;
 }
 
 /**
