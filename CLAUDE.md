@@ -81,6 +81,7 @@ export default {
 A 3-second cooldown is enforced globally per command per user in `src/events/interactionCreate.js`. Attempting to spam commands will return an ephemeral `V2Embed` indicating the remaining wait time.
 
 #### Current System Commands:
+- **`/play`, `/pause`, `/resume`, `/skip`, `/stop`, `/queue`** (Music Player): Play and control music playback in voice channels. Uses a dual pipeline resolver: `yt-dlp` acts as the primary resolver with signature decryption arguments (`--js-runtimes node`, `--remote-components ejs:github`, `--extractor-args "youtube:player_client=android,web"`) and falls back to `play-dl` for non-rate-limit errors. If `yt-dlp` fails due to rate limits, it aborts immediately to bypass `play-dl` and prevent unhandled promise rejections.
 - **`/webhook`** (Utility): Create or view details of webhooks with copy URL buttons.
 - **`/role`** (Utility): Assign, remove, or view positions and IDs of server roles.
 - **`/music-search`** (Utility): Query Apple iTunes Music API for tracks. Show cover art, navigate results page-by-page, fetch lyrics via LRCLIB integration with a button click, and link direct previews. Utilizes Discord Message Components V2 and i18n support.

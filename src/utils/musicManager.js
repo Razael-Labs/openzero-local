@@ -6,12 +6,30 @@ import {
   VoiceConnectionStatus,
   StreamType
 } from '@discordjs/voice';
-import { spawn } from 'child_process';
+import { spawn, exec } from 'child_process';
 import { Readable } from 'stream';
+import { promisify } from 'util';
+const execAsync = promisify(exec);
 import play from 'play-dl';
+import fs from 'fs';
+import path from 'path';
 import logger from './logger.js';
 import { V2Embed } from './v2Embed.js';
 import { MessageFlags } from 'discord.js';
+
+// Resolve cookies path from environment variable YTDLP_COOKIES_PATH or fallback cookies.txt/cookie.txt in root directory
+let cookiesPath = process.env.YTDLP_COOKIES_PATH || null;
+if (!cookiesPath) {
+  const fallbackPlural = path.resolve(process.cwd(), 'cookies.txt');
+  const fallbackSingular = path.resolve(process.cwd(), 'cookie.txt');
+  if (fs.existsSync(fallbackPlural)) {
+    cookiesPath = fallbackPlural;
+  } else if (fs.existsSync(fallbackSingular)) {
+    cookiesPath = fallbackSingular;
+  }
+} else {
+  cookiesPath = path.resolve(process.cwd(), cookiesPath);
+}
 
 // Global map to hold active music sessions per guild
 export const musicSessions = new Map();
@@ -100,6 +118,16 @@ export class MusicSession {
       return audioStream;
     } catch (ytDlpError) {
       logger.warn(`[Music Manager] yt-dlp failed (${ytDlpError.message}), falling back to play-dl...`);
+      if (
+        ytDlpError.message?.includes('Requests') || 
+        ytDlpError.message?.includes('429') ||
+        ytDlpError.message?.includes('confirm your session') ||
+        ytDlpError.message?.includes('current session') ||
+        ytDlpError.message?.includes('12482') ||
+        ytDlpError.message?.includes('Requested format is not available')
+      ) {
+        throw new Error('YouTube rate limit or session block. Skipping fallback to prevent crash.');
+      }
     }
 
     // --- Fallback: play-dl with retry ---
@@ -133,15 +161,26 @@ export class MusicSession {
         } catch (_) {}
       }
 
-      const ytdlp = spawn('yt-dlp', [
+      const hasCookies = cookiesPath && fs.existsSync(cookiesPath);
+      const ytdlpArgs = [
         '--js-runtimes', 'node',
         '--remote-components', 'ejs:github',
         '-f', 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio',
         '--no-playlist',
         '-o', '-',        // output to stdout
-        '--quiet',
-        url
-      ]);
+        '--quiet'
+      ];
+
+      if (hasCookies) {
+        ytdlpArgs.push('--cookies', cookiesPath);
+        logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`);
+      } else {
+        ytdlpArgs.push('--extractor-args', 'youtube:player_client=android,web');
+      }
+
+      ytdlpArgs.push(url);
+
+      const ytdlp = spawn('yt-dlp', ytdlpArgs);
 
       this.activeProcess = ytdlp;
       let resolved = false;
@@ -348,4 +387,98 @@ export function getOrCreateSession(guildId, voiceChannel, textChannel) {
     logger.info(`[Music Manager] Created new session for guild: ${guildId}`);
   }
   return session;
+}
+
+/**
+ * Format duration in seconds to M:SS or H:MM:SS format
+ */
+function formatDuration(sec) {
+  if (!sec) return '0:00';
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  const seconds = Math.floor(sec % 60);
+  const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+  if (hours > 0) {
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${hours}:${formattedMinutes}:${formattedSeconds}`;
+  }
+  return `${minutes}:${formattedSeconds}`;
+}
+
+/**
+ * Fallback to play-dl for resolving track metadata
+ */
+async function playDlFallback(query) {
+  const isUrl = play.yt_validate(query) === 'video';
+  let videoInfo;
+  if (isUrl) {
+    videoInfo = await play.video_basic_info(query);
+  } else {
+    const searchResults = await play.search(query, { limit: 1 });
+    if (!searchResults || searchResults.length === 0) {
+      throw new Error(`No search results found for: ${query}`);
+    }
+    videoInfo = await play.video_basic_info(searchResults[0].url);
+  }
+  
+  return {
+    title: videoInfo.video_details.title,
+    url: videoInfo.video_details.url,
+    duration: videoInfo.video_details.durationRaw,
+    thumbnail: videoInfo.video_details.thumbnails[0]?.url,
+    video_details: {
+      title: videoInfo.video_details.title,
+      url: videoInfo.video_details.url,
+      durationRaw: videoInfo.video_details.durationRaw,
+      thumbnails: [{ url: videoInfo.video_details.thumbnails[0]?.url }]
+    }
+  };
+}
+
+/**
+ * Resolves track metadata (title, URL, duration, thumbnail) via yt-dlp.
+ * If yt-dlp fails, it automatically falls back to play-dl.
+ * @param {string} query - The search query or video URL
+ */
+export async function fetchVideoInfoViaYtDlp(query) {
+  if (process.env.NODE_ENV === 'test') {
+    logger.info('[Music Manager] Test environment detected. Skipping yt-dlp and using play-dl fallback directly.');
+    return playDlFallback(query);
+  }
+
+  try {
+    const isUrl = query.startsWith('http://') || query.startsWith('https://');
+    const target = isUrl ? query : `ytsearch1:${query}`;
+    
+    let cookiesFlag = '';
+    let extractorArgsFlag = '--extractor-args "youtube:player_client=android,web" ';
+    if (cookiesPath && fs.existsSync(cookiesPath)) {
+      cookiesFlag = `--cookies ${JSON.stringify(cookiesPath)} `;
+      extractorArgsFlag = '';
+      logger.info(`[Music Manager] Using yt-dlp cookies from: ${cookiesPath}`);
+    }
+
+    logger.info(`[Music Manager] Querying yt-dlp metadata for: ${target}`);
+    const { stdout } = await execAsync(`yt-dlp --js-runtimes node --remote-components ejs:github ${extractorArgsFlag}${cookiesFlag}--dump-json --no-playlist ${JSON.stringify(target)}`);
+    const data = JSON.parse(stdout);
+    
+    const durationStr = data.duration_string || formatDuration(data.duration);
+    const thumbnail = data.thumbnail || (data.thumbnails && data.thumbnails[0]?.url) || null;
+    
+    return {
+      title: data.title,
+      url: data.webpage_url || data.original_url || query,
+      duration: durationStr,
+      thumbnail: thumbnail,
+      video_details: {
+        title: data.title,
+        url: data.webpage_url || data.original_url || query,
+        durationRaw: durationStr,
+        thumbnails: [{ url: thumbnail }]
+      }
+    };
+  } catch (error) {
+    logger.warn(`[Music Manager] yt-dlp metadata query failed (${error.message}). Falling back to play-dl...`);
+    return playDlFallback(query);
+  }
 }

@@ -74,25 +74,32 @@ Mengelola role pengguna di server dengan hak akses `ManageRoles`.
 Mengaktifkan penghapusan pesan secara massal di saluran teks dengan hak akses `ManageMessages`.
 *   **`/purge [amount]`**: Menghapus pesan (1-100, default: 100). Otomatis menyaring pesan yang berumur lebih dari 14 hari agar tidak menimbulkan error API.
 
-### 4. Perintah `/music-search` (Utility)
+### 4. Perintah Pemutar Musik (`/play`, `/pause`, `/resume`, `/skip`, `/stop`, `/queue`) (Music Player)
+Memutar dan mengontrol musik dari YouTube di saluran suara.
+*   **Dual Pipeline System:** Menggunakan `yt-dlp` sebagai pemecah metadata dan pemutar utama dengan argumen bypass blokir (`--js-runtimes node`, `--remote-components ejs:github`, dan `--extractor-args "youtube:player_client=android,web"`, yang secara otomatis beralih menggunakan `"youtube:player_client=ios,web"` jika file cookie terdeteksi karena client `android` tidak mendukung pengiriman cookie).
+*   **Netscape Cookies Support:** Mendukung cookie berformat Netscape untuk melewati pembatasan usia dan deteksi bot pada YouTube. Jalur file cookie dapat ditentukan melalui variabel lingkungan `YTDLP_COOKIES_PATH` di `.env` (atau menggunakan file fallback `cookies.txt` di root direktori jika tersedia).
+*   **Fallback Guard:** Jika `yt-dlp` gagal karena limitasi / pembatasan akses (`429` atau `Too Many Requests`), proses akan dihentikan langsung untuk menghindari fallback ke `play-dl` guna mencegah kesalahan *unhandled rejection* yang dapat terjadi pada `play-dl`.
+*   **Mock Bypass:** Proses pencarian/streaming `yt-dlp` dilewati secara otomatis saat pengujian (`process.env.NODE_ENV === 'test'`) untuk menghindari timeout pada unit testing.
+
+### 5. Perintah `/music-search` (Utility)
 Mencari trek lagu di Apple iTunes Search API dan menampilkan hasilnya dengan visual premium menggunakan layout Discord Message Components V2.
 *   **`/music-search [query]`**: Mencari lagu berdasarkan judul atau artis. Hasil pencarian menampilkan gambar sampul album (cover art) resolusi tinggi dan memiliki navigasi halaman.
 *   **Tombol 🎤 Lirik #X**: Mengambil lirik lagu secara instan langsung dari API LRCLIB.
 *   **Tombol 🎵 Preview #X**: Tautan eksternal pratinjau audio lagu jika tersedia.
 *   Mendukung lokalisasi i18n penuh (Bahasa Indonesia / Inggris).
 
-### 5. Perintah `/help` & `/menu` (Utility)
+### 6. Perintah `/help` & `/menu` (Utility)
 Menampilkan menu bantuan interaktif dengan daftar perintah bot yang dikelompokkan secara dinamis berdasarkan kategori.
 *   Menggunakan layout **Discord Message Components V2** (`V2Embed`).
 *   Menggunakan emoji kustom Font Awesome (seperti `oz_border_all` untuk Semua, `oz_black_tie` untuk Moderasi, `oz_music` untuk Musik, `oz_tools` untuk Utility, `oz_discord` untuk kategori, dan `oz_letterboxd` untuk ringkasan) yang disiapkan melalui skrip `npm run setup-emojis`.
 *   Mempunyai format judul yang disesuaikan menjadi `<icon> Help Menu` (misal: `oz_discord Help Menu`).
 *   Mendukung lokalisasi i18n penuh (Bahasa Indonesia / Inggris, default ke Bahasa Inggris).
 
-### 6. Context Menu: `Translate to English` (Apps Selection)
+### 7. Context Menu: `Translate to English` (Apps Selection)
 Penerjemah pesan otomatis yang diintegrasikan ke menu konteks Discord.
 *   Pesan diterjemahkan menggunakan `@vitalets/google-translate-api` secara gratis dan murni lokal.
 
-### 7. Context Menu Terkonsolidasi: `User Info` (Apps Selection)
+### 8. Context Menu Terkonsolidasi: `User Info` (Apps Selection)
 Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi profil:
 *   Informasi global (Username, ID, Akun Bot/Sistem, Lencana/Badges, Banner Color).
 *   Informasi khusus Server (Nickname server, Role, Key permissions, Status Booster).
@@ -102,16 +109,16 @@ Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi pro
 *   Tombol download Avatar Global, Server Avatar, dan Banner Image.
 *   Respon output mendukung lokalisasi bahasa (Indonesia/Inggris) berdasarkan bahasa klien pengguna.
 
-### 8. Context Menu: `Messages Record` (Apps Selection)
+### 9. Context Menu: `Messages Record` (Apps Selection)
 Mengambil riwayat pesan yang dikirim oleh target pengguna di berbagai channel server ini selama 7 hari terakhir. Digunakan oleh moderator untuk memonitor perilaku pengguna. Respon output mendukung lokalisasi bahasa.
 
-### 9. Perintah `/fox` (Utility / AI Agent)
+### 10. Perintah `/fox` (Utility / AI Agent)
 Memanggil asisten kecerdasan buatan Fox (AI Agent) secara langsung via prompt text.
 *   Mendukung integrasi **Groq API** (model default `gemma2-9b-it`) untuk merespon obrolan.
 *   Menggunakan skema *Function Calling/Tool Use* untuk memicu plugin secara otomatis (seperti membuat webhook, memutar lagu, atau menambah role) berdasarkan wacana natural pengguna.
 *   Secara otomatis mendeteksi jika bot di-ping/mention di chat room dan memproses obrolan serupa.
 
-### 10. Perintah `/plugin` (Utility / Plugin Manager)
+### 11. Perintah `/plugin` (Utility / Plugin Manager)
 Menginstal dan menghapus modul plugin AI secara dinamis tanpa perlu me-restart bot.
 *   **`/plugin list`**: Menampilkan daftar semua plugin dan status keaktifan saat ini.
 *   **`/plugin install [name]`**: Mengaktifkan plugin dan mendaftarkan perintah terkait ke Discord API secara instan.

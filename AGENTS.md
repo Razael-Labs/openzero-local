@@ -62,15 +62,22 @@ openzero-local/
     │   │   ├── translate.js  # Context Menu Command 'Translate to English' via Apps selection
     │   │   ├── userInfo.js   # Context Menu 'User Info' (Consolidated global & guild profile)
     │   │   └── messagesRecord.js # Context Menu 'Messages Record' (7-day chat history inspector)
-    │   └── moderation/
-    │       ├── ban.js        # Slash command /ban
-    │       ├── deafen.js     # Slash command /deafen
-    │       ├── kick.js       # Slash command /kick
-    │       ├── mute.js       # Slash command /mute
-    │       ├── purge.js      # Slash command /purge (deletes 1-100 messages, default 100)
-    │       ├── timeout.js    # Slash command /timeout
-    │       ├── undeafen.js   # Slash command /undeafen
-    │       └── unmute.js     # Slash command /unmute
+    │   ├── moderation/
+    │   │   ├── ban.js        # Slash command /ban
+    │   │   ├── deafen.js     # Slash command /deafen
+    │   │   ├── kick.js       # Slash command /kick
+    │   │   ├── mute.js       # Slash command /mute
+    │   │   ├── purge.js      # Slash command /purge (deletes 1-100 messages, default 100)
+    │   │   ├── timeout.js    # Slash command /timeout
+    │   │   ├── undeafen.js   # Slash command /undeafen
+    │   │   └── unmute.js     # Slash command /unmute
+    │   └── music/
+    │       ├── play.js       # Slash command /play (adds and plays a YouTube video)
+    │       ├── pause.js      # Slash command /pause (pauses active playback)
+    │       ├── resume.js     # Slash command /resume (resumes active playback)
+    │       ├── skip.js       # Slash command /skip (skips current song)
+    │       ├── stop.js       # Slash command /stop (stops active playback and disconnects bot)
+    │       └── queue.js      # Slash command /queue (lists queued songs)
     └── scripts/
         ├── sendRules.js  # Maintenance script to post/edit guild rules
         └── updateVersion.js # Script to automatically sync version from root VERSION file
@@ -138,6 +145,13 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - Each new tool or action that the AI is supposed to perform must be wrapped in a plugin file inside `src/plugins/`.
 - All plugin files must expose standard OpenAI function schemas via `.parameters` and an execution entrypoint via `.execute(args, context)`.
 - Plugins must be registered in the `plugins` dictionary in `src/utils/aiManager.js` and their commands mapped in `src/utils/pluginManager.js` to support dynamic installation and automatic Discord re-registration via `/plugin`.
+
+### 10. Dual Music Resolution & Streaming Pipeline (yt-dlp + play-dl)
+- **Primary Pipeline:** Audio streaming and track metadata resolution use `yt-dlp` as the primary resolver to bypass signature block limits.
+- **Extractor Flags:** All `yt-dlp` command calls (streaming spawn processes and metadata extraction `exec` tasks) must include `--js-runtimes node`, `--remote-components ejs:github`, and `--extractor-args "youtube:player_client=android,web"` (automatically switched to `"youtube:player_client=ios,web"` when a cookies file is present, since the `android` client does not support cookies).
+- **Netscape Cookies Support:** If a netscape-formatted cookies file path is defined in `YTDLP_COOKIES_PATH` (or if a `cookies.txt` file exists in the project root directory as a fallback), it is automatically passed via the `--cookies` option to all `yt-dlp` executions to bypass age restrictions and bot detection.
+- **Fallback Guard:** If `yt-dlp` fails due to a rate limit (`429` or `Too Many Requests`), it must fail immediately and skip the `play-dl` fallback, avoiding unhandled promise rejections.
+- **Test Bypass:** To keep the test suite fast and robust, `yt-dlp` execution is skipped in test mode (`process.env.NODE_ENV === 'test'`), redirecting immediately to the mocked `play-dl` client.
 
 ---
 

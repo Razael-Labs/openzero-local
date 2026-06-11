@@ -1,6 +1,5 @@
-import { getOrCreateSession } from '../utils/musicManager.js';
+import { getOrCreateSession, fetchVideoInfoViaYtDlp } from '../utils/musicManager.js';
 import { V2Embed } from '../utils/v2Embed.js';
-import play from 'play-dl';
 
 export const musicPlugin = {
   name: 'music',
@@ -46,29 +45,11 @@ export const musicPlugin = {
         return { success: false, error: 'Query lagu wajib diisi untuk aksi "play".' };
       }
 
-      // Check validation
-      const validate = await play.yt_validate(query);
-      let videoUrl = query;
-      let videoTitle = query;
-
-      if (validate === 'search') {
-        const searchResult = await play.search(query, { limit: 1 });
-        if (!searchResult || searchResult.length === 0) {
-          return { success: false, error: `Lagu tidak ditemukan untuk query: "${query}"` };
-        }
-        videoUrl = searchResult[0].url;
-        videoTitle = searchResult[0].title;
-      } else {
-        const info = await play.video_basic_info(query).catch(() => null);
-        if (info) {
-          videoUrl = info.video_details.url;
-          videoTitle = info.video_details.title;
-        }
-      }
-
-      const info = await play.video_basic_info(videoUrl).catch(() => null);
-      const duration = info?.video_details?.durationRaw || 'N/A';
-      const thumbnail = info?.video_details?.thumbnails?.[0]?.url || null;
+      const videoInfo = await fetchVideoInfoViaYtDlp(query);
+      const videoUrl = videoInfo.url;
+      const videoTitle = videoInfo.title;
+      const duration = videoInfo.duration;
+      const thumbnail = videoInfo.thumbnail;
 
       const track = {
         title: videoTitle,

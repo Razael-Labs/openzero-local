@@ -1,8 +1,7 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { getOrCreateSession } from '../../utils/musicManager.js';
+import { getOrCreateSession, fetchVideoInfoViaYtDlp } from '../../utils/musicManager.js';
 import { t } from '../../utils/i18n.js';
 import { V2Embed } from '../../utils/v2Embed.js';
-import play from 'play-dl';
 
 export default {
   data: new SlashCommandBuilder()
@@ -64,35 +63,13 @@ export default {
     await interaction.deferReply();
 
     try {
-      let videoInfo = null;
-
-      // Validate URL or do a search
-      const isUrl = play.yt_validate(query) === 'video';
-
-      if (isUrl) {
-        videoInfo = await play.video_basic_info(query);
-      } else {
-        const searchResults = await play.search(query, { limit: 1 });
-        if (searchResults.length === 0) {
-          return interaction.editReply({
-            components: [
-              new V2Embed()
-                .setTitle(t('errorTitle', locale))
-                .setDescription(t('noMusicResults', locale, { query }))
-                .setColor(0xff8800)
-                .build()
-            ],
-            flags: MessageFlags.IsComponentsV2
-          });
-        }
-        videoInfo = await play.video_basic_info(searchResults[0].url);
-      }
+      const videoInfo = await fetchVideoInfoViaYtDlp(query);
 
       const track = {
-        title: videoInfo.video_details.title,
-        url: videoInfo.video_details.url,
-        duration: videoInfo.video_details.durationRaw,
-        thumbnail: videoInfo.video_details.thumbnails[0]?.url,
+        title: videoInfo.title,
+        url: videoInfo.url,
+        duration: videoInfo.duration,
+        thumbnail: videoInfo.thumbnail,
         requestedBy: interaction.user.toString()
       };
 
