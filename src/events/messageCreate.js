@@ -87,6 +87,10 @@ export default {
           replyOptions.content = response.responseText;
         }
 
+        if (replyOptions.components) {
+          delete replyOptions.content;
+        }
+
         await message.reply(replyOptions);
       } catch (err) {
         logger.error('[AI Message Trigger] Gagal merespon mention:', err);
