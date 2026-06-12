@@ -52,3 +52,44 @@ export async function analyzeWithAI(message) {
     return 'CLEAN';
   }
 }
+
+/**
+ * Generates an AI warning message for phishing/scam link violations.
+ * @param {import('discord.js').Message} message
+ * @returns {Promise<string>} Warning message or null if failed/unconfigured
+ */
+export async function generateScamWarningWithAI(message) {
+  const apiKey = config.groq?.apiKey || process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
+
+  const model = process.env.GROQ_MODERATION_MODEL || 'llama-3.1-8b-instant';
+  const systemPrompt = `Kamu adalah sistem moderator Discord otomatis. Tugasmu adalah memberikan peringatan ramah, santai, humoris, namun tetap menegur user dalam Bahasa Indonesia karena telah mengirimkan link phishing/scam berbahaya yang baru saja dihapus. Sebut @username. Maksimal 1-2 kalimat.`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Pesan dari @${message.author.username}: "${message.content}"` }
+        ],
+        temperature: 0.8,
+        max_tokens: 150
+      })
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  } catch (error) {
+    logger.error('[AI Moderation] Error generating scam warning with AI:', error);
+    return null;
+  }
+}
+

@@ -1,4 +1,4 @@
-import { Events, PermissionFlagsBits } from 'discord.js';
+import { Events, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import logger from '../utils/logger.js';
 import { incrementMessageCount } from '../utils/database.js';
 import { recordMessage } from '../utils/supabase.js';
@@ -6,10 +6,11 @@ import { handleSticker } from '../handlers/stickerHandler.js';
 import { handleDevCommand } from '../handlers/devCommandHandler.js';
 import { needsAIReview } from '../moderation/preFilter.js';
 import { isOnCooldown, setCooldown } from '../moderation/cooldown.js';
-import { analyzeWithAI } from '../moderation/aiAnalyzer.js';
+import { analyzeWithAI, generateScamWarningWithAI } from '../moderation/aiAnalyzer.js';
 import { containsScamLink } from '../moderation/scamFilter.js';
 import { t } from '../utils/i18n.js';
 import { config } from '../config.js';
+import { V2Embed } from '../utils/v2Embed.js';
 
 export default {
   name: Events.MessageCreate,
@@ -57,8 +58,18 @@ export default {
       if (isDev || !hasPermission || isOwner) {
         logger.warn(`[Scam Filter] Detected scam link from ${message.author.tag} in #${message.channel.name}. Deleting message...`);
         await message.delete().catch(() => null);
-        const warningMsg = t('scamLinkWarning', message.guild.preferredLocale || 'en', { username: message.author.username });
-        await message.channel.send(warningMsg).catch(() => null);
+        
+        // Generate friendly AI warning message or fallback to localized string
+        const aiWarning = await generateScamWarningWithAI(message);
+        const description = aiWarning || t('scamLinkWarning', message.guild.preferredLocale || 'en', { username: message.author.username });
+        
+        const embed = new V2Embed(message.guild)
+          .setTitle(message.guild.preferredLocale === 'id' ? '🛡️ Peringatan Keamanan' : '🛡️ Security Warning')
+          .setDescription(description)
+          .setColor(0xff3333) // Red accent
+          .build();
+
+        await message.channel.send({ components: [embed], flags: MessageFlags.IsComponentsV2 }).catch(() => null);
         return;
       }
     }
