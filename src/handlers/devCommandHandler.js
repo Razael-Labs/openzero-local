@@ -57,5 +57,37 @@ export async function handleDevCommand(message) {
     return true;
   }
 
+  // Command untuk mengetes greetings message
+  if (command === 'test-greetings' || command === 'testgreetings') {
+    logger.info(
+      `[Dev Command] Memicu event greetings secara manual untuk guild: ${message.guild.name}`
+    );
+
+    const statusMsg = await message.reply(
+      `⚙️ **[Dev Tool]** Memicu event \`GuildCreate\` untuk server ini...`
+    );
+
+    try {
+      // Emit event GuildCreate secara manual pada client Discord
+      message.client.emit(Events.GuildCreate, message.guild);
+
+      setTimeout(async () => {
+        try {
+          await statusMsg.edit(
+            `⚙️ **[Dev Tool]** Event \`GuildCreate\` berhasil dipicu!`
+          );
+        } catch (err) {
+          // Abaikan jika pesan sudah dihapus oleh pengguna
+        }
+      }, 1500);
+    } catch (error) {
+      logger.error('[Dev Command] Failed to manually trigger GuildCreate event:', error);
+      await statusMsg
+        .edit(`❌ **[Dev Tool]** Gagal memicu event: ${error.message}`)
+        .catch(() => {});
+    }
+    return true;
+  }
+
   return false;
 }

@@ -392,14 +392,4 @@ export function incrementUserWarningCount(guildId, userId) {
   return db.warningCounts[key];
 }
 
-/**
- * Reset user warning count
- * @param {string} guildId
- * @param {string} userId
- */
-export function resetUserWarningCount(guildId, userId) {
-  if (!db.warningCounts) db.warningCounts = {};
-  const key = `${guildId}_${userId}`;
-  db.warningCounts[key] = 0;
-  saveDb();
-}
+
