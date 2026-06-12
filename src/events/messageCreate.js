@@ -109,8 +109,8 @@ export default {
             .setColor(0xff3333)
             .build();
             
+          await logChannel.send({ content: mentionString }).catch(() => null);
           await logChannel.send({
-            content: mentionString,
             components: [alertEmbed],
             flags: MessageFlags.IsComponentsV2
           }).catch((err) => {
