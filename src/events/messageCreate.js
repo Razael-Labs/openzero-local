@@ -72,9 +72,27 @@ export default {
         await message.channel.send({ components: [embed], flags: MessageFlags.IsComponentsV2 }).catch(() => null);
 
         // Send alert to moderator-only channel if it exists
-        const logChannel = message.guild.channels.cache.find(c => c.name === 'moderator-only');
+        let logChannel = message.guild.channels.cache.find(c => c.name === 'moderator-only');
+        if (!logChannel) {
+          try {
+            const channels = await message.guild.channels.fetch();
+            logChannel = channels.find(c => c.name === 'moderator-only');
+          } catch (err) {
+            logger.error('[Scam Filter] Failed to fetch guild channels:', err);
+          }
+        }
+
         if (logChannel) {
-          const adminRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === 'admin' || r.name.toLowerCase() === 'administrator');
+          let adminRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === 'admin' || r.name.toLowerCase() === 'administrator');
+          if (!adminRole) {
+            try {
+              const roles = await message.guild.roles.fetch();
+              adminRole = roles.find(r => r.name.toLowerCase() === 'admin' || r.name.toLowerCase() === 'administrator');
+            } catch (err) {
+              // Ignore role fetch error
+            }
+          }
+
           const mentionString = adminRole ? `<@${message.guild.ownerId}> | ${adminRole}` : `<@${message.guild.ownerId}>`;
           
           const alertEmbed = new V2Embed(message.guild)
@@ -95,7 +113,9 @@ export default {
             content: mentionString,
             components: [alertEmbed],
             flags: MessageFlags.IsComponentsV2
-          }).catch(() => null);
+          }).catch((err) => {
+            logger.error('[Scam Filter] Failed to send log to moderator-only channel:', err);
+          });
         }
 
         return;
