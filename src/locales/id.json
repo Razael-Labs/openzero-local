@@ -87,5 +87,5 @@
   "customScamLinksListEmpty": "Tidak ada daftar domain scam kustom yang tersimpan di basis data saat ini.",
   "scamLinkWarningTitle": "🛡️ Peringatan Keamanan",
   "scamAlertTitle": "🛡️ Laporan Link Phising/Scam",
-  "scamAlertDescription": "**Pengirim:** {userMention} ({userTag} / ID: {userId})\n**Saluran:** {channelMention}\n**Pesan Asli:**\n```\n{messageContent}\n```"
+  "scamAlertDescription": "**Pengirim:** {userMention} ({userTag} / ID: {userId})\n-\n**Saluran:** {channelMention}\n-\n**Pesan Asli:**\n```\n{messageContent}\n```"
 }

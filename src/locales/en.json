@@ -87,5 +87,5 @@
   "customScamLinksListEmpty": "There are no custom blacklisted scam domains stored in the database.",
   "scamLinkWarningTitle": "🛡️ Security Warning",
   "scamAlertTitle": "🛡️ Scam/Phishing Link Alert",
-  "scamAlertDescription": "**User:** {userMention} ({userTag} / ID: {userId})\n**Channel:** {channelMention}\n**Original Message:**\n```\n{messageContent}\n```"
+  "scamAlertDescription": "**User:** {userMention} ({userTag} / ID: {userId})\n-\n**Channel:** {channelMention}\n-\n**Original Message:**\n```\n{messageContent}\n```"
 }
