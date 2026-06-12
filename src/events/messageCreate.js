@@ -1,4 +1,4 @@
-import { Events } from 'discord.js';
+import { Events, PermissionFlagsBits } from 'discord.js';
 import logger from '../utils/logger.js';
 import { incrementMessageCount } from '../utils/database.js';
 import { recordMessage } from '../utils/supabase.js';
@@ -47,12 +47,91 @@ export default {
     );
 
     // AI Moderation Filters
-    if (needsAIReview(finalContent) && !isOnCooldown(message.author.id)) {
+    if (message.guild && needsAIReview(finalContent) && !isOnCooldown(message.author.id)) {
+      // Skip moderation if member has ManageGuild permission (Admins/Mods)
+      if (message.member && message.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+        return;
+      }
+
       setCooldown(message.author.id);
       try {
+        const {
+          getModerationConfig,
+          incrementUserWarningCount,
+          recordModerationTrigger,
+          getBadWordsLocally
+        } = await import('../utils/database.js');
+
         const moderationResult = await analyzeWithAI(message);
         if (moderationResult && moderationResult.trim().toUpperCase() !== 'CLEAN') {
-          await message.reply(moderationResult);
+          // Identify category of the triggered bad word
+          const words = getBadWordsLocally();
+          let category = 'General';
+          let detectedWordText = 'Unknown';
+          const triggeredWordObj = words.find((w) => {
+            const checkWord = typeof w === 'object' ? w.word : w;
+            return finalContent.toLowerCase().includes(checkWord);
+          });
+          if (triggeredWordObj) {
+            category = typeof triggeredWordObj === 'object' ? triggeredWordObj.category : 'General';
+            detectedWordText = typeof triggeredWordObj === 'object' ? triggeredWordObj.word : triggeredWordObj;
+          }
+
+          const modConfig = getModerationConfig(message.guild.id);
+          let actionTaken = 'warn';
+
+          // Silent delete
+          if (modConfig.silentDelete) {
+            await message.delete().catch(() => null);
+          }
+
+          // Graduated/Aksi bertingkat
+          const warningCount = incrementUserWarningCount(message.guild.id, message.author.id);
+          let responseText = moderationResult;
+
+          if (warningCount >= modConfig.maxWarnings) {
+            if (modConfig.warnAction === 'ban') {
+              actionTaken = 'ban';
+              if (message.member.bannable) {
+                await message.member
+                  .ban({ reason: `Exceeded max warnings (${modConfig.maxWarnings})` })
+                  .catch(() => null);
+                responseText = `🚫 @${message.author.username} telah di-ban dari server karena mencapai batas pelanggaran kustom.`;
+              }
+            } else if (modConfig.warnAction === 'kick') {
+              actionTaken = 'kick';
+              if (message.member.kickable) {
+                await message.member
+                  .kick(`Exceeded max warnings (${modConfig.maxWarnings})`)
+                  .catch(() => null);
+                responseText = `👢 @${message.author.username} telah di-kick dari server karena mencapai batas pelanggaran kustom.`;
+              }
+            } else if (modConfig.warnAction === 'mute') {
+              actionTaken = 'mute';
+              if (message.member.moderatable) {
+                await message.member
+                  .timeout(10 * 60 * 1000, `Exceeded max warnings (${modConfig.maxWarnings})`)
+                  .catch(() => null);
+                responseText = `🔇 @${message.author.username} telah di-mute selama 10 menit karena mencapai batas pelanggaran kustom.`;
+              }
+            }
+          }
+
+          // Record moderation trigger audit log
+          recordModerationTrigger(
+            message.guild.id,
+            message.author.id,
+            message.author.username,
+            message.channel.id,
+            detectedWordText,
+            category,
+            actionTaken
+          );
+
+          // Only send warning/action message if not silent delete OR if action taken is major (mute/kick/ban)
+          if (!modConfig.silentDelete || actionTaken !== 'warn') {
+            await message.channel.send(responseText).catch(() => null);
+          }
         }
       } catch (err) {
         logger.error('[AI Moderation] Failed to run moderation checks:', err);

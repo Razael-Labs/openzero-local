@@ -6,7 +6,7 @@ export const badWordPlugin = {
   name: 'badWord',
   commands: ['bad-word'],
   description:
-    'Manage the custom bad words moderation list. Actions include "add" (add a new word to filter), "remove" (remove a word from filter), and "list" (show filtered words).',
+    'Manage the custom bad words moderation list. Actions include "add" (add a new word to filter), "remove" (remove a word from filter), and "list" (show filtered words). Support optional category.',
   parameters: {
     type: 'object',
     properties: {
@@ -18,6 +18,10 @@ export const badWordPlugin = {
       content: {
         type: 'string',
         description: 'The bad word to add or remove.'
+      },
+      category: {
+        type: 'string',
+        description: 'Optional category (e.g. NSFW, SARA, Spam, General).'
       }
     },
     required: ['action']
@@ -29,18 +33,21 @@ export const badWordPlugin = {
    * @param {object} context
    */
   async execute(args, context) {
-    const { action, content } = args;
+    const { action, content, category } = args;
     const { user } = context;
+
+    const useCategory = category || 'General';
 
     if (action === 'add') {
       if (!content) return { success: false, error: 'Content is required.' };
-      const added = addBadWordLocally(content);
+      const added = addBadWordLocally(content, useCategory);
       if (added) {
         reloadPatterns();
         const embed = new V2Embed()
           .setTitle('Bad Word Added ⚠️')
           .setDescription(
             `*   **Kata Baru:** \`${content.toLowerCase()}\`\n` +
+              `*   **Kategori:** \`${useCategory}\`\n` +
               `*   **Status:** Berhasil ditambahkan & regex pre-filter diperbarui.\n` +
               `*   **Operator:** ${user ? user.username : 'AI Agent'}`
           )
@@ -48,7 +55,7 @@ export const badWordPlugin = {
         return {
           success: true,
           method: 'add',
-          responseText: `Kata \`${content.toLowerCase()}\` berhasil ditambahkan ke database filter.`,
+          responseText: `Kata \`${content.toLowerCase()}\` dengan kategori \`${useCategory}\` berhasil ditambahkan ke database filter.`,
           embeds: [embed]
         };
       } else {
@@ -78,18 +85,24 @@ export const badWordPlugin = {
       }
     } else if (action === 'list') {
       const words = getBadWordsLocally();
+      const listText = words.length > 0
+        ? words
+            .map((w) => {
+              const wordText = typeof w === 'object' ? w.word : w;
+              const catText = typeof w === 'object' ? w.category : 'General';
+              return `- \`${wordText}\` (${catText})`;
+            })
+            .join('\n')
+        : '*Belum ada kata kasar kustom yang ditambahkan.*';
+
       const embed = new V2Embed()
         .setTitle('Custom Bad Words List 📋')
-        .setDescription(
-          words.length > 0
-            ? words.map((w) => `- \`${w}\``).join('\n')
-            : '*Belum ada kata kasar kustom yang ditambahkan.*'
-        )
+        .setDescription(listText)
         .build();
       return {
         success: true,
         method: 'list',
-        responseText: `Berikut daftar kata kustom: ${words.join(', ') || 'kosong'}.`,
+        responseText: `Berikut daftar kata kustom: ${words.map((w) => (typeof w === 'object' ? w.word : w)).join(', ') || 'kosong'}.`,
         embeds: [embed]
       };
     }

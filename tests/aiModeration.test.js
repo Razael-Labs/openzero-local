@@ -88,28 +88,45 @@ describe('AI Moderation Layer 3: AI Analyzer', () => {
   });
 });
 
-describe('AI Moderation: Custom Bad Words', () => {
-  it('should dynamically add and compile a custom bad word', async () => {
-    const { addBadWordLocally, getBadWordsLocally, removeBadWordLocally } = await import('../src/utils/database.js');
+describe('AI Moderation: Custom Bad Words, Whitelist & Leetspeak', () => {
+  it('should dynamically add, compile, and whitelist a custom bad word', async () => {
+    const {
+      addBadWordLocally,
+      getBadWordsLocally,
+      removeBadWordLocally,
+      addWhitelistLocally,
+      getWhitelistLocally,
+      removeWhitelistLocally
+    } = await import('../src/utils/database.js');
     const { reloadPatterns } = await import('../src/moderation/preFilter.js');
 
     // Add custom word
-    const added = addBadWordLocally('pantek');
+    const added = addBadWordLocally('pantek', 'NSFW');
     expect(added).toBe(true);
-    expect(getBadWordsLocally()).toContain('pantek');
+    expect(getBadWordsLocally()).toContainEqual({ word: 'pantek', category: 'NSFW' });
 
     // Reload patterns to compile the regex
     reloadPatterns();
 
-    // Verify it blocks spaced/repeated variations
+    // Verify it blocks spaced/repeated/leetspeak variations
     expect(needsAIReview('dasar pantek')).toBe(true);
     expect(needsAIReview('pan tek')).toBe(true);
     expect(needsAIReview('p a n t e k')).toBe(true);
     expect(needsAIReview('p*a*n*t*e*k')).toBe(true);
+    expect(needsAIReview('p4nt3k')).toBe(true); // leetspeak
+    expect(needsAIReview('p a n   t e k')).toBe(true); // spaces
+
+    // Whitelist check
+    addWhitelistLocally('pantekan');
+    expect(getWhitelistLocally()).toContain('pantekan');
+
+    // "pantekan" is whitelisted so it should be allowed
+    expect(needsAIReview('ini adalah pantekan')).toBe(false);
 
     // Clean up/remove
     const removed = removeBadWordLocally('pantek');
     expect(removed).toBe(true);
+    removeWhitelistLocally('pantekan');
     reloadPatterns();
 
     // Verify it no longer blocks

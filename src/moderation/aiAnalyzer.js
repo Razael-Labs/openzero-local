@@ -1,9 +1,11 @@
 import { config } from '../config.js';
 import logger from '../utils/logger.js';
 
-const SYSTEM_PROMPT = `Kamu adalah moderator Discord.
-Analisa pesan berikut. Jika melanggar (kata kasar, toxic, harassment):
-balas peringatan ramah Bahasa Indonesia, sebut @username, max 1 kalimat.
+const SYSTEM_PROMPT = `Kamu adalah moderator Discord yang ramah, sopan, dan humoris namun tegas.
+Analisa pesan berikut. Jika melanggar (seperti berkata kasar, toxic, SARA, harassment, pornografi):
+Berikan respon peringatan yang bervariasi, natural, santai, dan bersahabat dalam Bahasa Indonesia.
+Sebut @username dalam peringatan tersebut. Batasi maksimal 1 atau 2 kalimat.
+Buat variasi respon yang tidak monoton (misalnya gunakan lelucon ringan, nasehat santai, atau sindiran lucu).
 Jika tidak melanggar: balas hanya: CLEAN`;
 
 /**
@@ -18,7 +20,6 @@ export async function analyzeWithAI(message) {
     return 'CLEAN';
   }
 
-  // Use llama-3.1-8b-instant as default for moderation, but allow override
   const model = process.env.GROQ_MODERATION_MODEL || 'llama-3.1-8b-instant';
 
   try {
@@ -34,8 +35,8 @@ export async function analyzeWithAI(message) {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: `Pesan dari @${message.author.username}: "${message.content}"` }
         ],
-        temperature: 0.5,
-        max_tokens: 100
+        temperature: 0.8, // Slightly higher temperature for more natural/diverse responses
+        max_tokens: 150
       })
     });
 
