@@ -78,5 +78,11 @@
   "greetingsDocButton": "Documentation 📖",
   "music247Title": "24/7 Mode Active 📻",
   "music247Desc": "Queue finished. Playing random chill music to keep the voice channel active.\n\n*Note: This automatic lofi track indicates the bot is waiting for users to add more tracks.*",
-  "scamLinkWarning": "⚠️ @{username}, your message was deleted because it contained a known phishing or scam link!"
+  "scamLinkWarning": "⚠️ @{username}, your message was deleted because it contained a known phishing or scam link!",
+  "customScamLinkAdded": "✅ Successfully added custom scam domain **{domain}** to the database.",
+  "customScamLinkRemoved": "✅ Successfully removed custom scam domain **{domain}** from the database.",
+  "customScamLinkNotFound": "❌ Custom scam domain **{domain}** was not found in the database.",
+  "supabaseNotConfiguredError": "❌ Supabase configuration is missing! Please set `SUPABASE_URL` and `SUPABASE_KEY` in the bot's `.env` file to use custom scam link management.",
+  "customScamLinksListTitle": "🛡️ Custom Blacklisted Scam Domains",
+  "customScamLinksListEmpty": "There are no custom blacklisted scam domains stored in the database."
 }

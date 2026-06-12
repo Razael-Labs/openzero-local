@@ -69,7 +69,7 @@ describe('Anti-Phishing/Scam Link Filter', () => {
       await initScamFilter();
 
       expect(fetchSpy).toHaveBeenCalled();
-      expect(getScamDomainsCount()).toBe(2);
+      expect(getScamDomainsCount().public).toBe(2);
       expect(fs.existsSync(fallbackPath)).toBe(true);
 
       const savedData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
@@ -89,7 +89,7 @@ describe('Anti-Phishing/Scam Link Filter', () => {
 
       await initScamFilter();
 
-      expect(getScamDomainsCount()).toBe(1);
+      expect(getScamDomainsCount().public).toBe(1);
       expect(containsScamLink('check out http://local-scam.com/gift')).toBe(true);
     });
   });

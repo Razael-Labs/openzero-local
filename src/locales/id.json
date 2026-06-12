@@ -78,5 +78,11 @@
   "greetingsDocButton": "Dokumentasi 📖",
   "music247Title": "Mode 24/7 Aktif 📻",
   "music247Desc": "Antrean habis. Memutar musik santai acak untuk menemani saluran suara.\n\n*Catatan: Musik lofi otomatis ini menandakan bot sedang menunggu pengguna untuk menambahkan lagu berikutnya.*",
-  "scamLinkWarning": "⚠️ @{username}, pesan Anda dihapus karena mengandung tautan phising atau scam yang mencurigakan!"
+  "scamLinkWarning": "⚠️ @{username}, pesan Anda dihapus karena mengandung tautan phising atau scam yang mencurigakan!",
+  "customScamLinkAdded": "✅ Berhasil menambahkan domain scam kustom **{domain}** ke basis data.",
+  "customScamLinkRemoved": "✅ Berhasil menghapus domain scam kustom **{domain}** dari basis data.",
+  "customScamLinkNotFound": "❌ Domain scam kustom **{domain}** tidak ditemukan di basis data.",
+  "supabaseNotConfiguredError": "❌ Konfigurasi Supabase tidak ditemukan! Silakan atur `SUPABASE_URL` dan `SUPABASE_KEY` pada file `.env` bot untuk menggunakan fitur manajemen link scam kustom.",
+  "customScamLinksListTitle": "🛡️ Daftar Domain Scam yang Diblokir (Kustom)",
+  "customScamLinksListEmpty": "Tidak ada daftar domain scam kustom yang tersimpan di basis data saat ini."
 }

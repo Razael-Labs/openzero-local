@@ -10,8 +10,9 @@ const __dirname = path.dirname(__filename);
 const scamListUrl = 'https://raw.githubusercontent.com/Discord-AntiScam/scam-links/main/list.json';
 const fallbackFilePath = path.join(config.database.dir, 'scam_links.json');
 
-// Memory cache of scam domains
+// Memory caches
 let scamDomains = new Set();
+let customScamDomains = new Set();
 let updateInterval = null;
 
 /**
@@ -22,7 +23,7 @@ export async function initScamFilter() {
   loadFallback();
 
   try {
-    logger.info('[Scam Filter] Fetching latest scam domains list...');
+    logger.info('[Scam Filter] Fetching latest public scam domains list...');
     const response = await fetch(scamListUrl);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,6 +48,22 @@ export async function initScamFilter() {
   } catch (error) {
     logger.warn(`[Scam Filter] Failed to fetch live list: ${error.message}. Using local fallback.`);
     loadFallback();
+  }
+
+  // Load custom scam links from Supabase
+  try {
+    const { fetchCustomScamLinks } = await import('../utils/supabase.js');
+    const customLinks = await fetchCustomScamLinks();
+    if (Array.isArray(customLinks)) {
+      customScamDomains = new Set(customLinks.map(item => item.domain.toLowerCase()));
+      logger.info(`[Scam Filter] Successfully loaded ${customScamDomains.size} custom scam domains from Supabase.`);
+    }
+  } catch (err) {
+    if (err.message === 'SUPABASE_NOT_CONFIGURED') {
+      logger.warn('[Scam Filter] Supabase not configured. Custom scam links will not be loaded.');
+    } else {
+      logger.error('[Scam Filter] Failed to load custom scam domains from Supabase:', err);
+    }
   }
 
   // Schedule background refresh every 12 hours if not already scheduled
@@ -83,13 +100,11 @@ function loadFallback() {
  */
 export function extractDomains(text) {
   if (!text) return [];
-  // Regex to match URLs or potential domains
   const urlRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/gi;
   const domains = [];
   let match;
   while ((match = urlRegex.exec(text)) !== null) {
     let host = match[1].toLowerCase();
-    // Strip trailing paths, queries, hashes, ports if captured
     host = host.split('/')[0].split('?')[0].split('#')[0].split(':')[0];
     if (host) {
       domains.push(host);
@@ -99,17 +114,18 @@ export function extractDomains(text) {
 }
 
 /**
- * Checks if content contains any domains present in the scam list.
+ * Checks if content contains any domains present in the scam lists.
  * @param {string} content
  * @returns {boolean}
  */
 export function containsScamLink(content) {
-  if (!content || scamDomains.size === 0) return false;
+  if (!content) return false;
+  if (scamDomains.size === 0 && customScamDomains.size === 0) return false;
 
   const domains = extractDomains(content);
   for (const domain of domains) {
-    // Direct match check
-    if (scamDomains.has(domain)) {
+    // Direct match check (GitHub list or custom list)
+    if (scamDomains.has(domain) || customScamDomains.has(domain)) {
       return true;
     }
 
@@ -118,7 +134,7 @@ export function containsScamLink(content) {
     const parts = domain.split('.');
     while (parts.length > 1) {
       const checkDomain = parts.join('.');
-      if (scamDomains.has(checkDomain)) {
+      if (scamDomains.has(checkDomain) || customScamDomains.has(checkDomain)) {
         return true;
       }
       parts.shift();
@@ -129,11 +145,30 @@ export function containsScamLink(content) {
 }
 
 /**
- * Retrieves the current count of loaded scam domains in the memory set.
- * @returns {number}
+ * Retrieves the current count of loaded scam domains in both caches.
+ * @returns {{public: number, custom: number}}
  */
 export function getScamDomainsCount() {
-  return scamDomains.size;
+  return {
+    public: scamDomains.size,
+    custom: customScamDomains.size
+  };
+}
+
+/**
+ * Adds a custom scam domain to the in-memory cache.
+ * @param {string} domain
+ */
+export function addCustomScamDomain(domain) {
+  customScamDomains.add(domain.toLowerCase().trim());
+}
+
+/**
+ * Removes a custom scam domain from the in-memory cache.
+ * @param {string} domain
+ */
+export function removeCustomScamDomain(domain) {
+  customScamDomains.delete(domain.toLowerCase().trim());
 }
 
 /**
@@ -141,4 +176,5 @@ export function getScamDomainsCount() {
  */
 export function clearScamCache() {
   scamDomains.clear();
+  customScamDomains.clear();
 }

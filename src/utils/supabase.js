@@ -176,3 +176,78 @@ export async function cleanupOldMessages() {
     return { success: false, error: err };
   }
 }
+
+/**
+ * Fetch custom scam links directly from Supabase.
+ * Throws an error if Supabase client is not configured.
+ * @returns {Promise<Array<{domain: string, guild_id: string, added_by: string}>>}
+ */
+export async function fetchCustomScamLinks() {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const { data, error } = await supabaseClient
+    .from('custom_scam_links')
+    .select('*');
+
+  if (error) {
+    logger.error('[Supabase] Failed to fetch custom scam links:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+/**
+ * Add custom scam link to Supabase.
+ * Throws an error if Supabase client is not configured.
+ */
+export async function addCustomScamLink(domain, guildId, addedBy) {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const normalizedDomain = domain.toLowerCase().trim();
+  const { error } = await supabaseClient
+    .from('custom_scam_links')
+    .upsert([
+      {
+        domain: normalizedDomain,
+        guild_id: guildId,
+        added_by: addedBy,
+        created_at: new Date().toISOString()
+      }
+    ], { onConflict: 'domain' });
+
+  if (error) {
+    logger.error(`[Supabase] Failed to add custom scam link ${normalizedDomain}:`, error);
+    throw error;
+  }
+
+  return { success: true };
+}
+
+/**
+ * Remove custom scam link from Supabase.
+ * Throws an error if Supabase client is not configured.
+ */
+export async function removeCustomScamLink(domain) {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const normalizedDomain = domain.toLowerCase().trim();
+  const { error } = await supabaseClient
+    .from('custom_scam_links')
+    .delete()
+    .eq('domain', normalizedDomain);
+
+  if (error) {
+    logger.error(`[Supabase] Failed to remove custom scam link ${normalizedDomain}:`, error);
+    throw error;
+  }
+
+  return { success: true };
+}
+
