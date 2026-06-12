@@ -48,31 +48,44 @@ if (!amountArg || amountArg.toLowerCase() === 'auto') {
 }
 
 const versionParts = currentVersion.split('.');
-if (versionParts.length !== 3) {
-  console.error(
-    `[Version] Error: Format versi saat ini (${currentVersion}) tidak valid untuk SemVer!`
-  );
-  process.exit(1);
-}
+let nextVersion = '';
 
-let major = parseInt(versionParts[0], 10);
-let minor = parseInt(versionParts[1], 10);
-let patch = parseInt(versionParts[2], 10);
-
-if (bumpType === 'major') {
-  major += incrementAmount;
-  minor = 0;
-  patch = 0;
-} else if (bumpType === 'minor') {
-  minor += incrementAmount;
-  patch = 0;
-} else if (bumpType === 'patch') {
-  patch += incrementAmount;
+if (bumpType === 'set') {
+  if (!amountArg) {
+    console.error(`[Version] Error: Silakan masukkan nama versi custom. Contoh: npm run version:bump set "P-1.8"`);
+    process.exit(1);
+  }
+  nextVersion = amountArg;
 } else {
-  console.log(`[Version] Type '${bumpType}' unknown, keeping current version.`);
-}
+  if (versionParts.length !== 3) {
+    console.error(
+      `[Version] Error: Format versi saat ini (${currentVersion}) tidak valid untuk SemVer!`
+    );
+    process.exit(1);
+  }
 
-const nextVersion = `${major}.${minor}.${patch}`;
+  let major = parseInt(versionParts[0], 10);
+  let minor = parseInt(versionParts[1], 10);
+  let patch = parseInt(versionParts[2], 10);
+
+  if (bumpType === 'major') {
+    major += incrementAmount;
+    minor = 0;
+    patch = 0;
+  } else if (bumpType === 'minor') {
+    minor += incrementAmount;
+    patch = 0;
+  } else if (bumpType === 'patch') {
+    patch += incrementAmount;
+  } else {
+    console.log(`[Version] Type '${bumpType}' unknown, keeping current version.`);
+    nextVersion = currentVersion;
+  }
+
+  if (!nextVersion) {
+    nextVersion = `${major}.${minor}.${patch}`;
+  }
+}
 
 // Write back to VERSION file
 fs.writeFileSync(versionFilePath, nextVersion + '\n', 'utf8');

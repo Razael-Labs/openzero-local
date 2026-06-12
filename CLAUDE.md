@@ -93,6 +93,7 @@ A 3-second cooldown is enforced globally per command per user in `src/events/int
 - **`/fox`** (AI Agent / Utility): Direct prompt assistant query. Supports **Groq API** (`gemma2-9b-it`) and uses function calling schema to trigger plugins automatically. Also responds to mentions/pings.
 - **`/plugin`** (Plugin Manager / Utility): Administrators can view (`/plugin list`), enable (`/plugin install`), and disable (`/plugin uninstall`) AI plugins. Command registrations to the Discord API are dynamically added/removed instantly.
 - **`/bad-word`** (Moderation / Bad Word Plugin): Manage custom bad words. Defaults to disabled (uninstalled) and can be activated with `/plugin install badWord`. Features `add`, `remove`, and `list` subcommands. Words are dynamically compiled into pre-filter regex matching spaces and repeated character variations.
+- **`/scam-link`** (Moderation): Manage custom blocked scam/phishing links. Admin-only command (`ManageGuild`) with `add`, `remove`, and `list` subcommands. Changes are synced with the custom database cache.
 
 ---
 
@@ -120,6 +121,17 @@ The bot features a highly modular, decoupled AI agent architecture:
 
 ---
 
+## Scam Link & Anti-Phishing Filter System
+- **Initialization & Local Cache:** The filter (`src/moderation/scamFilter.js`) downloads public scam links on startup from a remote repo, caching them locally in `data/scam_links.json`. It refreshes the list in-memory every 12 hours.
+- **Custom Blacklist:** Custom scam/phishing domains are configured using the `/scam-link` slash command, storing them in Supabase's `custom_scam_links` table (with local fallback to `data/database.json`).
+- **Detection & Action:** On every message (`src/events/messageCreate.js`), domains are extracted and matched (including parent/subdomain checks). If a match is found:
+  - The message is deleted instantly.
+  - A user warning is sent using a localized V2Embed.
+  - A notification is sent to the `#moderator-only` log channel, separating the admin ping text and the V2 components to prevent legacy field compatibility errors.
+  - The log embed formats distinct sections using Discord Components V2 `SeparatorBuilder` with dividers and spacing.
+
+---
+
 ## Posting & Editing Server Rules (`src/scripts/sendRules.js`)
 
 To publish or update rules in the rules channel, run the script from the terminal:
@@ -127,12 +139,28 @@ To publish or update rules in the rules channel, run the script from the termina
 npm run send-rules
 ```
 
+## Logging & Console Formatting
+
+The system uses `winston` and `chalk` in `src/utils/logger.js` to structure and output clean console logs. It resolves the following log types with unique color-coding:
+- **`INIT` (Magenta)**: Matches startup, bot initialization, and patch scripts (e.g. `patchPlayDl`).
+- **`MSG` (Green)**: Matches guild and DM text message traffic logs.
+- **`FETCH` (Blue)**: Matches files, API, and content fetch operations.
+- **`CMD` (BlueBright)**: Matches slash command deployments, API registers, etc.
+- **`OBTAINIUM` (YellowBright)**: Matches Obtainium Watcher execution logs.
+- **`SUCCSESS`/`DONE` (Green)**: Successful completions.
+- **`WARN` (Yellow)**: System warnings and fallbacks.
+- **`ERROR`/`404` (Red)**: Exceptions, errors, and missing resources.
+- **`UNKNOWN` (Gray)**: Fallback category.
+
+---
+
 ## Running & Testing the Project
 - Install dependencies: `npm install`
 - Run Jest test suites: `npm test`
 - Run production bot: `npm start`
 - Run development bot: `npm run dev`
 - Bump version code automatically: `npm run version:bump [major|minor|patch] [amount]` (defaults to `patch` and `auto` which calculates git commit count since last version update, e.g., `npm run version:bump patch 20`)
+- Set arbitrary custom version: `npm run version:bump set "<version_name>"` (e.g. `npm run version:bump set "P-1.8"` or `npm run version:bump set "Prototype 1.8"`)
 
 ---
 
@@ -140,3 +168,4 @@ npm run send-rules
 
 - **`release` (Default)**: Represents the stable codebase. Changes here are merged/committed by **Razael-Fox Bot**.
 - **`dev`**: Active development branch for developers using personal credentials (`razaeldotexe`).
+- **Automated Release Scheduler**: A GitHub Actions workflow (`.github/workflows/scheduled-release.yml`) runs on a cron schedule every Saturday at 19:00 WIB (12:00 UTC). It automatically merges `dev` into `release` branch, runs tests, bumps the version using `npm run version:bump set "P-1.8"`, and pushes to the `release` branch using the bot credentials.

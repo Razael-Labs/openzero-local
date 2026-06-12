@@ -43,12 +43,17 @@ openzero-local/
     │   ├── translatePlugin.js
     │   ├── userInfoPlugin.js
     │   └── messagesRecordPlugin.js
+    ├── moderation/       # AI Moderation logic
+    │   ├── aiAnalyzer.js # AI-based context moderation analyzer
+    │   ├── cooldown.js   # Moderation rate limiter/cooldown manager
+    │   ├── preFilter.js  # Local regex pattern match (bad words)
+    │   └── scamFilter.js  # Scam link & phishing domains detector
     ├── handlers/
     │   ├── commandHandler.js # Dynamic slash command loader & REST API deployment router
     │   └── eventHandler.js   # Dynamic event loader (registers ready, messageCreate, interactionCreate)
     ├── events/
     │   ├── ready.js          # On-ready: Sets presence activity, deploys slash commands, runs 7-day message cleanup
-    │   ├── messageCreate.js  # Message observer logging every guild message to Supabase/Local database
+    │   ├── messageCreate.js  # Message observer logging every guild message to Supabase/Local database, detects scam links
     │   └── interactionCreate # Interaction router (splits into slash commands and buttons, handles cooldowns)
     ├── commands/
     │   ├── utility/
@@ -68,6 +73,7 @@ openzero-local/
     │   │   ├── kick.js       # Slash command /kick
     │   │   ├── mute.js       # Slash command /mute
     │   │   ├── purge.js      # Slash command /purge (deletes 1-100 messages, default 100)
+    │   │   ├── scamLink.js   # Slash command /scam-link (manage custom scam/phishing blacklist)
     │   │   ├── timeout.js    # Slash command /timeout
     │   │   ├── undeafen.js   # Slash command /undeafen
     │   │   └── unmute.js     # Slash command /unmute
@@ -135,12 +141,16 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - Always ensure there is a clean fallback to `src/utils/database.js` local JSON methods when Supabase is not configured. This preserves offline testing and keeps the CI/CD test suite green without external API calls.
 - Write operations like message logging must utilize `upsert` with constraint targets (e.g. `onConflict: 'message_id'`) rather than raw `insert` to gracefully handle duplicate event triggers or updates.
 
-### 8. Automated Version Bumping (SemVer)
+### 8. Automated Version Bumping (SemVer & Custom)
 - To update the version across all files, do not manually edit files. Run the automated script:
   ```bash
   npm run version:bump [major|minor|patch] [amount]
   ```
   This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js). The `[amount]` defaults to `auto`, which automatically counts the number of git commits since the last version update. You can also specify an exact number, e.g., `npm run version:bump patch 20` increments the patch version by 20.
+- **Custom / Arbitrary Version Name:** To bypass SemVer and set a specific custom version string directly (e.g. `"P-1.8"` or `"Prototype 1.8"`), run:
+  ```bash
+  npm run version:bump set "<version_string>"
+  ```
 
 ### 9. AI Agent Plugins and Extension System
 - Each new tool or action that the AI is supposed to perform must be wrapped in a plugin file inside `src/plugins/`.
@@ -163,10 +173,31 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - **Layer 3 (AI Evaluation):** Forwards messages contextually to the Groq API (`llama-3.1-8b-instant`) in `src/moderation/aiAnalyzer.js` for final confirmation. If clean, it outputs `CLEAN` to ignore silently.
 - **Modularity:** Slash commands managing filters (e.g., `/bad-word`) must be mapped to an optional plugin structure (e.g., `badWordPlugin`) that defaults to **uninstalled** unless enabled on a per-guild basis.
 
+### 12. Anti-Phishing & Scam Link Filter
+- **Dual List Matching:** The bot verifies message URLs in `src/events/messageCreate.js` using a pre-fetched list of public scam domains (updating every 12 hours, cached in `data/scam_links.json`) and a custom list of server-specific domains stored in the Supabase table `custom_scam_links` (cached in memory and falling back to local `data/database.json`).
+- **Slash Commands Management:** Custom domains are managed via the `/scam-link` slash command (with subcommands `add`, `remove`, `list`), requiring `ManageGuild` permission.
+- **Warning and Logger Actions:** When a scam domain match is found:
+  - The message is deleted.
+  - A warning message using `V2Embed` (i18n localizable) is sent to the channel.
+  - A log containing the user and channel info is sent to a `#moderator-only` channel (if configured), tagging the owner/admin.
+- **V2 Component Limits:** To avoid Discord's `MESSAGE_CANNOT_USE_LEGACY_FIELDS_WITH_COMPONENTS_V2` API errors, the owner/admin ping (`content`) and the `V2Embed` (`components`) must be sent separately rather than combined in a single payload containing `IsComponentsV2`.
+- **Neat Separation:** The alert embed utilizes a native `SeparatorBuilder` with `.setDivider(true)` and `.setSpacing('small')` to separate section fields neatly.
+
 ---
 
 ## Logging Guidelines
-Always utilize the custom logger imported from `src/utils/logger.js`.
+Always utilize the custom logger imported from `src/utils/logger.js`. The console logger dynamically resolves and color-codes log output according to these recognized log types:
+- **`INIT` (Magenta)**: Matches bot initialization (e.g. startup logs, `patchPlayDl` scripts, etc.).
+- **`MSG` (Green)**: Matches guild/DM message activity logs.
+- **`FETCH` (Blue)**: Matches URL, file, or data fetching logs.
+- **`CMD` (BlueBright)**: Matches slash command operations (registration, deploy, etc.).
+- **`OBTAINIUM` (YellowBright)**: Matches Obtainium Watcher process logs.
+- **`SUCCSESS`/`DONE` (Green)**: Matches success states and completed tasks.
+- **`WARN` (Yellow)**: Matches warning logs.
+- **`ERROR`/`404` (Red)**: Matches errors and not-found responses.
+- **`UNKNOWN` (Gray)**: Fallback category for other generic logs.
+
+Usage details:
 - Use `logger.info('message')` for standard info.
 - Use `logger.warn('message')` for non-blocking warnings.
 - Use `logger.error('message', error)` for catches and exceptions.
@@ -185,4 +216,5 @@ Test files are situated under the `tests/` directory (e.g. `tests/moderation.tes
 As an AI Agent, you must adhere to the branching workflow rules:
 * **Active Development**: All code modifications, new feature additions, and script improvements must be written, committed, and pushed on the **`dev`** branch using personal developer credentials (`razaeldotexe`).
 * **Stable Releases**: Changes must be merged into the **`release`** branch (default branch) using **Razael-Fox Bot** credentials (`bot@razael-fox.my.id`). Do not push code directly to `release` from your own git profile; always use the bot credentials when merging/committing on this branch.
+* **Automated Release Scheduler**: A GitHub Actions workflow (`.github/workflows/scheduled-release.yml`) runs on a cron schedule every Saturday at 19:00 WIB (12:00 UTC). It automatically merges `dev` into `release` branch, runs tests, bumps the version using `npm run version:bump set "P-1.8"`, and pushes to the `release` branch using the bot credentials.
 
