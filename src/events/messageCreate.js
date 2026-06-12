@@ -70,6 +70,34 @@ export default {
           .build();
 
         await message.channel.send({ components: [embed], flags: MessageFlags.IsComponentsV2 }).catch(() => null);
+
+        // Send alert to moderator-only channel if it exists
+        const logChannel = message.guild.channels.cache.find(c => c.name === 'moderator-only');
+        if (logChannel) {
+          const adminRole = message.guild.roles.cache.find(r => r.name.toLowerCase() === 'admin' || r.name.toLowerCase() === 'administrator');
+          const mentionString = adminRole ? `<@${message.guild.ownerId}> | ${adminRole}` : `<@${message.guild.ownerId}>`;
+          
+          const alertEmbed = new V2Embed(message.guild)
+            .setTitle(message.guild.preferredLocale === 'id' ? '🛡️ Laporan Link Phising/Scam' : '🛡️ Scam/Phishing Link Alert')
+            .setDescription(
+              message.guild.preferredLocale === 'id'
+                ? `**Pengirim:** ${message.author} (${message.author.tag} / ID: ${message.author.id})\n` +
+                  `**Saluran:** ${message.channel}\n` +
+                  `**Pesan Asli:**\n\`\`\`\n${finalContent}\n\`\`\``
+                : `**User:** ${message.author} (${message.author.tag} / ID: ${message.author.id})\n` +
+                  `**Channel:** ${message.channel}\n` +
+                  `**Original Message:**\n\`\`\`\n${finalContent}\n\`\`\``
+            )
+            .setColor(0xff3333)
+            .build();
+            
+          await logChannel.send({
+            content: mentionString,
+            components: [alertEmbed],
+            flags: MessageFlags.IsComponentsV2
+          }).catch(() => null);
+        }
+
         return;
       }
     }
