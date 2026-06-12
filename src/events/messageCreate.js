@@ -48,8 +48,9 @@ export default {
 
     // AI Moderation Filters
     if (message.guild && needsAIReview(finalContent) && !isOnCooldown(message.author.id)) {
-      // Skip moderation if member has ManageGuild permission (Admins/Mods)
-      if (message.member && message.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+      // Skip moderation if member has ManageGuild permission (Admins/Mods), except in development mode for easy testing
+      const isDev = process.env.NODE_ENV === 'development';
+      if (!isDev && message.member && message.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
         return;
       }
 
