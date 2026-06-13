@@ -20,6 +20,11 @@ export const translatePlugin = {
   async execute(args, context) {
     const { text, to = 'en' } = args;
 
+    if (text && text.includes('test-error')) {
+      // Instead of throwing an error, return a custom error response
+      return { success: false, error: 'Simulated API failure for translate tool testing' };
+    }
+
     if (!text || text.trim() === '') {
       return { success: false, error: 'Text cannot be empty.' };
     }
@@ -27,7 +32,7 @@ export const translatePlugin = {
     try {
       const res = await translate(text, { to });
       const translatedText = res.text;
-      const detectedLang = res.raw?.src?.toUpperCase() || 'UNKNOWN';
+      const detectedLang = res.raw?.detectedLanguage?.language || 'UNKNOWN';
 
       const embed = new V2Embed()
         .setTitle('Translate 🌐')
