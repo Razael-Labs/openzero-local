@@ -1,5 +1,6 @@
 import { PermissionFlagsBits, Events } from 'discord.js';
 import logger from '../utils/logger.js';
+import { config } from '../config.js';
 
 /**
  * Memproses command prefix khusus developer untuk keperluan testing/debugging event.
@@ -7,6 +8,10 @@ import logger from '../utils/logger.js';
  * @returns {Promise<boolean>} Mengembalikan true jika pesan diproses sebagai command developer, sebaliknya false
  */
 export async function handleDevCommand(message) {
+  // Hanya bekerja jika environment adalah dev/development/test (bukan production)
+  const isDev = config.nodeEnv === 'development' || config.nodeEnv === 'dev' || config.nodeEnv === 'test';
+  if (!isDev) return false;
+
   // Gunakan prefix '!' untuk command developer
   const prefix = '!';
   if (!message.content.startsWith(prefix)) return false;

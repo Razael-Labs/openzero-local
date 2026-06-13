@@ -113,5 +113,10 @@ export default {
     } catch (error) {
       logger.error('[Obtainium Startup] Failed to initialize Obtainium Watcher:', error);
     }
+
+    // Set a timeout to log the final status to guarantee it prints after other startup logs
+    setTimeout(() => {
+      logger.info('[Client] Bot sudah online!', { type: 'READY' });
+    }, 1000);
   }
 };

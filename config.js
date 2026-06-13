@@ -81,6 +81,11 @@ export const config = {
   // New Guild Member Welcome Channel Config
   welcome: {
     channelId: '1511326472219001014'
+  },
+
+  // Custom Logs Channel Config
+  logs: {
+    channelId: null
   }
 };
 
@@ -92,7 +97,8 @@ const defaults = {
   'activity.type': 'WATCHING',
   'activity.status': 'online',
   'language': process.env.BOT_LANGUAGE || 'en',
-  'groq.model': process.env.GROQ_MODEL || 'gemma2-9b-it'
+  'groq.model': process.env.GROQ_MODEL || 'gemma2-9b-it',
+  'logs.channelId': null
 };
 
 function setNestedValue(obj, keyPath, value) {

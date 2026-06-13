@@ -32,6 +32,9 @@ process.on('uncaughtException', (error) => {
 });
 
 async function init() {
+  // Clear console to wipe out npm run header metadata noise and start clean
+  console.clear();
+
   logger.info(`[Bot] Starting bot initialization v${VERSION}...`);
 
   // Load Commands and Events

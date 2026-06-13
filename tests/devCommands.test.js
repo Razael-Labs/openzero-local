@@ -96,4 +96,19 @@ describe('Developer Prefix Command Handler', () => {
 
     expect(processed).toBe(false);
   });
+
+  test('should ignore command in production environment', async () => {
+    const { config } = await import('../src/config.js');
+    const originalNodeEnv = config.nodeEnv;
+    config.nodeEnv = 'production';
+
+    const processed = await handleDevCommand(mockMessage);
+
+    expect(processed).toBe(false);
+    expect(mockMessage.client.emit).not.toHaveBeenCalled();
+    expect(mockMessage.reply).not.toHaveBeenCalled();
+
+    // Restore
+    config.nodeEnv = originalNodeEnv;
+  });
 });

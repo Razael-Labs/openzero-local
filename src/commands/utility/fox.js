@@ -32,7 +32,8 @@ export default {
         guild: interaction.guild,
         channel: interaction.channel,
         member: interaction.member,
-        user: interaction.user
+        user: interaction.user,
+        locale: interaction.locale
       };
 
       const response = await runAgent(prompt, context);

@@ -71,14 +71,25 @@ export default {
 
         await message.channel.send({ components: [embed], flags: MessageFlags.IsComponentsV2 }).catch(() => null);
 
-        // Send alert to moderator-only channel if it exists
-        let logChannel = message.guild.channels.cache.find(c => c.name === 'moderator-only');
-        if (!logChannel) {
+        // Send alert to configured logs channel or fallback to moderator-only channel
+        let logChannel = null;
+        if (config.logs?.channelId) {
           try {
-            const channels = await message.guild.channels.fetch();
-            logChannel = channels.find(c => c.name === 'moderator-only');
+            logChannel = await message.guild.channels.fetch(config.logs.channelId);
           } catch (err) {
-            logger.error('[Scam Filter] Failed to fetch guild channels:', err);
+            logger.error('[Scam Filter] Failed to fetch configured logs channel:', err);
+          }
+        }
+
+        if (!logChannel) {
+          logChannel = message.guild.channels.cache.find(c => c.name === 'moderator-only');
+          if (!logChannel) {
+            try {
+              const channels = await message.guild.channels.fetch();
+              logChannel = channels.find(c => c.name === 'moderator-only');
+            } catch (err) {
+              logger.error('[Scam Filter] Failed to fetch guild channels:', err);
+            }
           }
         }
 
@@ -122,8 +133,22 @@ export default {
             components: [alertEmbed],
             flags: MessageFlags.IsComponentsV2
           }).catch((err) => {
-            logger.error('[Scam Filter] Failed to send log to moderator-only channel:', err);
+            logger.error('[Scam Filter] Failed to send log to logs channel:', err);
           });
+        } else {
+          // Notify owner if no log channel is configured or found
+          try {
+            const owner = await message.guild.members.fetch(message.guild.ownerId);
+            if (owner) {
+              const isId = message.guild.preferredLocale === 'id';
+              const dmMessage = isId
+                ? `⚠️ **Pemberitahuan Sistem Bot:** Kami mendeteksi link scam di server **${message.guild.name}**, tetapi tidak dapat mengirim log karena saluran \`#moderator-only\` tidak ditemukan. Harap atur ID saluran log kustom menggunakan perintah: \`/config set key:logs_channel_id value:<ID_Channel>\``
+                : `⚠️ **Bot System Notification:** We detected a scam link in your server **${message.guild.name}**, but could not send the logs because the \`#moderator-only\` channel was not found. Please set a custom log channel ID using: \`/config set key:logs_channel_id value:<Channel_ID>\``;
+              await owner.send(dmMessage).catch(() => null);
+            }
+          } catch (err) {
+            logger.warn(`[Scam Filter Alert] Failed to notify guild owner via DM: ${err.message}`);
+          }
         }
 
         return;
@@ -223,18 +248,33 @@ export default {
       }
     }
 
-    // AI Trigger: Jika bot di-mention, panggil AI Agent runAgent
+    // AI Trigger: Jika bot di-mention atau user me-reply pesan bot, panggil AI Agent runAgent
     const botMention = `<@${message.client.user.id}>`;
     const botMentionNick = `<@!${message.client.user.id}>`;
-    if (message.content.includes(botMention) || message.content.includes(botMentionNick)) {
+    const isMentioned = message.content.includes(botMention) || message.content.includes(botMentionNick);
+
+    let isReplyToBot = false;
+    let referencedMessage = null;
+    if (message.reference && message.reference.messageId) {
       try {
-        // Bersihkan mention bot dari prompt
+        referencedMessage = await message.channel.messages.fetch(message.reference.messageId);
+        if (referencedMessage && referencedMessage.author.id === message.client.user.id) {
+          isReplyToBot = true;
+        }
+      } catch (err) {
+        logger.error('[AI Trigger] Failed to fetch referenced message:', err);
+      }
+    }
+
+    if (isMentioned || isReplyToBot) {
+      try {
+        // Bersihkan mention bot dari prompt jika ada
         let cleanPrompt = message.content
           .replace(botMention, '')
           .replace(botMentionNick, '')
           .trim();
 
-        if (cleanPrompt.length === 0) {
+        if (cleanPrompt.length === 0 && !isReplyToBot) {
           return message.reply(
             'Ada yang bisa saya bantu? Tanyakan saja atau minta saya menjalankan tugas!'
           );
@@ -249,19 +289,16 @@ export default {
           guild: message.guild,
           channel: message.channel,
           member: message.member,
-          user: message.author
+          user: message.author,
+          locale: message.guild?.preferredLocale,
+          referencedMessage: referencedMessage
         };
 
         const response = await runAgent(cleanPrompt, context);
 
         const replyOptions = {
-          content: response.responseText || 'Tugas selesai dijalankan.'
+          content: 'Tugas selesai dijalankan.'
         };
-
-        if (response.result?.embeds) {
-          replyOptions.components = response.result.embeds; // V2Embed builds to a container components format
-          replyOptions.flags = 1 << 14; // MessageFlags.IsComponentsV2 (IsComponentsV2 is 16384 or 1 << 14)
-        }
 
         if (response.result?.responseText) {
           replyOptions.content = response.result.responseText;
@@ -269,14 +306,28 @@ export default {
           replyOptions.content = response.responseText;
         }
 
-        if (replyOptions.components) {
-          delete replyOptions.content;
+        try {
+          await message.reply(replyOptions);
+        } catch (replyErr) {
+          // If the original message was deleted (e.g. via a purge action), reply will throw 50035 Unknown Message.
+          // Fallback to sending a direct channel message in this case.
+          if (replyErr.code === 50035 || replyErr.message?.includes('Unknown message') || replyErr.message?.includes('message_reference')) {
+            await message.channel.send(replyOptions);
+          } else {
+            throw replyErr;
+          }
         }
-
-        await message.reply(replyOptions);
       } catch (err) {
         logger.error('[AI Message Trigger] Failed to respond to mention:', err);
-        await message.reply('Maaf, saya mengalami kesalahan saat memproses permintaan Anda.');
+        try {
+          await message.reply('Maaf, saya mengalami kesalahan saat memproses permintaan Anda.');
+        } catch (fallbackErr) {
+          if (fallbackErr.code === 50035 || fallbackErr.message?.includes('Unknown message') || fallbackErr.message?.includes('message_reference')) {
+            await message.channel.send('Maaf, saya mengalami kesalahan saat memproses permintaan Anda.');
+          } else {
+            logger.error('[AI Message Trigger] Failed to send fallback error message:', fallbackErr);
+          }
+        }
       }
     }
   }

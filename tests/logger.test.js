@@ -52,5 +52,26 @@ describe('Logger i18n Translation', () => {
       expect(loggerType).toBe('System');
       expect(loggerMessage).toBe('Login successful!');
     });
+
+    test('should detect READY type and translate bot online message', () => {
+      const { type, loggerMessage } = resolveLogDetails(
+        'info',
+        '[Client] Bot sudah online!'
+      );
+
+      expect(type).toBe('READY');
+      expect(loggerMessage).toBe('Bot is online!');
+    });
+
+    test('should detect AI type and resolve AI Agent messages', () => {
+      const { type, loggerType, loggerMessage } = resolveLogDetails(
+        'info',
+        '[AI Agent] Routing stats query directly to plugin.'
+      );
+
+      expect(type).toBe('AI');
+      expect(loggerType).toBe('AI Agent');
+      expect(loggerMessage).toBe('Routing stats query directly to plugin.');
+    });
   });
 });

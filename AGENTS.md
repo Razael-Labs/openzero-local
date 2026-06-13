@@ -173,7 +173,14 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - **Layer 3 (AI Evaluation):** Forwards messages contextually to the Groq API (`llama-3.1-8b-instant`) in `src/moderation/aiAnalyzer.js` for final confirmation. If clean, it outputs `CLEAN` to ignore silently.
 - **Modularity:** Slash commands managing filters (e.g., `/bad-word`) must be mapped to an optional plugin structure (e.g., `badWordPlugin`) that defaults to **uninstalled** unless enabled on a per-guild basis.
 
-### 12. Anti-Phishing & Scam Link Filter
+### 12. AI Agent Loop & Security Verification
+- **Multi-Turn Loop**: The AI agent (`/fox` or message triggers) executes tools inside a multi-turn looping logic (up to 5 turns max) to handle sequential steps and clean up malformed XML/JSON tag generation.
+- **Enablement Checking**: Every tool triggered by the AI (other than `plugin` itself) is checked against the list of active/installed guild plugins. If not active, execution is aborted.
+- **Security Check on Plugin Tool**: The `plugin` tool requires the invoking user to be the Guild Owner, have Administrator/ManageGuild permissions, or hold a role with the name "admin".
+- **Mention API Compatibility**: For mention triggers, returns only `responseText` and bypasses V2 Components to prevent Discord API exceptions.
+- **Reply Fallback Handling**: If the invoking mention message is deleted (e.g., during a purge action), replying directly via `message.reply()` throws a `DiscordAPIError[50035] Unknown message`. Catch this error and fallback to sending the message directly via `message.channel.send()`.
+
+### 13. Anti-Phishing & Scam Link Filter
 - **Dual List Matching:** The bot verifies message URLs in `src/events/messageCreate.js` using a pre-fetched list of public scam domains (updating every 12 hours, cached in `data/scam_links.json`) and a custom list of server-specific domains stored in the Supabase table `custom_scam_links` (cached in memory and falling back to local `data/database.json`).
 - **Slash Commands Management:** Custom domains are managed via the `/scam-link` slash command (with subcommands `add`, `remove`, `list`), requiring `ManageGuild` permission.
 - **Warning and Logger Actions:** When a scam domain match is found:

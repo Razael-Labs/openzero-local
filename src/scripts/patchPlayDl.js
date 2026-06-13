@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +14,7 @@ const files = ['index.js', 'index.mjs'];
 const modernUserAgents =
   '["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"]';
 
-console.log('[Patch Play-DL] Starting patching process...');
+logger.info('[Patch Play-DL] Starting patching process...');
 
 files.forEach((file) => {
   const filePath = path.join(basePath, file);
@@ -25,18 +26,18 @@ files.forEach((file) => {
     const teRegex = /var te=\[.*?\];/;
     if (teRegex.test(content)) {
       content = content.replace(teRegex, `var te=${modernUserAgents};`);
-      console.log(`[Patch Play-DL] Patched te (User-Agents) in ${file}`);
+      logger.info(`[Patch Play-DL] Patched te (User-Agents) in ${file}`);
       modified = true;
     }
 
     // 2. Replace Android clientVersion "16.49" with "20.10.38"
     if (content.includes('clientVersion:"16.49"')) {
       content = content.replaceAll('clientVersion:"16.49"', 'clientVersion:"20.10.38"');
-      console.log(`[Patch Play-DL] Patched Android clientVersion in ${file}`);
+      logger.info(`[Patch Play-DL] Patched Android clientVersion in ${file}`);
       modified = true;
     } else if (content.includes('clientVersion:"19.11.38"')) {
       content = content.replaceAll('clientVersion:"19.11.38"', 'clientVersion:"20.10.38"');
-      console.log(`[Patch Play-DL] Updated Android clientVersion to 20.10.38 in ${file}`);
+      logger.info(`[Patch Play-DL] Updated Android clientVersion to 20.10.38 in ${file}`);
       modified = true;
     }
 
@@ -45,7 +46,7 @@ files.forEach((file) => {
     const replacementSafety = 'JSON.parse(s).streamingData?.formats||[]';
     if (content.includes(targetSafety)) {
       content = content.replaceAll(targetSafety, replacementSafety);
-      console.log(`[Patch Play-DL] Patched safety check in ${file}`);
+      logger.info(`[Patch Play-DL] Patched safety check in ${file}`);
       modified = true;
     }
 
@@ -56,7 +57,7 @@ files.forEach((file) => {
       'function O(i){let e=[];i.forEach(t=>{let r=t.mimeType;r.startsWith("audio")&&t.url&&(t.codec=r.split(\'codecs="\')[1].split(\'"\')[0],t.container=r.split("audio/")[1].split(";")[0],e.push(t))});if(e.length===0){let t=i.find(f=>f.itag===18&&f.url);if(t){let r=t.mimeType;t.codec=r.includes(\'codecs="\')?r.split(\'codecs="\')[1].split(\'"\')[0]:"mp4a.40.2";t.container="mp4";e.push(t)}}return e}a(O,"parseAudioFormats");';
     if (content.includes(targetO)) {
       content = content.replaceAll(targetO, replacementO);
-      console.log(`[Patch Play-DL] Patched parseAudioFormats in ${file}`);
+      logger.info(`[Patch Play-DL] Patched parseAudioFormats in ${file}`);
       modified = true;
     }
 
@@ -65,7 +66,7 @@ files.forEach((file) => {
     const replacementRetry = 'this.url=t[this.quality]?.url||t[0]?.url||""';
     if (content.includes(targetRetry)) {
       content = content.replaceAll(targetRetry, replacementRetry);
-      console.log(`[Patch Play-DL] Patched retry url access in ${file}`);
+      logger.info(`[Patch Play-DL] Patched retry url access in ${file}`);
       modified = true;
     }
 
@@ -76,7 +77,7 @@ files.forEach((file) => {
       'e.headers&&(e.headers={"user-agent":Ge(),"accept-encoding":"gzip, deflate, br",...e.headers})';
     if (content.includes(targetHMerge)) {
       content = content.replaceAll(targetHMerge, replacementHMerge);
-      console.log(`[Patch Play-DL] Patched header override support in h for ${file}`);
+      logger.info(`[Patch Play-DL] Patched header override support in h for ${file}`);
       modified = true;
     }
 
@@ -86,7 +87,7 @@ files.forEach((file) => {
       'contentCheckOk:!0,racyCheckOk:!0}),headers:{"User-Agent":"com.google.android.youtube/20.10.38 (Linux; U; Android 11; Scale/2.00; Sylph/1.0.0; Build/RQ3A.210605.005)"},cookies:!0,cookieJar:e})';
     if (content.includes(targetAndroidCall)) {
       content = content.replaceAll(targetAndroidCall, replacementAndroidCall);
-      console.log(`[Patch Play-DL] Patched Android API call headers in ${file}`);
+      logger.info(`[Patch Play-DL] Patched Android API call headers in ${file}`);
       modified = true;
     }
 
@@ -96,7 +97,7 @@ files.forEach((file) => {
       'const sd=JSON.parse(s).streamingData;const formats=[];if(sd){if(sd.formats)formats.push(...sd.formats);if(sd.adaptiveFormats)formats.push(...sd.adaptiveFormats)}return formats;}';
     if (content.includes(targetAndroidReturn)) {
       content = content.replaceAll(targetAndroidReturn, replacementAndroidReturn);
-      console.log(
+      logger.info(
         `[Patch Play-DL] Patched getAndroidFormats to return combined formats in ${file}`
       );
       modified = true;
@@ -110,7 +111,7 @@ files.forEach((file) => {
       '="webm"?"webm/opus":"arbitrary";if(e.discordPlayerCompatibility&&s==="webm/opus"){const mp4fmt=t.find(f=>f.container==="mp4")||t[t.length-1];s="arbitrary";t[0]=mp4fmt;}if(await _(`https://${new dt.URL(t[0].url).host}/generate_204`),s==="webm/opus")if(e.discordPlayerCompatibility){if(e.seek)throw new Error("Can not seek with discordPlayerCompatibility set to true.")}else{if(e.seek??=0,e.seek>=i.video_details.durationInSec||e.seek<0)throw new Error(`Seeking beyond limit. [ 0 - ${i.video_details.durationInSec-1}]`);return new fe(t[0].url,i.video_details.durationInSec,t[0].indexRange.end,Number(t[0].contentLength),Number(t[0].bitrate),i.video_details.url,e)}';
     if (content.includes(targetDPC)) {
       content = content.replaceAll(targetDPC, replacementDPC);
-      console.log(
+      logger.info(
         `[Patch Play-DL] Patched discordPlayerCompatibility to force mp4/arbitrary format in ${file}`
       );
       modified = true;
@@ -118,9 +119,9 @@ files.forEach((file) => {
 
     if (modified) {
       fs.writeFileSync(filePath, content, 'utf8');
-      console.log(`[Patch Play-DL] Successfully updated ${file}`);
+      logger.info(`[Patch Play-DL] Successfully updated ${file}`);
     }
   } else {
-    console.log(`[Patch Play-DL] ${file} does not exist at ${filePath}`);
+    logger.warn(`[Patch Play-DL] ${file} does not exist at ${filePath}`);
   }
 });

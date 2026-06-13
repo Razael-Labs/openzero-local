@@ -10,6 +10,7 @@ const { combine, timestamp, printf } = winston.format;
 function translateLog(message) {
   const idToEn = {
     'Login berhasil!': 'Login successful!',
+    'Bot sudah online!': 'Bot is online!',
     'Gagal melakukan purge:': 'Failed to purge:',
     'Menjalankan pencarian untuk:': 'Running search for:',
     'Gagal mengambil rekaman pesan:': 'Failed to fetch messages record:',
@@ -74,7 +75,50 @@ function resolveLogDetails(level, message, meta = {}) {
     } else {
       // Analyze loggerMessage to guess type
       const msgLower = loggerMessage.toLowerCase();
+      const typeLower = loggerType ? loggerType.toLowerCase() : '';
       if (
+        msgLower.includes('bot sudah online') ||
+        msgLower.includes('bot is online')
+      ) {
+        type = 'READY';
+      } else if (
+        typeLower === 'bot' ||
+        typeLower.includes('patch') ||
+        msgLower.includes('initialization') ||
+        msgLower.includes('starting bot') ||
+        msgLower.includes('patching')
+      ) {
+        type = 'INIT';
+      } else if (
+        typeLower.includes('obtainium') ||
+        msgLower.includes('obtainium')
+      ) {
+        type = 'OBTAINIUM';
+      } else if (
+        typeLower.includes('ai') ||
+        typeLower.includes('agent') ||
+        msgLower.includes('ai agent')
+      ) {
+        type = 'AI';
+      } else if (
+        typeLower.includes('fetch') ||
+        msgLower.includes('fetching') ||
+        msgLower.includes('fetch')
+      ) {
+        type = 'FETCH';
+      } else if (
+        typeLower.includes('command') ||
+        typeLower.includes('slash') ||
+        msgLower.includes('register') ||
+        msgLower.includes('unregister') ||
+        msgLower.includes('slash command')
+      ) {
+        type = 'CMD';
+      } else if (
+        typeLower === 'message'
+      ) {
+        type = 'MSG';
+      } else if (
         msgLower.includes('berhasil') ||
         msgLower.includes('success') ||
         msgLower.includes('aktif') ||
@@ -217,10 +261,24 @@ const consoleFormat = printf(({ level, message, timestamp, stack, ...meta }) => 
   let typeColor = chalk.cyan;
   if (type === 'SUCCSESS' || type === 'DONE') {
     typeColor = chalk.green;
+  } else if (type === 'READY') {
+    typeColor = chalk.greenBright;
   } else if (type === 'WARN') {
     typeColor = chalk.yellow;
   } else if (type === 'ERROR' || type === '404') {
     typeColor = chalk.red;
+  } else if (type === 'INIT') {
+    typeColor = chalk.magenta;
+  } else if (type === 'MSG') {
+    typeColor = chalk.green;
+  } else if (type === 'OBTAINIUM') {
+    typeColor = chalk.yellowBright;
+  } else if (type === 'AI') {
+    typeColor = chalk.cyanBright;
+  } else if (type === 'FETCH') {
+    typeColor = chalk.blue;
+  } else if (type === 'CMD') {
+    typeColor = chalk.blueBright;
   } else if (type === 'UNKNOWN') {
     typeColor = chalk.gray;
   }

@@ -76,6 +76,14 @@ describe('AI Agent Plugin and Extension System', () => {
       expect(classification.args.action).toBe('list');
     });
 
+    test('should classify server stats request correctly', () => {
+      const prompt = 'Fox tolong tampilkan berapa member dan channel di server Discord';
+      const classification = classifyIntentMock(prompt);
+
+      expect(classification).not.toBeNull();
+      expect(classification.pluginName).toBe('serverStats');
+    });
+
     test('should return null for unmatched general chat prompt', () => {
       const prompt = 'Apa cuaca hari ini?';
       const classification = classifyIntentMock(prompt);
@@ -85,6 +93,41 @@ describe('AI Agent Plugin and Extension System', () => {
   });
 
   describe('Plugin Execution and Agent Response Loops', () => {
+    test('should execute serverStats plugin when matching prompt is run', async () => {
+      const prompt = 'Fox tampilkan member dan channel server ini';
+
+      // Mock Discord structures for channels
+      const mockChannels = new Map([
+        ['1', { type: 0, id: '1' }], // GuildText
+        ['2', { type: 2, id: '2' }], // GuildVoice
+        ['3', { type: 4, id: '3' }]  // GuildCategory
+      ]);
+
+      const mockGuild = {
+        id: mockGuildId,
+        memberCount: 42,
+        channels: {
+          fetch: jest.fn().mockResolvedValue(mockChannels),
+          cache: mockChannels
+        }
+      };
+
+      const context = {
+        guild: mockGuild,
+        user: { id: mockUserId, tag: 'User#1234' }
+      };
+
+      const result = await runAgent(prompt, context);
+
+      expect(result.agentExecuted).toBe(true);
+      expect(result.pluginUsed).toBe('serverStats');
+      expect(result.result.success).toBe(true);
+      expect(result.result.data.totalMembers).toBe(42);
+      expect(result.result.data.totalChannels).toBe(3);
+      expect(result.result.responseText).toContain('42');
+      expect(result.result.responseText).toContain('3');
+    });
+
     test('should execute webhook create mock plugin when matching prompt is run', async () => {
       const prompt = "Fox buatkan webhook nama 'DevWebhook' url https://example.com/pfp.jpg";
 
@@ -339,6 +382,171 @@ describe('AI Agent Plugin and Extension System', () => {
         config.nodeEnv = originalNodeEnv;
         plugins.instagram.execute = originalInstagramExecute;
       }
+    });
+  });
+
+  describe('AI Plugin Installation and Security Permissions', () => {
+    test('should allow server owner to install plugin via pluginPlugin', async () => {
+      const { pluginPlugin } = await import('../src/plugins/pluginPlugin.js');
+      const mockContext = {
+        guild: { id: mockGuildId, ownerId: mockUserId },
+        user: { id: mockUserId, tag: 'Owner#1111' },
+        member: { permissions: { has: () => false }, roles: { cache: { some: () => false } } },
+        client: {}
+      };
+
+      const result = await pluginPlugin.execute({ action: 'install', name: 'music' }, mockContext);
+      expect(result.success).toBe(true);
+      expect(result.responseText).toContain('berhasil diinstal');
+    });
+
+    test('should allow admin role user to install plugin via pluginPlugin', async () => {
+      const { pluginPlugin } = await import('../src/plugins/pluginPlugin.js');
+      const mockContext = {
+        guild: { id: mockGuildId, ownerId: 'other-owner' },
+        user: { id: mockUserId, tag: 'Admin#2222' },
+        member: {
+          permissions: { has: (perm) => true },
+          roles: { cache: { some: () => false } }
+        },
+        client: {}
+      };
+
+      const result = await pluginPlugin.execute({ action: 'install', name: 'music' }, mockContext);
+      expect(result.success).toBe(true);
+      expect(result.responseText).toContain('berhasil diinstal');
+    });
+
+    test('should reject non-admin and non-owner from installing plugin via pluginPlugin', async () => {
+      const { pluginPlugin } = await import('../src/plugins/pluginPlugin.js');
+      const mockContext = {
+        guild: { id: mockGuildId, ownerId: 'other-owner' },
+        user: { id: mockUserId, tag: 'User#3333' },
+        member: {
+          permissions: { has: () => false },
+          roles: { cache: { some: (cb) => false } }
+        },
+        client: {}
+      };
+
+      const result = await pluginPlugin.execute({ action: 'install', name: 'music' }, mockContext);
+      expect(result.success).toBe(false);
+      expect(result.responseText).toContain('tidak memiliki izin');
+    });
+  });
+
+  describe('AI Plugin Enablement Checking', () => {
+    test('should refuse to trigger a plugin if it is not installed/enabled in the guild', async () => {
+      const prompt = "Fox buatkan webhook nama 'BlockedWebhook'";
+      const mockContext = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' },
+        member: { permissions: { has: () => false }, roles: { cache: { some: () => false } } },
+        client: {},
+        enablePluginCheckForTesting: true,
+        installedPluginsForTesting: [] // Webhook not installed
+      };
+
+      const response = await runAgent(prompt, mockContext);
+      expect(response.agentExecuted).toBe(false);
+      expect(response.responseText).toContain('belum diaktifkan/diinstal');
+
+      // Verify that it works when installed
+      const mockContextInstalled = {
+        ...mockContext,
+        installedPluginsForTesting: ['webhook'] // Webhook is installed
+      };
+
+      // Mock channel structure to avoid crash inside webhookPlugin during successful execution
+      mockContextInstalled.guild.channels = {
+        cache: {
+          get: () => ({
+            type: 0, // GuildText
+            createWebhook: jest.fn().mockResolvedValue({
+              id: '88888888',
+              name: 'BlockedWebhook',
+              token: 'token123',
+              url: 'https://example.com'
+            })
+          })
+        }
+      };
+      mockContextInstalled.channel = { id: 'channel-123' };
+
+      const responseSuccess = await runAgent(prompt, mockContextInstalled);
+      expect(responseSuccess.agentExecuted).toBe(true);
+      expect(responseSuccess.pluginUsed).toBe('webhook');
+    });
+
+    test('should intercept serverStats queries and refuse execution if plugin is not installed', async () => {
+      const prompt = 'ada berapa member di server ini?';
+      const mockContext = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' },
+        client: {},
+        enablePluginCheckForTesting: true,
+        installedPluginsForTesting: [] // serverStats not installed
+      };
+
+      const response = await runAgent(prompt, mockContext);
+      expect(response.agentExecuted).toBe(true);
+      expect(response.pluginUsed).toBe('serverStats');
+      expect(response.action).toBe('error');
+      expect(response.result.success).toBe(false);
+      expect(response.result.responseText).toContain('SYSTEM DETECTION');
+      expect(response.result.responseText).toContain('serverStats');
+      expect(response.result.embeds).toBeDefined();
+    });
+
+    test('should NOT intercept serverStats plugin installation requests', async () => {
+      const prompt = 'install kan aku plugin serverStats';
+      const mockContext = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' },
+        client: {},
+        enablePluginCheckForTesting: true,
+        installedPluginsForTesting: []
+      };
+
+      // Mock user permissions so pluginPlugin doesn't fail internally
+      mockContext.guild.ownerId = mockUserId;
+
+      const response = await runAgent(prompt, mockContext);
+      expect(response.agentExecuted).toBe(true);
+      expect(response.pluginUsed).toBe('plugin');
+      expect(response.action).toBe('install');
+    });
+
+    test('should resolve referenced message context when user replies to the bot', async () => {
+      const prompt = 'tolong aktifkan plugin nya';
+      const mockContext = {
+        guild: { id: mockGuildId },
+        user: { id: mockUserId, tag: 'User#1234' },
+        client: {},
+        enablePluginCheckForTesting: true,
+        installedPluginsForTesting: [],
+        referencedMessage: {
+          content: '',
+          embeds: [
+            {
+              title: 'System Alert: Missing Plugin 🛑',
+              description: 'Required Module: serverStats'
+            }
+          ]
+        }
+      };
+
+      // Mock user permissions so pluginPlugin doesn't fail internally
+      mockContext.guild.ownerId = mockUserId;
+
+      const response = await runAgent(prompt, mockContext);
+      
+      // Since context contains "Required Module: serverStats" and prompt is "aktifkan",
+      // it should match the "plugin" -> "install" -> "serverStats" command!
+      expect(response.agentExecuted).toBe(true);
+      expect(response.pluginUsed).toBe('plugin');
+      expect(response.action).toBe('install');
+      expect(response.result.responseText).toContain('serverStats');
     });
   });
 });

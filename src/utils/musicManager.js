@@ -17,6 +17,7 @@ import logger from './logger.js';
 import { V2Embed } from './v2Embed.js';
 import { MessageFlags, ActivityType } from 'discord.js';
 import { config } from '../config.js';
+import { t } from './i18n.js';
 
 // Resolve cookies path from environment variable YTDLP_COOKIES_PATH or fallback cookies.txt/cookie.txt in root directory
 let cookiesPath = process.env.YTDLP_COOKIES_PATH || null;
@@ -48,6 +49,7 @@ export class MusicSession {
     this.isPlaying = false;
     this.activeProcess = null;
     this.is247 = false;
+    this.locale = config.language || 'en';
 
     // Create connection to the voice channel
     this.connection = joinVoiceChannel({
@@ -305,10 +307,8 @@ export class MusicSession {
           .send({
             components: [
               new V2Embed()
-                .setTitle('24/7 Mode Active 📻')
-                .setDescription(
-                  'Antrean habis. Memutar musik santai acak untuk menemani saluran suara.'
-                )
+                .setTitle(t('music247Title', this.locale))
+                .setDescription(t('music247Desc', this.locale))
                 .build()
             ],
             flags: MessageFlags.IsComponentsV2

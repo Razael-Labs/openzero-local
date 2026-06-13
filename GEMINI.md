@@ -48,6 +48,9 @@ Membaca subfolder di dalam `src/commands/` secara dinamis. Mendukung **Slash Com
 ### 5. Cooldown & Anti-Spam (`src/events/interactionCreate.js`)
 Sistem pertahanan bot yang membatasi eksekusi command sebesar **3 detik** per perintah per pengguna. Menampilkan hitungan mundur secara privat (*ephemeral*) menggunakan `V2Embed` jika pengguna melakukan spamming.
 
+### 5b. Penanganan Fallback Reply Pesan Terhapus (`src/events/messageCreate.js`)
+Jika pesan mention asli pengguna dihapus (seperti setelah aksi bulk-delete/purge), pemanggilan `message.reply()` akan melempar error. Sistem secara otomatis mengalihkan pengiriman respon menggunakan `message.channel.send()` agar bot tidak mengalami crash.
+
 ### 6. Mesin Internasionalisasi & Lokalisasi / i18n (`src/utils/i18n.js`)
 Menyediakan utilitas `t(key, locale, replaceData)` untuk menerjemahkan teks respon bot secara dinamis berdasarkan bahasa klien (Discord client locale) pengguna yang melakukan interaksi. Mendukung Bahasa Indonesia (`id`) dan Inggris (`en`) (secara bawaan/default menggunakan **Bahasa Inggris**). File kamus bahasa disimpan di folder `src/locales/`.
 
@@ -128,14 +131,9 @@ Perintah klik kanan pengguna satu pintu yang menggabungkan seluruh informasi pro
 ### 9. Context Menu: `Messages Record` (Apps Selection)
 Mengambil riwayat pesan yang dikirim oleh target pengguna di berbagai channel server ini selama 7 hari terakhir. Digunakan oleh moderator untuk memonitor perilaku pengguna. Respon output mendukung lokalisasi bahasa.
 
-### 10. Perintah `/fox` (Utility / AI Agent)
-Memanggil asisten kecerdasan buatan Fox (AI Agent) secara langsung via prompt text.
-*   Mendukung integrasi **Groq API** (model default `gemma2-9b-it`) untuk merespon obrolan.
-*   Menggunakan skema *Function Calling/Tool Use* untuk memicu plugin secara otomatis (seperti membuat webhook, memutar lagu, atau menambah role) berdasarkan wacana natural pengguna.
-*   Secara otomatis mendeteksi jika bot di-ping/mention di chat room dan memproses obrolan serupa.
+### 10. **`/fox` (Utility / AI Agent)**: Memanggil asisten kecerdasan buatan Fox (AI Agent) secara langsung via prompt text. Mendukung integrasi **Groq API** (model default `gemma2-9b-it`) untuk merespon obrolan. Menggunakan skema *Function Calling/Tool Use* untuk memicu plugin secara otomatis dengan dukungan multi-turn/multi-tool loop (hingga 5 iterasi) dan perbaikan pencocokan intent lokal agar tidak salah mendeteksi status pertanyaan. Sebelum memicu plugin, sistem akan memastikan plugin tersebut aktif/terinstal di server tersebut. Jika bot di-mention di chat room, ia akan membalas dengan respon teks saja (tanpa komponen V2) untuk mencegah error Discord API pada mention non-interaction.
 
-### 11. Perintah `/plugin` (Utility / Plugin Manager)
-Menginstal dan menghapus modul plugin AI secara dinamis tanpa perlu me-restart bot.
+### 11. **`/plugin` (Utility / Plugin Manager)**: Menginstal dan menghapus modul plugin AI secara dinamis tanpa perlu me-restart bot. Mengizinkan AI untuk melakukan instalasi plugin secara mandiri via tool `plugin` dengan validasi hak akses ketat (Owner, Admin, atau role dengan nama 'admin').
 *   **`/plugin list`**: Menampilkan daftar semua plugin dan status keaktifan saat ini.
 *   **`/plugin install [name]`**: Mengaktifkan plugin dan mendaftarkan perintah terkait ke Discord API secara instan.
 *   **`/plugin uninstall [name]`**: Menonaktifkan plugin dan menghapus perintah terkait dari Discord API secara instan.
@@ -177,7 +175,8 @@ Menerapkan sistem penyaringan pesan efisien biaya (eksekusi Groq API terkontrol)
 
 ## Integrasi Sistem AI Agent & Plugin
 Bot ini dilengkapi dengan arsitektur agen cerdas modular di bawah direktori `src/plugins/`:
-*   **AI Engine**: Menggunakan API OpenAI-compatible dari Groq.com dengan penanganan fallback otomatis. Jika model tidak mendukung *tool calling* (seperti gemma2-9b-it), request secara otomatis dikirim ulang tanpa parameter tools untuk menjamin bot tetap memberikan respon obrolan.
+*   **AI Engine & Loop Agent**: Menggunakan API OpenAI-compatible dari Groq.com dengan penanganan fallback otomatis. Jika model tidak mendukung *tool calling* (seperti gemma2-9b-it), request secara otomatis dikirim ulang tanpa parameter tools untuk menjamin bot tetap memberikan respon obrolan. Selain itu, eksekusi tool didelegasikan ke dalam loop agen multi-turn (maksimal 5 iterasi) yang mengevaluasi output Groq secara iteratif.
+*   **Pemeriksaan Status Aktif Plugin**: Setiap eksekusi plugin divalidasi silang secara dinamis dengan daftar plugin terinstal di server (`getInstalledPlugins`). AI tidak diperkenankan memicu fungsionalitas plugin yang berstatus nonaktif di guild.
 *   **Histori Obrolan Persisten**: Percakapan pengguna disimpan secara berurutan ke tabel Supabase `ai_chat_history`. Jika koneksi terputus atau tabel belum dibuat, sistem secara otomatis mengalihkan penyimpanan (*failover*) secara lokal ke `data/database.json`.
 *   **Modularitas Plugin**: Setiap fungsi bot dibungkus sebagai plugin terisolasi (seperti `webhookPlugin`, `musicPlugin`, `rolePlugin`, `badWordPlugin`). Status keaktifan plugin dikontrol oleh `/plugin` dan dipantau oleh `src/utils/pluginManager.js`.
 

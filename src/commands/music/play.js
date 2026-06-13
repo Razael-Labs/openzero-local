@@ -78,6 +78,7 @@ export default {
       const twentyFourSeven = interaction.options.getBoolean('twentyfour-seven') ?? false;
 
       const session = getOrCreateSession(interaction.guildId, voiceChannel, interaction.channel);
+      session.locale = locale;
       session.is247 = twentyFourSeven;
       session.addTrack(track);
 
