@@ -1,7 +1,7 @@
 {
-  "name": "discord-basic-bot",
-  "version": "1.7.22",
-  "description": "A basic Discord bot with modular handlers",
+  "name": "openzero-local",
+  "version": "1.7.90",
+  "description": "Discord Bot for OpenZero Local with dynamic modules and AI capability",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -15,16 +15,22 @@
     "format": "node node_modules/prettier/bin/prettier.cjs --write src",
     "format:check": "node node_modules/prettier/bin/prettier.cjs --check src",
     "fetch-repos": "node src/scripts/fetchRepos.js",
+    "setup-emojis": "node src/scripts/setupGuildEmojis.js",
     "version:update": "node src/scripts/updateVersion.js",
-    "version:bump": "node src/scripts/updateVersion.js"
+    "version:bump": "node src/scripts/updateVersion.js",
+    "postinstall": "node src/scripts/patchPlayDl.js"
   },
   "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "@napi-rs/canvas": "^1.0.0",
     "@sentry/node": "^10.56.0",
     "@supabase/supabase-js": "^2.107.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "chalk": "^5.6.2",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.5",
+    "libsodium-wrappers": "^0.8.4",
+    "play-dl": "^1.9.7",
     "winston": "^3.17.0"
   },
   "devDependencies": {

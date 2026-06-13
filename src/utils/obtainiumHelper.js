@@ -21,7 +21,7 @@ async function loadApps() {
     // Handle both raw export (object with .apps) and enriched data (array)
     return Array.isArray(data) ? data : data.apps || [];
   } catch (error) {
-    logger.error('[Obtainium Helper] Gagal membaca berkas JSON Obtainium:', error);
+    logger.error('[Obtainium Helper] Failed to read Obtainium JSON file:', error);
     return [];
   }
 }
@@ -98,13 +98,15 @@ export async function updateObtainiumMessage(client) {
   try {
     const channelId = config?.obtainium?.channelId;
     if (!channelId) {
-      logger.warn('[Obtainium Helper] channelId tidak terkonfigurasi di config.js');
+      logger.warn('[Obtainium Helper] channelId is not configured in config.js');
       return false;
     }
 
     const channel = await client.channels.fetch(channelId);
     if (!channel || !channel.isTextBased()) {
-      logger.error(`[Obtainium Helper] Channel ID ${channelId} tidak ditemukan atau bukan channel teks!`);
+      logger.error(
+        `[Obtainium Helper] Channel ID ${channelId} not found or is not a text channel!`
+      );
       return false;
     }
 
@@ -120,8 +122,10 @@ export async function updateObtainiumMessage(client) {
       try {
         message = await channel.messages.fetch(targetMessageId);
       } catch (err) {
-        const refType = (storedRef && storedRef.includes('://')) ? 'tautan' : 'ID';
-        logger.info(`[Obtainium Helper] Pesan dengan ${refType} ${storedRef} tidak ditemukan atau telah terhapus. Membuat pesan baru.`);
+        const refType = storedRef && storedRef.includes('://') ? 'link' : 'ID';
+        logger.info(
+          `[Obtainium Helper] Message with ${refType} ${storedRef} not found or was deleted. Creating new message.`
+        );
       }
     }
 
@@ -133,7 +137,7 @@ export async function updateObtainiumMessage(client) {
         components: [embed],
         flags: MessageFlags.IsComponentsV2
       });
-      logger.info('[Obtainium Helper] Berhasil memperbarui pesan list Obtainium di Discord!');
+      logger.info('[Obtainium Helper] Successfully updated Obtainium list message in Discord!');
       return true;
     } else {
       // Create new message and save its URL to persist it
@@ -142,12 +146,13 @@ export async function updateObtainiumMessage(client) {
         flags: MessageFlags.IsComponentsV2
       });
       setObtainiumMessageId(sentMessage.url);
-      logger.info(`[Obtainium Helper] Berhasil membuat pesan list Obtainium baru dengan tautan: ${sentMessage.url}`);
+      logger.info(
+        `[Obtainium Helper] Successfully created new Obtainium list message with link: ${sentMessage.url}`
+      );
       return true;
     }
   } catch (error) {
-    logger.error('[Obtainium Helper] Gagal memperbarui pesan list Obtainium:', error);
+    logger.error('[Obtainium Helper] Failed to update Obtainium list message:', error);
   }
   return false;
 }
-

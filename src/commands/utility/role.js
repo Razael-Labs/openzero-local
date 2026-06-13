@@ -73,7 +73,7 @@ const PERMISSION_MAP = {
 const PERMISSION_DESCRIPTIONS = {
   administrator: 'Full administrative control (bypasses all channel protections and permissions).',
   manage_server: 'Allows editing server settings, name, region, integrations, and widgets.',
-  manage_roles: 'Allows creating, editing, and deleting roles below the bot\'s highest role.',
+  manage_roles: "Allows creating, editing, and deleting roles below the bot's highest role.",
   manage_channels: 'Allows creating, editing, and deleting channels on the server.',
   view_audit_log: 'Allows viewing audit logs of admin and moderator actions.',
   kick: 'Allows kicking members from the server.',
@@ -83,7 +83,7 @@ const PERMISSION_DESCRIPTIONS = {
   embed_links: 'Allows sending formatted links with rich embeds/previews.',
   attach_files: 'Allows uploading files and media in channels.',
   read_history: 'Allows reading past message history in channels.',
-  manage_messages: 'Allows deleting other users\' messages or pinning messages.',
+  manage_messages: "Allows deleting other users' messages or pinning messages.",
   connect: 'Allows joining voice channels.',
   speak: 'Allows speaking/communicating in voice channels.',
   mute_members: 'Allows muting other members in voice channels.',
@@ -224,7 +224,7 @@ export default {
     .addSubcommand((subcommand) =>
       subcommand
         .setName('savetemplate')
-        .setDescription('Save an existing role\'s permissions as a new custom template.')
+        .setDescription("Save an existing role's permissions as a new custom template.")
         .addStringOption((option) =>
           option.setName('name').setDescription('Name of the new custom template').setRequired(true)
         )

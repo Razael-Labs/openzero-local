@@ -31,13 +31,29 @@ openzero-local/
     │   ├── v2Embed.js    # Custom fluent V2Embed helper wrapper for Discord Message Components V2
     │   ├── i18n.js       # Dynamic translation engine for localized input/output
     │   ├── database.js   # Local JSON database utility (msg counts and logging fallback)
-    │   └── supabase.js   # Supabase database wrapper (message records with 7-day auto cleanup)
+    │   ├── supabase.js   # Supabase database wrapper (message records with 7-day auto cleanup)
+    │   ├── aiHistory.js  # AI Chat history manager (Supabase + Local fallback)
+    │   ├── aiManager.js  # Main AI agent coordinator with Groq client support
+    │   └── pluginManager.js # Plugin installer state mapping commands to active plugins
+    ├── plugins/          # AI plugin extensions
+    │   ├── webhookPlugin.js
+    │   ├── rolePlugin.js
+    │   ├── musicPlugin.js
+    │   ├── moderationPlugin.js
+    │   ├── translatePlugin.js
+    │   ├── userInfoPlugin.js
+    │   └── messagesRecordPlugin.js
+    ├── moderation/       # AI Moderation logic
+    │   ├── aiAnalyzer.js # AI-based context moderation analyzer
+    │   ├── cooldown.js   # Moderation rate limiter/cooldown manager
+    │   ├── preFilter.js  # Local regex pattern match (bad words)
+    │   └── scamFilter.js  # Scam link & phishing domains detector
     ├── handlers/
     │   ├── commandHandler.js # Dynamic slash command loader & REST API deployment router
     │   └── eventHandler.js   # Dynamic event loader (registers ready, messageCreate, interactionCreate)
     ├── events/
     │   ├── ready.js          # On-ready: Sets presence activity, deploys slash commands, runs 7-day message cleanup
-    │   ├── messageCreate.js  # Message observer logging every guild message to Supabase/Local database
+    │   ├── messageCreate.js  # Message observer logging every guild message to Supabase/Local database, detects scam links
     │   └── interactionCreate # Interaction router (splits into slash commands and buttons, handles cooldowns)
     ├── commands/
     │   ├── utility/
@@ -46,18 +62,28 @@ openzero-local/
     │   │   ├── webhook.js    # Slash command /webhook (create / info webhooks with button link)
     │   │   ├── role.js       # Slash command /role (add / remove / id configurations)
     │   │   ├── musicSearch.js # Slash command /music-search (iTunes search API, LRCLIB lyrics lookup, preview button link)
+    │   │   ├── help.js       # Slash command /help (interactive dynamic help menu with category buttons)
+    │   │   ├── menu.js       # Slash command /menu (identical shortcut to /help)
     │   │   ├── translate.js  # Context Menu Command 'Translate to English' via Apps selection
     │   │   ├── userInfo.js   # Context Menu 'User Info' (Consolidated global & guild profile)
     │   │   └── messagesRecord.js # Context Menu 'Messages Record' (7-day chat history inspector)
-    │   └── moderation/
-    │       ├── ban.js        # Slash command /ban
-    │       ├── deafen.js     # Slash command /deafen
-    │       ├── kick.js       # Slash command /kick
-    │       ├── mute.js       # Slash command /mute
-    │       ├── purge.js      # Slash command /purge (deletes 1-100 messages, default 100)
-    │       ├── timeout.js    # Slash command /timeout
-    │       ├── undeafen.js   # Slash command /undeafen
-    │       └── unmute.js     # Slash command /unmute
+    │   ├── moderation/
+    │   │   ├── ban.js        # Slash command /ban
+    │   │   ├── deafen.js     # Slash command /deafen
+    │   │   ├── kick.js       # Slash command /kick
+    │   │   ├── mute.js       # Slash command /mute
+    │   │   ├── purge.js      # Slash command /purge (deletes 1-100 messages, default 100)
+    │   │   ├── scamLink.js   # Slash command /scam-link (manage custom scam/phishing blacklist)
+    │   │   ├── timeout.js    # Slash command /timeout
+    │   │   ├── undeafen.js   # Slash command /undeafen
+    │   │   └── unmute.js     # Slash command /unmute
+    │   └── music/
+    │       ├── play.js       # Slash command /play (adds and plays a YouTube video)
+    │       ├── pause.js      # Slash command /pause (pauses active playback)
+    │       ├── resume.js     # Slash command /resume (resumes active playback)
+    │       ├── skip.js       # Slash command /skip (skips current song)
+    │       ├── stop.js       # Slash command /stop (stops active playback and disconnects bot)
+    │       └── queue.js      # Slash command /queue (lists queued songs)
     └── scripts/
         ├── sendRules.js  # Maintenance script to post/edit guild rules
         └── updateVersion.js # Script to automatically sync version from root VERSION file
@@ -85,7 +111,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
 - All event listeners must be created in `src/events/`.
 - The `interactionCreate` event listener contains a **3-second cooldown** system per command per user. If adding high-frequency features, verify they are compatible or exclude them from the global map if necessary.
 
-### 4. Components V2 & Embedding
+### 4. Components V2, Embedding & Custom Emojis
 - Do **not** use legacy `EmbedBuilder` for messages. Always use the kustom helper class **`V2Embed`** (located at `src/utils/v2Embed.js`).
 - Default colors in `V2Embed` are resolved using the global `config.embedColor` generator (configured via `colorStrategy` in the root `config.js`) on every instantiation.
 - When sending a `V2Embed` in a reply or edit, you must pass the `MessageFlags.IsComponentsV2` flag:
@@ -96,6 +122,7 @@ When extending or editing this codebase, you **must** strictly follow these rule
   const embed = new V2Embed().setTitle('Title').setDescription('Content').build();
   await interaction.reply({ components: [embed], flags: MessageFlags.IsComponentsV2 });
   ```
+- Emojis in embeds are automatically mapped and formatted using the custom Font Awesome guild symbols (configured via `src/utils/symbols.js` and uploaded to the guild using `npm run setup-emojis`). The bot resolves matching emojis such as `oz_border_all` (All category button), `oz_tools` (Utility), `oz_black_tie` (Moderation), `oz_music` (Music), `oz_discord` (Category title), and `oz_letterboxd` (Summary icon). Help and Menu embeds format their titles as `<icon> Help Menu`.
 
 ### 5. Interactive Routing (Buttons, Select Menus)
 - Any button click or select menu interaction will trigger the `interactionCreate` event.
@@ -107,23 +134,70 @@ When extending or editing this codebase, you **must** strictly follow these rule
   import { t } from '../../utils/i18n.js';
   const text = t('keyName', interaction.locale, { param: 'value' });
   ```
-- Make sure keys are present in both `src/locales/id.json` and `src/locales/en.json`.
+- Make sure keys are present in both `src/locales/id.json` and `src/locales/en.json` (Default bot locale is English `en`).
 
 ### 7. Dual Database Pipeline (Supabase + Local fallback)
 - Logging/Audit records should run through `src/utils/supabase.js`.
 - Always ensure there is a clean fallback to `src/utils/database.js` local JSON methods when Supabase is not configured. This preserves offline testing and keeps the CI/CD test suite green without external API calls.
+- Write operations like message logging must utilize `upsert` with constraint targets (e.g. `onConflict: 'message_id'`) rather than raw `insert` to gracefully handle duplicate event triggers or updates.
 
-### 8. Automated Version Bumping (SemVer)
+### 8. Automated Version Bumping (SemVer & Custom)
 - To update the version across all files, do not manually edit files. Run the automated script:
   ```bash
   npm run version:bump [major|minor|patch] [amount]
   ```
   This will dynamically update the root [VERSION](file:///data/data/com.termux/files/home/openzero-local/VERSION) file, [package.json](file:///data/data/com.termux/files/home/openzero-local/package.json), and [src/version.js](file:///data/data/com.termux/files/home/openzero-local/src/version.js). The `[amount]` defaults to `auto`, which automatically counts the number of git commits since the last version update. You can also specify an exact number, e.g., `npm run version:bump patch 20` increments the patch version by 20.
+- **Custom / Arbitrary Version Name:** To bypass SemVer and set a specific custom version string directly (e.g. `"P-1.8"` or `"Prototype 1.8"`), run:
+  ```bash
+  npm run version:bump set "<version_string>"
+  ```
+
+### 9. AI Agent Plugins and Extension System
+- Each new tool or action that the AI is supposed to perform must be wrapped in a plugin file inside `src/plugins/`.
+- All plugin files must expose standard OpenAI function schemas via `.parameters` and an execution entrypoint via `.execute(args, context)`.
+- Plugins must be registered in the `plugins` dictionary in `src/utils/aiManager.js` and their commands mapped in `src/utils/pluginManager.js` to support dynamic installation and automatic Discord re-registration via `/plugin`.
+
+### 10. Dual Music Resolution & Streaming Pipeline (yt-dlp + play-dl)
+- **Primary Pipeline:** Audio streaming and track metadata resolution use `yt-dlp` as the primary resolver to bypass signature block limits. For direct YouTube URLs, the system first attempts to fast-resolve metadata using `play-dl` before falling back to `yt-dlp`.
+- **Extractor Flags:** All `yt-dlp` command calls (streaming spawn processes and metadata extraction `exec` tasks) must include `--js-runtimes node`, `--remote-components ejs:github`, and `--extractor-args "youtube:player_client=android,web"` (which are automatically omitted when cookies are present to allow fallback to clients like `tv downgraded` which support cookies and bypass SABR streaming). To optimize metadata queries, we also pass `--flat-playlist`, `--no-check-certificates`, and `--no-call-home`.
+- **Netscape Cookies Support:** If a netscape-formatted cookies file path is defined in `YTDLP_COOKIES_PATH` (or if a `cookies.txt`/`cookie.txt` file exists in the project root directory as a fallback), it is automatically passed via the `--cookies` option to all `yt-dlp` executions to bypass age restrictions and bot detection.
+- **Metadata Cache System:** A fast in-memory cache (`metadataCache`) with a 30-minute TTL stores successfully resolved track metadata objects to eliminate redundant `yt-dlp` subprocess invocations and fast-track repeating user requests.
+- **Dynamic Presence Activity:** The bot presence status dynamically monitors music playback. When a song starts playing, the presence changes to `Listening {track_name}`. When stopped, paused, or when the voice channel is destroyed, it automatically resets to `Watching /help | /menu` (with status matching `config.activity.status` or `invisible` in development).
+- **Fallback Guard:** If `yt-dlp` fails due to a rate limit (`429` or `Too Many Requests`) or a session block, it must fail immediately and skip the `play-dl` fallback. If the process is killed due to a user-triggered skip or stop, it throws an `Aborted` error and exits silently.
+- **24/7 Autoplay:** When 24/7 mode is active and the queue is finished, the bot automatically selects and plays a random chill/lofi track from a predefined list to keep the voice channel active.
+- **Test Bypass:** To keep the test suite fast and robust, `yt-dlp` execution is skipped in test mode (`process.env.NODE_ENV === 'test'`), redirecting immediately to the mocked `play-dl` client.
+
+### 11. AI Moderation & 3-Layer Filter System
+- **Layer 1 (Pre-filter):** All message content must be pre-filtered locally in `src/moderation/preFilter.js` using robust regular expressions to match common variations of bad words (including space dividers and character repetition) before invoking the AI.
+- **Layer 2 (User Cooldown):** Enforces a 10-second cooldown in `src/moderation/cooldown.js` to prevent spamming the AI APIs.
+- **Layer 3 (AI Evaluation):** Forwards messages contextually to the Groq API (`llama-3.1-8b-instant`) in `src/moderation/aiAnalyzer.js` for final confirmation. If clean, it outputs `CLEAN` to ignore silently.
+- **Modularity:** Slash commands managing filters (e.g., `/bad-word`) must be mapped to an optional plugin structure (e.g., `badWordPlugin`) that defaults to **uninstalled** unless enabled on a per-guild basis.
+
+### 12. Anti-Phishing & Scam Link Filter
+- **Dual List Matching:** The bot verifies message URLs in `src/events/messageCreate.js` using a pre-fetched list of public scam domains (updating every 12 hours, cached in `data/scam_links.json`) and a custom list of server-specific domains stored in the Supabase table `custom_scam_links` (cached in memory and falling back to local `data/database.json`).
+- **Slash Commands Management:** Custom domains are managed via the `/scam-link` slash command (with subcommands `add`, `remove`, `list`), requiring `ManageGuild` permission.
+- **Warning and Logger Actions:** When a scam domain match is found:
+  - The message is deleted.
+  - A warning message using `V2Embed` (i18n localizable) is sent to the channel.
+  - A log containing the user and channel info is sent to a `#moderator-only` channel (if configured), tagging the owner/admin.
+- **V2 Component Limits:** To avoid Discord's `MESSAGE_CANNOT_USE_LEGACY_FIELDS_WITH_COMPONENTS_V2` API errors, the owner/admin ping (`content`) and the `V2Embed` (`components`) must be sent separately rather than combined in a single payload containing `IsComponentsV2`.
+- **Neat Separation:** The alert embed utilizes a native `SeparatorBuilder` with `.setDivider(true)` and `.setSpacing('small')` to separate section fields neatly.
 
 ---
 
 ## Logging Guidelines
-Always utilize the custom logger imported from `src/utils/logger.js`.
+Always utilize the custom logger imported from `src/utils/logger.js`. The console logger dynamically resolves and color-codes log output according to these recognized log types:
+- **`INIT` (Magenta)**: Matches bot initialization (e.g. startup logs, `patchPlayDl` scripts, etc.).
+- **`MSG` (Green)**: Matches guild/DM message activity logs.
+- **`FETCH` (Blue)**: Matches URL, file, or data fetching logs.
+- **`CMD` (BlueBright)**: Matches slash command operations (registration, deploy, etc.).
+- **`OBTAINIUM` (YellowBright)**: Matches Obtainium Watcher process logs.
+- **`SUCCSESS`/`DONE` (Green)**: Matches success states and completed tasks.
+- **`WARN` (Yellow)**: Matches warning logs.
+- **`ERROR`/`404` (Red)**: Matches errors and not-found responses.
+- **`UNKNOWN` (Gray)**: Fallback category for other generic logs.
+
+Usage details:
 - Use `logger.info('message')` for standard info.
 - Use `logger.warn('message')` for non-blocking warnings.
 - Use `logger.error('message', error)` for catches and exceptions.
@@ -142,3 +216,5 @@ Test files are situated under the `tests/` directory (e.g. `tests/moderation.tes
 As an AI Agent, you must adhere to the branching workflow rules:
 * **Active Development**: All code modifications, new feature additions, and script improvements must be written, committed, and pushed on the **`dev`** branch using personal developer credentials (`razaeldotexe`).
 * **Stable Releases**: Changes must be merged into the **`release`** branch (default branch) using **Razael-Fox Bot** credentials (`bot@razael-fox.my.id`). Do not push code directly to `release` from your own git profile; always use the bot credentials when merging/committing on this branch.
+* **Automated Release Scheduler**: A GitHub Actions workflow (`.github/workflows/scheduled-release.yml`) runs on a cron schedule every Saturday at 19:00 WIB (12:00 UTC). It automatically merges `dev` into `release` branch, runs tests, bumps the version using `npm run version:bump set "P-1.8"`, and pushes to the `release` branch using the bot credentials.
+

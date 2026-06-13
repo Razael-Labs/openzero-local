@@ -19,8 +19,10 @@ export default {
     }
 
     if (message.id === targetMessageId) {
-      const refType = (storedRef && storedRef.includes('://')) ? 'tautan' : 'ID';
-      logger.info(`[Event] Monitored Obtainium message (${refType}: ${storedRef}) was deleted. Recreating...`);
+      const refType = storedRef && storedRef.includes('://') ? 'tautan' : 'ID';
+      logger.info(
+        `[Event] Monitored Obtainium message (${refType}: ${storedRef}) was deleted. Recreating...`
+      );
       await updateObtainiumMessage(client);
     }
   }

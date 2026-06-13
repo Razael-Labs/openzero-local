@@ -1,34 +1,41 @@
 // Managed by Razael-Fox Bot
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { SpecificColor, SequentialColor, RandomColor } from './src/utils/color.js';
+import { SequentialColor } from './src/utils/color.js';
 
-// Load environment variables dynamically
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const nodeEnv = process.env.NODE_ENV || 'development';
-const isTest = nodeEnv === 'test';
-
+const isTest = process.env.NODE_ENV === 'test';
 const dbName = isTest ? 'database-test.json' : 'database.json';
 const dbDir = path.resolve(__dirname, 'data');
 const dbPath = path.join(dbDir, dbName);
+const overridesPath = path.join(dbDir, 'config-overrides.json');
 
 export const config = {
-  // Global Bot Credentials & Environment config
+  // Global Credentials & Environment
   token: process.env.DISCORD_TOKEN,
   clientId: process.env.CLIENT_ID,
   guildId: process.env.GUILD_ID,
-  nodeEnv: nodeEnv,
+  ownerId: process.env.OWNER_ID,
+  nodeEnv: process.env.NODE_ENV || 'development',
   sentryDsn: process.env.SENTRY_DSN,
+  language: process.env.BOT_LANGUAGE || 'en',
 
   // Supabase Configuration
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY
+  },
+
+  // Groq API Configuration
+  groq: {
+    apiKey: process.env.GROQ_API_KEY,
+    model: process.env.GROQ_MODEL || 'gemma2-9b-it'
   },
 
   // Local JSON Database Configuration
@@ -38,44 +45,113 @@ export const config = {
     path: dbPath
   },
 
-  // Strategi pewarnaan embed (SpecificColor, SequentialColor, atau RandomColor)
-  colorStrategy: new SequentialColor([
-    0x6e4cc1, // #6e4cc1
-    0x242221, // #242221
-    0xf58e25, // #f58e25
-    0xfdfdfd  // #fdfdfd
-  ]),
-
-  // Warna aksen utama embed
+  // Embed Colors (Sequential Rotation Strategy)
+  colorStrategy: new SequentialColor([0x6e4cc1, 0x242221, 0xf58e25, 0xfdfdfd]),
   get embedColor() {
     return this.colorStrategy.getColor();
   },
 
+  // Bot Status & Presence Config
   activity: {
-    name: 'Grand Theft Auto VI',
-    // Pilihan tipe: PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
-    type: 'PLAYING',
-    // Pilihan status: online, idle, dnd, invisible (Hanya berlaku di mode production)
+    name: '/help | /menu',
+    type: 'WATCHING',
     status: 'online',
-    details: 'Exploring Leonida & Vice City',
-    state: 'Campaign: 68% Completed',
+    details: 'View commands helper',
+    state: 'Active',
     assets: {
-      largeImage: 'https://discord.c99.nl/widget/theme-1/1511151761660838049.png', // Discord C99 Status Widget
-      largeText: 'Grand Theft Auto VI',
-      smallImage: 'https://i.imgur.com/pYVjN18.png', // Rockstar Games Logo
-      smallText: 'Leonida County'
+      largeImage: 'https://discord.c99.nl/widget/theme-1/1511151761660838049.png',
+      largeText: 'OpenZero Bot',
+      smallImage: 'https://i.imgur.com/pYVjN18.png',
+      smallText: 'Support System'
     },
     buttons: [
       {
-        label: 'Join Game',
-        url: 'https://discord.gg/openzero' // Target URL untuk tombol Join Game
+        label: 'Support Server',
+        url: 'https://discord.gg/openzero'
       }
     ]
   },
 
-  // Target Discord Channel dan Message ID untuk list Obtainium
+  // Obtainium Dashboard Message Config
   obtainium: {
     channelId: '1511326472219001014',
     messageId: '1511327184546042019'
+  },
+
+  // New Guild Member Welcome Channel Config
+  welcome: {
+    channelId: '1511326472219001014'
   }
 };
+
+const defaults = {
+  'welcome.channelId': '1511326472219001014',
+  'obtainium.channelId': '1511326472219001014',
+  'obtainium.messageId': '1511327184546042019',
+  'activity.name': '/help | /menu',
+  'activity.type': 'WATCHING',
+  'activity.status': 'online',
+  'language': process.env.BOT_LANGUAGE || 'en',
+  'groq.model': process.env.GROQ_MODEL || 'gemma2-9b-it'
+};
+
+function setNestedValue(obj, keyPath, value) {
+  const parts = keyPath.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!current[parts[i]]) current[parts[i]] = {};
+    current = current[parts[i]];
+  }
+  current[parts[parts.length - 1]] = value;
+}
+
+function deleteNestedValue(obj, keyPath) {
+  const parts = keyPath.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!current[parts[i]]) return;
+    current = current[parts[i]];
+  }
+  delete current[parts[parts.length - 1]];
+}
+
+// Load overrides on startup
+let overrides = {};
+try {
+  if (fs.existsSync(overridesPath)) {
+    overrides = JSON.parse(fs.readFileSync(overridesPath, 'utf8'));
+    for (const [key, val] of Object.entries(overrides)) {
+      setNestedValue(config, key, val);
+    }
+  }
+} catch {
+  overrides = {};
+}
+
+export function updateConfigValue(keyPath, value) {
+  setNestedValue(config, keyPath, value);
+  overrides[keyPath] = value;
+  try {
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    fs.writeFileSync(overridesPath, JSON.stringify(overrides, null, 2), 'utf8');
+  } catch (err) {
+    // Ignore
+  }
+}
+
+export function unsetConfigValue(keyPath) {
+  const defaultValue = defaults[keyPath];
+  if (defaultValue !== undefined) {
+    setNestedValue(config, keyPath, defaultValue);
+  } else {
+    deleteNestedValue(config, keyPath);
+  }
+  delete overrides[keyPath];
+  try {
+    fs.writeFileSync(overridesPath, JSON.stringify(overrides, null, 2), 'utf8');
+  } catch (err) {
+    // Ignore
+  }
+}

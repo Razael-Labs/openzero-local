@@ -37,8 +37,8 @@ const mockTracks = [
 
 // Import command dynamically after mocking
 const musicSearchCmd = (await import('../src/commands/utility/musicSearch.js')).default;
-const { musicSearchCache, generateMusicSearchEmbed, getLyricsForTrack } = await import('../src/commands/utility/musicSearch.js');
-
+const { musicSearchCache, generateMusicSearchEmbed, getLyricsForTrack } =
+  await import('../src/commands/utility/musicSearch.js');
 
 describe('Music Search Slash Command', () => {
   let mockInteraction;
@@ -54,7 +54,7 @@ describe('Music Search Slash Command', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock the global fetch
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
@@ -82,7 +82,7 @@ describe('Music Search Slash Command', () => {
 
     const replyArg = mockInteraction.editReply.mock.calls[0][0];
     expect(replyArg.components).toBeDefined();
-    
+
     // Verify that session was stored in cache
     expect(musicSearchCache.size).toBe(1);
   });
@@ -98,7 +98,7 @@ describe('Music Search Slash Command', () => {
     const { embed } = generateMusicSearchEmbed(sessionId, 0);
     expect(embed).toBeDefined();
     expect(embed.components).toBeDefined();
-    
+
     // Clean up
     musicSearchCache.delete(sessionId);
   });
@@ -137,10 +137,12 @@ describe('Music Search Slash Command', () => {
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue([{
-        plainLyrics: 'Some plain lyrics',
-        syncedLyrics: '[00:10.00] Some synced lyrics'
-      }])
+      json: jest.fn().mockResolvedValue([
+        {
+          plainLyrics: 'Some plain lyrics',
+          syncedLyrics: '[00:10.00] Some synced lyrics'
+        }
+      ])
     });
 
     const embed = await getLyricsForTrack(sessionId, 0, 'id');

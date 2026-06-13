@@ -10,4 +10,5 @@ yarn-error.log*
 .DS_Store
 /data/database.json
 /data/database-test.json
+/data/icons/
 /brain/

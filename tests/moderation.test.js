@@ -103,12 +103,15 @@ describe('Moderation Commands', () => {
       },
       channels: {
         cache: new Map([
-          ['channel_1', {
-            isTextBased: () => true,
-            permissionOverwrites: {
-              edit: jest.fn().mockResolvedValue(true)
+          [
+            'channel_1',
+            {
+              isTextBased: () => true,
+              permissionOverwrites: {
+                edit: jest.fn().mockResolvedValue(true)
+              }
             }
-          }]
+          ]
         ])
       }
     };
@@ -130,7 +133,12 @@ describe('Moderation Commands', () => {
       },
       channel: {
         name: 'general',
-        bulkDelete: jest.fn().mockResolvedValue(new Map([['msg_1', {}], ['msg_2', {}]]))
+        bulkDelete: jest.fn().mockResolvedValue(
+          new Map([
+            ['msg_1', {}],
+            ['msg_2', {}]
+          ])
+        )
       },
       deferReply: jest.fn().mockResolvedValue(true),
       editReply: jest.fn().mockResolvedValue(true),
@@ -154,9 +162,9 @@ describe('Moderation Commands', () => {
 
     test('should fail if target is not in the server', async () => {
       mockGuild.members.fetch.mockRejectedValueOnce(new Error('Member not found'));
-      
+
       await kick.execute(mockInteraction);
-      
+
       expect(mockTargetMember.kick).not.toHaveBeenCalled();
       expect(mockInteraction.editReply).toHaveBeenCalled();
       const replyArg = mockInteraction.editReply.mock.calls[0][0];
@@ -242,7 +250,10 @@ describe('Moderation Commands', () => {
 
       await unmute.execute(mockInteraction);
 
-      expect(mockTargetMember.voice.setMute).toHaveBeenCalledWith(false, 'Mod#0002: No reason provided');
+      expect(mockTargetMember.voice.setMute).toHaveBeenCalledWith(
+        false,
+        'Mod#0002: No reason provided'
+      );
     });
   });
 
@@ -278,7 +289,10 @@ describe('Moderation Commands', () => {
 
       await deafen.execute(mockInteraction);
 
-      expect(mockTargetMember.voice.setDeafen).toHaveBeenCalledWith(true, 'Mod#0002: No reason provided');
+      expect(mockTargetMember.voice.setDeafen).toHaveBeenCalledWith(
+        true,
+        'Mod#0002: No reason provided'
+      );
     });
   });
 
@@ -289,7 +303,10 @@ describe('Moderation Commands', () => {
 
       await undeafen.execute(mockInteraction);
 
-      expect(mockTargetMember.voice.setDeafen).toHaveBeenCalledWith(false, 'Mod#0002: No reason provided');
+      expect(mockTargetMember.voice.setDeafen).toHaveBeenCalledWith(
+        false,
+        'Mod#0002: No reason provided'
+      );
     });
   });
 

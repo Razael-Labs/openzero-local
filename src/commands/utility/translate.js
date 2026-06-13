@@ -38,7 +38,8 @@ export default {
       const detectedLang = res.raw && res.raw.src ? res.raw.src.toUpperCase() : 'UNKNOWN';
 
       const successEmbed = new V2Embed()
-        .setTitle('Translate to English 🇺🇸')
+        .setContext(interaction)
+        .setTitle('Translate to English 🌐')
         .setDescription(
           `**Teks Asli (${detectedLang}):**\n` +
             `> ${originalText.length > 500 ? originalText.slice(0, 500) + '...' : originalText}\n\n` +
@@ -53,9 +54,9 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
 
-      logger.info(`[Translate Command] Sukses menerjemahkan pesan dari (${detectedLang}) ke EN`);
+      logger.info(`[Translate Command] Successfully translated message from (${detectedLang}) to EN`);
     } catch (error) {
-      logger.error('[Translate Command] Gagal melakukan terjemahan:', error);
+      logger.error('[Translate Command] Failed to perform translation:', error);
 
       const errorEmbed = new V2Embed()
         .setTitle('Terjemahan Gagal')

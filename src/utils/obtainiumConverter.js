@@ -133,7 +133,12 @@ export function toYaml(data) {
  * @param {string} outputPathYaml Target path for enriched YAML
  * @param {object} options Options like { enrich: true }
  */
-export async function convertObtainiumFile(inputPath, outputPathJson, outputPathYaml, options = { enrich: true }) {
+export async function convertObtainiumFile(
+  inputPath,
+  outputPathJson,
+  outputPathYaml,
+  options = { enrich: true }
+) {
   logger.info(`[Obtainium Converter] Reading raw export from: ${inputPath}`);
   const rawData = await fs.readFile(inputPath, 'utf-8');
   const parsedData = JSON.parse(rawData);
@@ -149,13 +154,17 @@ export async function convertObtainiumFile(inputPath, outputPathJson, outputPath
     const existingRaw = await fs.readFile(outputPathJson, 'utf-8');
     const existingApps = JSON.parse(existingRaw);
     if (Array.isArray(existingApps)) {
-      existingApps.forEach(app => {
+      existingApps.forEach((app) => {
         if (app.id) existingAppsMap.set(app.id, app);
       });
-      logger.info(`[Obtainium Converter] Loaded ${existingAppsMap.size} existing apps from ${outputPathJson} to reuse descriptions/READMEs`);
+      logger.info(
+        `[Obtainium Converter] Loaded ${existingAppsMap.size} existing apps from ${outputPathJson} to reuse descriptions/READMEs`
+      );
     }
   } catch {
-    logger.info('[Obtainium Converter] No existing enriched JSON found (or failed to read). Fetching all details from scratch.');
+    logger.info(
+      '[Obtainium Converter] No existing enriched JSON found (or failed to read). Fetching all details from scratch.'
+    );
   }
 
   const result = [];
@@ -164,7 +173,7 @@ export async function convertObtainiumFile(inputPath, outputPathJson, outputPath
 
   for (let i = 0; i < apps.length; i++) {
     const app = apps[i];
-    
+
     // Check if we can reuse the description/README
     const existing = existingAppsMap.get(app.id);
     let details = { description: '', readme: '' };
@@ -180,7 +189,9 @@ export async function convertObtainiumFile(inputPath, outputPathJson, outputPath
       const parsed = parseRepoUrl(app.url);
       if (parsed) {
         const { host, owner, repo } = parsed;
-        logger.info(`[Obtainium Converter] [${i + 1}/${apps.length}] Fetching remote details for ${app.name} (${owner}/${repo})...`);
+        logger.info(
+          `[Obtainium Converter] [${i + 1}/${apps.length}] Fetching remote details for ${app.name} (${owner}/${repo})...`
+        );
         if (host.includes('github.com')) {
           details = await fetchGithubRepo(owner, repo);
         } else if (host.includes('codeberg.org')) {

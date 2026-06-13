@@ -1,4 +1,5 @@
 import './instrument.js';
+import './scripts/patchPlayDl.js';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { config } from './config.js';
 import logger from './utils/logger.js';
@@ -7,12 +8,12 @@ import { loadCommands } from './handlers/commandHandler.js';
 
 import { VERSION } from './version.js';
 
-// Inisialisasi Discord Client dengan Intents yang diperlukan
+// Initialize Discord Client with required Intents
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent, // Memerlukan aktivasi di Discord Developer Portal
+    GatewayIntentBits.MessageContent, // Requires activation in Discord Developer Portal
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMembers,
@@ -21,9 +22,9 @@ const client = new Client({
   partials: [Partials.Channel, Partials.Message]
 });
 
-// Menangani Error Global agar Bot tidak crash tiba-tiba
+// Handle Global Errors to prevent sudden crashes
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection di:', promise, 'alasan:', reason);
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 process.on('uncaughtException', (error) => {
@@ -31,28 +32,28 @@ process.on('uncaughtException', (error) => {
 });
 
 async function init() {
-  logger.info(`[Bot] Memulai inisialisasi bot v${VERSION}...`);
+  logger.info(`[Bot] Starting bot initialization v${VERSION}...`);
 
-  // Memuat Commands dan Events
+  // Load Commands and Events
   await loadCommands(client);
   await loadEvents(client);
 
   const token = config.token;
   if (!token) {
     logger.error(
-      '[Bot] Token Discord (DISCORD_TOKEN) tidak ditemukan di konfigurasi/file .env! Bot tidak dapat login.'
+      '[Bot] Discord Token (DISCORD_TOKEN) not found in config/env! The bot cannot login.'
     );
     process.exit(1);
   }
 
-  // Melakukan login ke Discord
+  // Perform login to Discord
   try {
     await client.login(token);
   } catch (error) {
-    logger.error('[Bot] Gagal melakukan login ke Discord:', error);
+    logger.error('[Bot] Failed to login to Discord:', error);
     process.exit(1);
   }
 }
 
-// Jalankan fungsi inisialisasi
+// Run initialization function
 init();

@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Memuat semua command dari subfolder direktori ../commands ke dalam client.commands
+ * Loads all commands from the subfolders of the ../commands directory into client.commands
  * @param {import('discord.js').Client} client
  */
 export async function loadCommands(client) {
@@ -17,7 +17,7 @@ export async function loadCommands(client) {
   const commandsPath = path.join(__dirname, '../commands');
 
   if (!fs.existsSync(commandsPath)) {
-    logger.warn(`Direktori commands tidak ditemukan di ${commandsPath}`);
+    logger.warn(`Commands directory not found at ${commandsPath}`);
     return;
   }
 
@@ -26,7 +26,7 @@ export async function loadCommands(client) {
   for (const folder of commandFolders) {
     const folderPath = path.join(commandsPath, folder);
 
-    // Pastikan path tersebut adalah direktori (misalnya utility, moderation, dll)
+    // Make sure the path is a directory (e.g. utility, moderation, etc.)
     if (!fs.statSync(folderPath).isDirectory()) continue;
 
     const commandFiles = fs.readdirSync(folderPath).filter((file) => file.endsWith('.js'));
@@ -40,21 +40,24 @@ export async function loadCommands(client) {
         const command = commandModule.default;
 
         if (!command || !command.data || !command.execute) {
-          logger.warn(`File command ${file} tidak memiliki properti 'data' atau fungsi 'execute'.`);
+          logger.warn(
+            `Command file ${file} does not have a 'data' property or an 'execute' function.`
+          );
           continue;
         }
 
+        command.category = folder;
         client.commands.set(command.data.name, command);
-        logger.info(`[Command Handler] Berhasil memuat command: /${command.data.name}`);
+        logger.info(`[Command Handler] Loaded command: /${command.data.name}`);
       } catch (error) {
-        logger.error(`[Command Handler] Gagal memuat file command ${file}:`, error);
+        logger.error(`[Command Handler] Failed to load command file ${file}:`, error);
       }
     }
   }
 }
 
 /**
- * Mendaftarkan slash commands yang telah di-load ke Discord API secara global
+ * Registers loaded slash commands to the Discord API globally or to a specific guild
  * @param {import('discord.js').Client} client
  */
 export async function deployCommands(client) {
@@ -64,7 +67,7 @@ export async function deployCommands(client) {
 
   if (!token || !clientId) {
     logger.warn(
-      '[Command Handler] Token atau Client ID tidak diatur. Melewati registrasi Slash Commands.'
+      '[Command Handler] Token or Client ID is not configured. Skipping Slash Commands registration.'
     );
     return;
   }
@@ -75,7 +78,7 @@ export async function deployCommands(client) {
   }
 
   if (commandData.length === 0) {
-    logger.info('[Command Handler] Tidak ada command untuk didaftarkan.');
+    logger.info('[Command Handler] No commands to register.');
     return;
   }
 
@@ -84,24 +87,24 @@ export async function deployCommands(client) {
   try {
     if (guildId && guildId.trim() !== '') {
       logger.info(
-        `[Command Handler] Memulai pendaftaran ${commandData.length} slash commands secara instan ke Guild (Server) ID: ${guildId}...`
+        `[Command Handler] Starting registration of ${commandData.length} slash commands instantly to Guild ID: ${guildId}...`
       );
 
       await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandData });
 
       logger.info(
-        `[Command Handler] Sukses meregistrasikan slash commands ke Guild ID: ${guildId}!`
+        `[Command Handler] Successfully registered slash commands to Guild ID: ${guildId}!`
       );
     } else {
       logger.info(
-        `[Command Handler] Memulai pendaftaran ${commandData.length} slash commands secara global (bisa memakan waktu hingga 1 jam)...`
+        `[Command Handler] Starting registration of ${commandData.length} slash commands globally (can take up to 1 hour)...`
       );
 
       await rest.put(Routes.applicationCommands(clientId), { body: commandData });
 
-      logger.info('[Command Handler] Sukses meregistrasikan slash commands secara global!');
+      logger.info('[Command Handler] Successfully registered slash commands globally!');
     }
   } catch (error) {
-    logger.error('[Command Handler] Terjadi kesalahan saat meregistrasikan slash commands:', error);
+    logger.error('[Command Handler] Error occurred while registering slash commands:', error);
   }
 }

@@ -17,8 +17,8 @@ function findLatestExportFile() {
   try {
     const files = fs.readdirSync(DATA_DIR);
     const exportFiles = files
-      .filter(f => f.startsWith('obtainium-export-') && f.endsWith('.json'))
-      .map(f => ({
+      .filter((f) => f.startsWith('obtainium-export-') && f.endsWith('.json'))
+      .map((f) => ({
         name: f,
         path: path.join(DATA_DIR, f),
         time: fs.statSync(path.join(DATA_DIR, f)).mtimeMs
@@ -29,7 +29,7 @@ function findLatestExportFile() {
       return exportFiles[0].path;
     }
   } catch (error) {
-    logger.error('Gagal memindai folder data untuk file export Obtainium:', error);
+    logger.error('Failed to scan data directory for Obtainium export files:', error);
   }
   return null;
 }
@@ -39,28 +39,32 @@ async function start() {
   let inputPath = process.argv[2];
 
   if (!inputPath) {
-    logger.info('Mencari file export Obtainium terbaru di folder data...');
+    logger.info('Searching for the latest Obtainium export file in the data folder...');
     inputPath = findLatestExportFile();
   }
 
   if (!inputPath) {
-    logger.error('Error: Tidak ditemukan file obtainium-export-*.json di folder data!');
-    logger.info('Silakan letakkan file export Obtainium (.json) di folder data/ atau berikan path file sebagai argumen.');
+    logger.error('Error: No obtainium-export-*.json file found in the data folder!');
+    logger.info(
+      'Please place your Obtainium export file (.json) in the data/ folder or provide the file path as an argument.'
+    );
     process.exit(1);
   }
 
-  logger.info(`Memproses file Obtainium: ${path.basename(inputPath)}`);
-  
-  const stats = await convertObtainiumFile(inputPath, DEFAULT_OUTPUT_JSON, DEFAULT_OUTPUT_YAML, { enrich: true });
-  
-  logger.info('=== Hasil Konversi ===');
-  logger.info(`Total Aplikasi: ${stats.total}`);
-  logger.info(`Data Direuse  : ${stats.reused}`);
-  logger.info(`Data Diambil  : ${stats.fetched}`);
-  logger.info('Proses penarikan dan konversi data selesai dengan sukses!');
+  logger.info(`Processing Obtainium file: ${path.basename(inputPath)}`);
+
+  const stats = await convertObtainiumFile(inputPath, DEFAULT_OUTPUT_JSON, DEFAULT_OUTPUT_YAML, {
+    enrich: true
+  });
+
+  logger.info('=== Conversion Results ===');
+  logger.info(`Total Applications: ${stats.total}`);
+  logger.info(`Reused Data  : ${stats.reused}`);
+  logger.info(`Fetched Data : ${stats.fetched}`);
+  logger.info('Data fetching and conversion completed successfully!');
 }
 
 start().catch((err) => {
-  logger.error('Terjadi kesalahan fatal:', err);
+  logger.error('A fatal error occurred:', err);
   process.exit(1);
 });

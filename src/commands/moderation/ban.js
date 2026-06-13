@@ -18,7 +18,7 @@ export default {
         .setDescription('Delete message history from this user')
         .setRequired(false)
         .addChoices(
-          { name: 'Don\'t Delete', value: '0' },
+          { name: "Don't Delete", value: '0' },
           { name: 'Previous 24 Hours', value: '86400' },
           { name: 'Previous 7 Days', value: '604800' }
         )

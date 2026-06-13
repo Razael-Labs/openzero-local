@@ -1,8 +1,4 @@
-import {
-  ContextMenuCommandBuilder,
-  ApplicationCommandType,
-  MessageFlags
-} from 'discord.js';
+import { ContextMenuCommandBuilder, ApplicationCommandType, MessageFlags } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import { getUserMessages } from '../../utils/supabase.js';
 import { t } from '../../utils/i18n.js';
@@ -42,14 +38,16 @@ export default {
         for (const record of displayRecords) {
           const timestamp = Math.floor(new Date(record.created_at).getTime() / 1000);
           const timeTag = `<t:${timestamp}:R>`;
-          const channelDisplay = record.channel_name ? `#${record.channel_name}` : `<#${record.channel_id}>`;
-          
+          const channelDisplay = record.channel_name
+            ? `#${record.channel_name}`
+            : `<#${record.channel_id}>`;
+
           // Potong isi pesan jika terlalu panjang
           let msgContent = record.content || '';
           if (msgContent.length > 150) {
             msgContent = msgContent.substring(0, 147) + '...';
           }
-          
+
           description += `*   [${timeTag}] ${t('chatAt', locale)} **${channelDisplay}**: \`${msgContent.replace(/`/g, '\\`').replace(/\n/g, ' ')}\`\n`;
         }
 
@@ -69,11 +67,11 @@ export default {
       });
 
       logger.info(
-        `[Messages Record Command] Sukses menampilkan rekaman pesan (${records.length} total) untuk ${targetUser.tag}`
+        `[Messages Record Command] Successfully displayed message records (${records.length} total) for ${targetUser.tag}`
       );
     } catch (err) {
-      logger.error('[Messages Record Command] Gagal mengambil rekaman pesan:', err);
-      
+      logger.error('[Messages Record Command] Failed to fetch message records:', err);
+
       const errorEmbed = new V2Embed()
         .setTitle(t('errorTitle', locale))
         .setDescription(t('messagesRecordError', locale))

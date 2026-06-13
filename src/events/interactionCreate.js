@@ -9,7 +9,7 @@ import {
 import logger from '../utils/logger.js';
 import { V2Embed } from '../utils/v2Embed.js';
 import { getObtainiumEmbed } from '../utils/obtainiumHelper.js';
-import { Symbols } from '../utils/symbols.js';
+import { Symbols, resolveEmoji } from '../utils/symbols.js';
 
 const cooldowns = new Collection();
 
@@ -34,7 +34,7 @@ export default {
               .setCustomId('ping_refresh')
               .setLabel('Ukur Ulang')
               .setStyle(ButtonStyle.Primary)
-              .setEmoji('🔄')
+              .setEmoji(resolveEmoji(interaction.guild, '🔄'))
           );
 
           const embed = new V2Embed()
@@ -53,10 +53,10 @@ export default {
           });
 
           logger.info(
-            `[Button Clicked] ping_refresh diproses untuk ${interaction.user.tag} (Latency: ${latency}ms)`
+            `[Button Clicked] ping_refresh processed for ${interaction.user.tag} (Latency: ${latency}ms)`
           );
         } catch (error) {
-          logger.error('[Button Error] Gagal memproses interaksi tombol ping_refresh:', error);
+          logger.error('[Button Error] Failed to process button interaction ping_refresh:', error);
         }
       } else if (interaction.customId.startsWith('obtainium_page_')) {
         try {
@@ -72,11 +72,11 @@ export default {
           });
 
           logger.info(
-            `[Button Clicked] ${interaction.customId} diproses untuk ${interaction.user.tag}`
+            `[Button Clicked] ${interaction.customId} processed for ${interaction.user.tag}`
           );
         } catch (error) {
           logger.error(
-            `[Button Error] Gagal memproses interaksi tombol ${interaction.customId}:`,
+            `[Button Error] Failed to process button interaction ${interaction.customId}:`,
             error
           );
         }
@@ -90,9 +90,7 @@ export default {
           const pageIndex = parseInt(parts[3], 10) || 0;
           const sessionId = parts.slice(4).join('_');
 
-          const { generateMusicSearchEmbed } = await import(
-            '../commands/utility/musicSearch.js'
-          );
+          const { generateMusicSearchEmbed } = await import('../commands/utility/musicSearch.js');
           const { embed } = generateMusicSearchEmbed(sessionId, pageIndex, interaction.locale);
 
           await interaction.editReply({
@@ -101,13 +99,10 @@ export default {
           });
 
           logger.info(
-            `[Button Clicked] ${interaction.customId} diproses (Page: ${pageIndex}) untuk ${interaction.user.tag}`
+            `[Button Clicked] ${interaction.customId} processed (Page: ${pageIndex}) for ${interaction.user.tag}`
           );
         } catch (error) {
-          logger.error(
-            '[Button Error] Gagal memproses interaksi tombol music search:',
-            error
-          );
+          logger.error('[Button Error] Failed to process music search button interaction:', error);
         }
       } else if (interaction.customId.startsWith('music_search_lyrics_')) {
         try {
@@ -118,9 +113,7 @@ export default {
           const trackIndex = parseInt(parts[3], 10) || 0;
           const sessionId = parts.slice(4).join('_');
 
-          const { getLyricsForTrack } = await import(
-            '../commands/utility/musicSearch.js'
-          );
+          const { getLyricsForTrack } = await import('../commands/utility/musicSearch.js');
           const embed = await getLyricsForTrack(sessionId, trackIndex, interaction.locale);
 
           await interaction.editReply({
@@ -129,11 +122,53 @@ export default {
           });
 
           logger.info(
-            `[Button Clicked] ${interaction.customId} diproses (Track Index: ${trackIndex}) untuk ${interaction.user.tag}`
+            `[Button Clicked] ${interaction.customId} processed (Track Index: ${trackIndex}) for ${interaction.user.tag}`
           );
         } catch (error) {
           logger.error(
-            `[Button Error] Gagal memproses lirik untuk tombol ${interaction.customId}:`,
+            `[Button Error] Failed to process lyrics for button ${interaction.customId}:`,
+            error
+          );
+        }
+      } else if (interaction.customId.startsWith('help_cat_')) {
+        try {
+          await interaction.deferUpdate();
+          const category = interaction.customId.replace('help_cat_', '');
+          const { generateHelpEmbed } = await import('../commands/utility/help.js');
+          const embed = generateHelpEmbed(
+            interaction.client,
+            interaction.locale,
+            category,
+            interaction
+          );
+
+          await interaction.editReply({
+            components: [embed],
+            flags: MessageFlags.IsComponentsV2
+          });
+
+          logger.info(
+            `[Button Clicked] ${interaction.customId} processed (Category: ${category}) for ${interaction.user.tag}`
+          );
+        } catch (error) {
+          logger.error(
+            `[Button Error] Failed to process button interaction ${interaction.customId}:`,
+            error
+          );
+        }
+      }
+      return;
+    }
+
+    // Memproses Autocomplete
+    if (interaction.isAutocomplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (command && typeof command.autocomplete === 'function') {
+        try {
+          await command.autocomplete(interaction);
+        } catch (error) {
+          logger.error(
+            `[Autocomplete Error] Failed to process autocomplete for /${interaction.commandName}:`,
             error
           );
         }

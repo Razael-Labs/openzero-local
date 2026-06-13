@@ -9,6 +9,7 @@ import {
 } from 'discord.js';
 import { V2Embed } from '../../utils/v2Embed.js';
 import logger from '../../utils/logger.js';
+import { resolveEmoji } from '../../utils/symbols.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -100,7 +101,7 @@ export default {
             .setLabel('Copy Webhook URL')
             .setStyle(ButtonStyle.Link)
             .setURL(webhook.url)
-            .setEmoji('📋')
+            .setEmoji(resolveEmoji(interaction.guild, '📋'))
         );
 
         const embedSuccess = new V2Embed()
@@ -181,7 +182,7 @@ export default {
             .setLabel('Copy Webhook URL')
             .setStyle(ButtonStyle.Link)
             .setURL(webhook.url)
-            .setEmoji('📋')
+            .setEmoji(resolveEmoji(interaction.guild, '📋'))
         );
 
         const channel =

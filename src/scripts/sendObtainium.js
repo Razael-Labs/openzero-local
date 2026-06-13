@@ -9,20 +9,20 @@ const client = new Client({
 
 client.once('ready', async () => {
   logger.info(
-    `[Script] Terhubung sebagai ${client.user.tag}. Menyiapkan pembaruan daftar Obtainium...`
+    `[Script] Connected as ${client.user.tag}. Preparing Obtainium list update...`
   );
 
   try {
     const success = await updateObtainiumMessage(client);
     if (success) {
-      logger.info('[Script] Sukses memperbarui/mengirim pesan Obtainium!');
+      logger.info('[Script] Successfully updated/sent Obtainium message!');
       process.exit(0);
     } else {
-      logger.error('[Script] Gagal memperbarui pesan Obtainium.');
+      logger.error('[Script] Failed to update Obtainium message.');
       process.exit(1);
     }
   } catch (error) {
-    logger.error('[Script] Terjadi kesalahan saat memproses Obtainium:', error);
+    logger.error('[Script] Error while processing Obtainium:', error);
     process.exit(1);
   }
 });
@@ -30,7 +30,7 @@ client.once('ready', async () => {
 // Login ke Discord
 const token = config.token;
 if (!token) {
-  logger.error('[Script] Token tidak diatur di konfigurasi/file .env!');
+  logger.error('[Script] Token is not set in configuration/.env file!');
   process.exit(1);
 }
 

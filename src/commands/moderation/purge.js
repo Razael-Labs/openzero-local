@@ -47,10 +47,10 @@ export default {
       });
 
       logger.info(
-        `[Moderation] ${interaction.user.tag} membersihkan ${deletedCount} pesan di channel #${channel.name}`
+        `[Moderation] ${interaction.user.tag} cleared ${deletedCount} messages in channel #${channel.name}`
       );
     } catch (error) {
-      logger.error('[Moderation Error] Gagal melakukan purge:', error);
+      logger.error('[Moderation Error] Failed to purge:', error);
       const embed = new V2Embed()
         .setTitle('System Error ❌')
         .setDescription('Terjadi kesalahan saat menghapus pesan di saluran ini.')

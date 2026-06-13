@@ -11,6 +11,7 @@ import { V2Embed } from '../../utils/v2Embed.js';
 import { getMessageCount } from '../../utils/database.js';
 import { t } from '../../utils/i18n.js';
 import logger from '../../utils/logger.js';
+import { resolveEmoji } from '../../utils/symbols.js';
 
 export default {
   data: new ContextMenuCommandBuilder()
@@ -37,7 +38,7 @@ export default {
     try {
       fullUser = await interaction.client.users.fetch(targetUser.id, { force: true });
     } catch (err) {
-      logger.error('[User Info Command] Gagal fetch user:', err);
+      logger.error('[User Info Command] Failed to fetch user:', err);
     }
 
     const createdTimestamp = Math.floor(targetUser.createdTimestamp / 1000);
@@ -141,7 +142,10 @@ export default {
         }
       }
     }
-    const keyPermsString = keyPermissions.length > 0 ? keyPermissions.join(', ') : `${t('none', locale)} (Regular Member)`;
+    const keyPermsString =
+      keyPermissions.length > 0
+        ? keyPermissions.join(', ')
+        : `${t('none', locale)} (Regular Member)`;
 
     // Setup action buttons for PFP and Banner downloads
     const actionRow = new ActionRowBuilder();
@@ -150,7 +154,7 @@ export default {
         .setLabel(t('downloadPfp', locale))
         .setStyle(ButtonStyle.Link)
         .setURL(globalAvatar)
-        .setEmoji('🖼️')
+        .setEmoji(resolveEmoji(interaction.guild, '🖼️'))
     );
 
     if (serverAvatar) {
@@ -159,7 +163,7 @@ export default {
           .setLabel(t('downloadServerAvatar', locale))
           .setStyle(ButtonStyle.Link)
           .setURL(serverAvatar)
-          .setEmoji('👤')
+          .setEmoji(resolveEmoji(interaction.guild, '👤'))
       );
     }
 
@@ -169,7 +173,7 @@ export default {
           .setLabel(t('downloadBanner', locale))
           .setStyle(ButtonStyle.Link)
           .setURL(bannerUrl)
-          .setEmoji('🏳️')
+          .setEmoji(resolveEmoji(interaction.guild, '🏳️'))
       );
     }
 

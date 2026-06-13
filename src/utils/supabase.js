@@ -17,9 +17,7 @@ const isSupabaseConfigured =
   supabaseKey &&
   supabaseKey !== 'YOUR_SUPABASE_ANON_KEY_HERE';
 
-export const supabaseClient = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseKey)
-  : null;
+export const supabaseClient = isSupabaseConfigured ? createClient(supabaseUrl, supabaseKey) : null;
 
 if (isSupabaseConfigured) {
   logger.info('[Supabase] Supabase client initialized successfully!');
@@ -30,38 +28,70 @@ if (isSupabaseConfigured) {
 /**
  * Record a user message to Supabase (or fallback to local DB)
  */
-export async function recordMessage({ guildId, channelId, channelName, userId, username, content, messageId, createdAt }) {
+export async function recordMessage({
+  guildId,
+  channelId,
+  channelName,
+  userId,
+  username,
+  content,
+  messageId,
+  createdAt
+}) {
   const dateStr = createdAt instanceof Date ? createdAt.toISOString() : createdAt;
 
   // Always write locally for local observability/fallback
-  recordMessageLocally(guildId, channelId, channelName, userId, username, content, messageId, dateStr);
+  recordMessageLocally(
+    guildId,
+    channelId,
+    channelName,
+    userId,
+    username,
+    content,
+    messageId,
+    dateStr
+  );
 
   if (!supabaseClient) {
     return { success: true, method: 'local' };
   }
 
   try {
-    const { error } = await supabaseClient.from('message_records').insert([
-      {
-        guild_id: guildId,
-        channel_id: channelId,
-        channel_name: channelName,
-        user_id: userId,
-        username: username,
-        content: content,
-        message_id: messageId,
-        created_at: dateStr
-      }
-    ]);
+    const { error } = await supabaseClient.from('message_records').upsert(
+      [
+        {
+          guild_id: guildId,
+          channel_id: channelId,
+          channel_name: channelName,
+          user_id: userId,
+          username: username,
+          content: content,
+          message_id: messageId,
+          created_at: dateStr
+        }
+      ],
+      { onConflict: 'message_id' }
+    );
 
     if (error) {
-      logger.error('[Supabase] Gagal menyimpan pesan:', error);
+      logger.error('[Supabase] Failed to save message:', error);
       return { success: false, error, method: 'supabase-error' };
     }
 
     return { success: true, method: 'supabase' };
   } catch (err) {
-    logger.error('[Supabase] Exception saat menyimpan pesan:', err);
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
+      logger.warn(
+        `[Supabase] Failed to save message to cloud (Offline/Network Error): ${err.message}. Saved locally.`
+      );
+    } else {
+      logger.error('[Supabase] Exception while saving message:', err);
+    }
     return { success: false, error: err, method: 'supabase-exception' };
   }
 }
@@ -85,14 +115,25 @@ export async function getUserMessages(guildId, userId) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      logger.error('[Supabase] Gagal fetch record pesan:', error);
+      logger.error('[Supabase] Failed to fetch message records:', error);
       // Fallback to local if Supabase fails
       return getUserMessagesLocally(guildId, userId);
     }
 
     return data || [];
   } catch (err) {
-    logger.error('[Supabase] Exception saat fetch record pesan:', err);
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
+      logger.warn(
+        `[Supabase] Failed to fetch from cloud (Offline/Network Error): ${err.message}. Fetching from local.`
+      );
+    } else {
+      logger.error('[Supabase] Exception while fetching message records:', err);
+    }
     return getUserMessagesLocally(guildId, userId);
   }
 }
@@ -115,14 +156,98 @@ export async function cleanupOldMessages() {
       .lt('created_at', sevenDaysAgo);
 
     if (error) {
-      logger.error('[Supabase] Gagal melakukan cleanup pesan lama:', error);
+      logger.error('[Supabase] Failed to clean up old messages:', error);
       return { success: false, error };
     }
 
-    logger.info('[Supabase] Pembersihan berkala (cleanup) pesan berumur > 7 hari selesai.');
+    logger.info('[Supabase] Routine cleanup of messages older than 7 days completed.');
     return { success: true, method: 'supabase' };
   } catch (err) {
-    logger.error('[Supabase] Exception saat cleanup pesan lama:', err);
+    if (
+      err.message &&
+      (err.message.includes('fetch failed') ||
+        err.message.includes('ENOTFOUND') ||
+        err.message.includes('ECONNREFUSED'))
+    ) {
+      logger.warn(`[Supabase] Cleanup postponed (Offline/Network Error): ${err.message}`);
+    } else {
+      logger.error('[Supabase] Exception during old messages cleanup:', err);
+    }
     return { success: false, error: err };
   }
 }
+
+/**
+ * Fetch custom scam links directly from Supabase.
+ * Throws an error if Supabase client is not configured.
+ * @returns {Promise<Array<{domain: string, guild_id: string, added_by: string}>>}
+ */
+export async function fetchCustomScamLinks() {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const { data, error } = await supabaseClient
+    .from('custom_scam_links')
+    .select('*');
+
+  if (error) {
+    logger.error('[Supabase] Failed to fetch custom scam links:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+/**
+ * Add custom scam link to Supabase.
+ * Throws an error if Supabase client is not configured.
+ */
+export async function addCustomScamLink(domain, guildId, addedBy) {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const normalizedDomain = domain.toLowerCase().trim();
+  const { error } = await supabaseClient
+    .from('custom_scam_links')
+    .upsert([
+      {
+        domain: normalizedDomain,
+        guild_id: guildId,
+        added_by: addedBy,
+        created_at: new Date().toISOString()
+      }
+    ], { onConflict: 'domain' });
+
+  if (error) {
+    logger.error(`[Supabase] Failed to add custom scam link ${normalizedDomain}:`, error);
+    throw error;
+  }
+
+  return { success: true };
+}
+
+/**
+ * Remove custom scam link from Supabase.
+ * Throws an error if Supabase client is not configured.
+ */
+export async function removeCustomScamLink(domain) {
+  if (!supabaseClient) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
+  }
+
+  const normalizedDomain = domain.toLowerCase().trim();
+  const { error } = await supabaseClient
+    .from('custom_scam_links')
+    .delete()
+    .eq('domain', normalizedDomain);
+
+  if (error) {
+    logger.error(`[Supabase] Failed to remove custom scam link ${normalizedDomain}:`, error);
+    throw error;
+  }
+
+  return { success: true };
+}
+

@@ -8,6 +8,7 @@ import {
 import { V2Embed } from '../../utils/v2Embed.js';
 import { t } from '../../utils/i18n.js';
 import logger from '../../utils/logger.js';
+import { resolveEmoji } from '../../utils/symbols.js';
 
 // Memory cache for active search sessions (tracks pagination)
 export const musicSearchCache = new Map();
@@ -154,9 +155,10 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
   let description = `${t('musicResultsFor', locale, { query })}\n`;
 
   const topTrack = pageItems[0];
-  const artworkUrl = topTrack && topTrack.artworkUrl100
-    ? topTrack.artworkUrl100.replace('100x100bb', '400x400bb')
-    : null;
+  const artworkUrl =
+    topTrack && topTrack.artworkUrl100
+      ? topTrack.artworkUrl100.replace('100x100bb', '400x400bb')
+      : null;
 
   if (artworkUrl) {
     description += `![Cover Art](${artworkUrl})\n\n`;
@@ -184,12 +186,12 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
     new ButtonBuilder()
       .setCustomId(`music_search_prev_${currentPage - 1}_${sessionId}`)
       .setStyle(ButtonStyle.Primary)
-      .setEmoji('⬅️')
+      .setEmoji(resolveEmoji(null, '⬅️'))
       .setDisabled(currentPage === 0),
     new ButtonBuilder()
       .setCustomId(`music_search_next_${currentPage + 1}_${sessionId}`)
       .setStyle(ButtonStyle.Primary)
-      .setEmoji('➡️')
+      .setEmoji(resolveEmoji(null, '➡️'))
       .setDisabled(currentPage >= totalPages - 1)
   );
 
@@ -205,7 +207,7 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
           .setCustomId(`music_search_lyrics_${start + index}_${sessionId}`)
           .setLabel(t('lyricsButtonLabel', locale, { index: globalIndex }))
           .setStyle(ButtonStyle.Secondary)
-          .setEmoji('🎤')
+          .setEmoji(resolveEmoji(null, '🎤'))
       );
     });
     actionRows.push(lyricsRow);
@@ -222,7 +224,7 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
             .setLabel(t('previewButtonLabel', locale, { index: globalIndex }))
             .setStyle(ButtonStyle.Link)
             .setURL(track.previewUrl)
-            .setEmoji('🎵')
+            .setEmoji(resolveEmoji(null, '🎵'))
         );
       }
     });
@@ -231,9 +233,7 @@ export function generateMusicSearchEmbed(sessionId, pageIndex, locale = 'id') {
     }
   }
 
-  const embed = new V2Embed()
-    .setTitle(t('musicSearchTitle', locale))
-    .setDescription(description);
+  const embed = new V2Embed().setTitle(t('musicSearchTitle', locale)).setDescription(description);
 
   for (const row of actionRows) {
     embed.addActionRow(row);
@@ -257,7 +257,7 @@ export default {
       id: 'Mencari lagu atau musik secara online.',
       'en-US': 'Search songs or music online.'
     })
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName('query')
         .setNameLocalizations({
@@ -281,7 +281,7 @@ export default {
     const locale = interaction.locale;
     await interaction.deferReply();
 
-    logger.info(`[Music Search] Menjalankan pencarian untuk: "${query}"`);
+    logger.info(`[Music Search] Running search for: "${query}"`);
     const results = await searchMusic(query);
 
     if (results.length === 0) {
@@ -305,9 +305,12 @@ export default {
     });
 
     // Clean up cache after 10 minutes to save memory
-    setTimeout(() => {
-      musicSearchCache.delete(sessionId);
-    }, 10 * 60 * 1000);
+    setTimeout(
+      () => {
+        musicSearchCache.delete(sessionId);
+      },
+      10 * 60 * 1000
+    );
 
     const { embed } = generateMusicSearchEmbed(sessionId, 0, locale);
 

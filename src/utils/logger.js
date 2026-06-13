@@ -6,6 +6,35 @@ import { config } from '../config.js';
 
 const { combine, timestamp, printf } = winston.format;
 
+// Translation mapping for logger types and messages to ensure consistency in English
+function translateLog(message) {
+  const idToEn = {
+    'Login berhasil!': 'Login successful!',
+    'Gagal melakukan purge:': 'Failed to purge:',
+    'Menjalankan pencarian untuk:': 'Running search for:',
+    'Gagal mengambil rekaman pesan:': 'Failed to fetch messages record:',
+    'Berhasil mengeksekusi plugin': 'Successfully executed plugin'
+  };
+
+  const idToEnTypes = {
+    Sistem: 'System'
+  };
+
+  let cleanMsg = String(message);
+
+  // Translate Indonesian to English
+  for (const [idKey, enVal] of Object.entries(idToEn)) {
+    if (cleanMsg.includes(idKey)) {
+      cleanMsg = cleanMsg.replace(idKey, enVal);
+    }
+  }
+  if (idToEnTypes[cleanMsg]) {
+    cleanMsg = idToEnTypes[cleanMsg];
+  }
+
+  return cleanMsg;
+}
+
 // Custom log helper to resolve type and logger_type from metadata or message contents
 function resolveLogDetails(level, message, meta = {}) {
   let type = meta.type;
@@ -32,6 +61,9 @@ function resolveLogDetails(level, message, meta = {}) {
   if (!loggerType) {
     loggerType = 'System';
   }
+  loggerType = translateLog(loggerType);
+
+  loggerMessage = translateLog(loggerMessage);
 
   if (!type) {
     const lvl = String(level).toLowerCase().trim();
@@ -42,11 +74,27 @@ function resolveLogDetails(level, message, meta = {}) {
     } else {
       // Analyze loggerMessage to guess type
       const msgLower = loggerMessage.toLowerCase();
-      if (msgLower.includes('berhasil') || msgLower.includes('success') || msgLower.includes('aktif') || msgLower.includes('loaded') || msgLower.includes('memuat') || msgLower.includes('set')) {
+      if (
+        msgLower.includes('berhasil') ||
+        msgLower.includes('success') ||
+        msgLower.includes('aktif') ||
+        msgLower.includes('loaded') ||
+        msgLower.includes('memuat') ||
+        msgLower.includes('set')
+      ) {
         type = 'SUCCSESS';
-      } else if (msgLower.includes('selesai') || msgLower.includes('done') || msgLower.includes('cleanup') || msgLower.includes('finish')) {
+      } else if (
+        msgLower.includes('selesai') ||
+        msgLower.includes('done') ||
+        msgLower.includes('cleanup') ||
+        msgLower.includes('finish')
+      ) {
         type = 'DONE';
-      } else if (msgLower.includes('tidak ditemukan') || msgLower.includes('not found') || msgLower.includes('404')) {
+      } else if (
+        msgLower.includes('tidak ditemukan') ||
+        msgLower.includes('not found') ||
+        msgLower.includes('404')
+      ) {
         type = '404';
       } else {
         type = 'UNKNOWN';
@@ -66,7 +114,11 @@ function pruneMetadata(meta) {
   for (const [key, value] of Object.entries(meta)) {
     if (value && typeof value === 'object') {
       const className = value.constructor?.name;
-      if (key === 'interaction' || className === 'ChatInputCommandInteraction' || className === 'ButtonInteraction') {
+      if (
+        key === 'interaction' ||
+        className === 'ChatInputCommandInteraction' ||
+        className === 'ButtonInteraction'
+      ) {
         pruned.interaction = {
           commandName: value.commandName,
           customId: value.customId,
@@ -213,3 +265,4 @@ const logger = winston.createLogger({
 });
 
 export default logger;
+export { translateLog, resolveLogDetails };

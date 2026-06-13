@@ -1,3 +1,1 @@
-export { config } from '../config.js';
-
-
+export { config, updateConfigValue, unsetConfigValue } from '../config.js';

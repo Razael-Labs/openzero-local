@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-const HTML_FILE = '/data/data/com.termux/files/home/.gemini/antigravity-cli/brain/08a7fe70-f772-4b95-96af-28d587881e80/.system_generated/steps/243/content.md';
+const HTML_FILE =
+  '/data/data/com.termux/files/home/.gemini/antigravity-cli/brain/08a7fe70-f772-4b95-96af-28d587881e80/.system_generated/steps/243/content.md';
 const OUTPUT_FILE = './src/utils/scrapedSymbols.js';
 
 function toConstantName(title) {
@@ -10,7 +11,7 @@ function toConstantName(title) {
     .toUpperCase()
     .replace(/[^A-Z0-9\s-_]/g, '') // remove special chars
     .trim()
-    .replace(/[\s-]+/g, '_');    // replace spaces/hyphens with underscore
+    .replace(/[\s-]+/g, '_'); // replace spaces/hyphens with underscore
 }
 
 async function scrape() {
@@ -20,7 +21,7 @@ async function scrape() {
 
     // Regex to match <span class="cs" title="TITLE" data-clipboard-text="SYMBOL">
     const regex = /class="cs"\s+title="([^"]+)"\s+data-clipboard-text="([^"]+)"/g;
-    
+
     let match;
     const symbolsMap = new Map();
 
@@ -40,7 +41,7 @@ async function scrape() {
 
     // Build class content
     let classContent = `/**\n * Auto-generated symbols class from coolsymbols.com\n */\nexport class CoolSymbols {\n`;
-    
+
     for (const [name, sym] of symbolsMap.entries()) {
       // Escape backslashes and quotes
       const escapedSym = sym.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
